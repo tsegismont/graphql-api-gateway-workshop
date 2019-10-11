@@ -52,6 +52,8 @@ type Cart {
 
 type Query {
   genres: [Genre!]
+  bestRated(limit: Int = 3): [Album!]
+  recentlyViewed(limit: Int = 3): [Album!]
   albums(genre: ID!): [Album!]
   album(id: ID): Album
   cart: Cart
