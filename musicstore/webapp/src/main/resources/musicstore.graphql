@@ -8,7 +8,6 @@ type Artist {
   id: ID,
   name: String!
   imageUri: String
-  albums: [Album!]
 }
 
 type Track {
