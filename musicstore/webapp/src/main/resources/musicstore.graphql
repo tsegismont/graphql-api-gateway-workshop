@@ -1,0 +1,62 @@
+type Genre {
+  id: ID,
+  name: String!
+  imageUri: String
+}
+
+type Artist {
+  id: ID,
+  name: String!
+  imageUri: String
+  albums: [Album!]
+}
+
+type Track {
+  id: ID,
+  number: Int!
+  name: String!
+}
+
+type Album {
+  id: ID,
+  name: String!
+  genre: Genre!
+  artist: Artist!
+  imageUri: String
+  tracks: [Track!]
+  totalTracks: Int!
+  rating: Int
+  reviews: [Review!]
+}
+
+type Review {
+  name: String!
+  rating: Int!
+  comment: String
+}
+
+type User {
+  login: String!
+  firstName: String!
+  lastName: String!
+}
+
+type CartItem {
+  album: Album
+  quantity: Int
+}
+
+type Cart {
+  items: [CartItem!]
+}
+
+type Query {
+  genres: [Genre!]
+  albums(genre: ID!): [Album!]
+  album(id: ID): Album
+  cart: Cart
+}
+
+type Mutation {
+  addToCart(albumId: ID): Cart
+}
