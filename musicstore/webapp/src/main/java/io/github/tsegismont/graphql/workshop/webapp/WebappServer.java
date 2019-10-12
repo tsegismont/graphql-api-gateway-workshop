@@ -22,11 +22,13 @@ import io.vertx.reactivex.ext.web.handler.graphql.GraphiQLHandler;
 public class WebappServer extends AbstractVerticle {
 
   private GenresRepository genresRepository;
+  private AlbumsRepository albumsRepository;
 
   @Override
   public Completable rxStart() {
     WebClient inventoryClient = WebClient.create(vertx, new WebClientOptions().setDefaultPort(8081));
     genresRepository = new GenresRepository(inventoryClient);
+    albumsRepository = new AlbumsRepository(inventoryClient);
 
     Router router = Router.router(vertx);
 
@@ -80,7 +82,12 @@ public class WebappServer extends AbstractVerticle {
   }
 
   private TypeRuntimeWiring.Builder query(TypeRuntimeWiring.Builder builder) {
-    return builder.dataFetcher("genres", env -> genresRepository.findAll().to(SingleInterop.get()));
+    return builder
+      .dataFetcher("genres", env -> genresRepository.findAll().to(SingleInterop.get()))
+      .dataFetcher("albums", env -> {
+        String genre = env.getArgument("genre");
+        return albumsRepository.findAll(genre == null ? null : Integer.valueOf(genre)).to(SingleInterop.get());
+      });
   }
 
   private static class CustomWiringFactory implements WiringFactory {
