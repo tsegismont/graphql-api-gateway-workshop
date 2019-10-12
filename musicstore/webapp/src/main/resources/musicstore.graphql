@@ -39,11 +39,12 @@ type Query {
   genres: [Genre!]
   bestRated(limit: Int = 3): [Album!]
   recentlyViewed(limit: Int = 3): [Album!]
-  albums(genre: ID!): [Album!]
-  album(id: ID): Album
+  albums(genre: ID): [Album!]
+  album(id: ID!): Album
   cart: Cart
 }
 
 type Mutation {
-  addToCart(albumId: ID): Cart
+  addToCart(albumId: ID!): Cart
+  removeFromCart(albumId: ID!): Cart
 }
