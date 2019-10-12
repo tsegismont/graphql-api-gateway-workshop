@@ -25,12 +25,9 @@ public class InventoryServer extends AbstractVerticle {
 
     Router router = Router.router(vertx);
 
-    Router apiRouter = Router.router(vertx);
-    apiRouter.route().handler(this::setResponseContentType);
-    apiRouter.get("/genres").handler(this::allGenres);
-    apiRouter.get("/albums").handler(this::allAlbums);
-
-    router.mountSubRouter("/api", apiRouter);
+    router.route().handler(this::setResponseContentType);
+    router.get("/genres").handler(this::allGenres);
+    router.get("/albums").handler(this::allAlbums);
 
     vertx.createHttpServer()
       .requestHandler(router)

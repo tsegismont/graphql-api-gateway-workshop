@@ -17,7 +17,7 @@ public class AlbumsRepository {
   }
 
   public Single<JsonArray> findAll(Integer genre) {
-    HttpRequest<JsonArray> request = inventoryClient.get("/api/albums")
+    HttpRequest<JsonArray> request = inventoryClient.get("/albums")
       .expect(ResponsePredicate.SC_OK)
       .expect(ResponsePredicate.JSON)
       .as(BodyCodec.jsonArray());

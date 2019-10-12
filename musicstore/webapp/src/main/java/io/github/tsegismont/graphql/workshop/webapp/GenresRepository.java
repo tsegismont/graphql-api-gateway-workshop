@@ -16,7 +16,7 @@ public class GenresRepository {
   }
 
   public Single<JsonArray> findAll() {
-    return inventoryClient.get("/api/genres")
+    return inventoryClient.get("/genres")
       .expect(ResponsePredicate.SC_OK)
       .expect(ResponsePredicate.JSON)
       .as(BodyCodec.jsonArray())
