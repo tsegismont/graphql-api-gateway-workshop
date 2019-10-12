@@ -10,20 +10,12 @@ type Artist {
   imageUri: String
 }
 
-type Track {
-  id: ID,
-  number: Int!
-  name: String!
-}
-
 type Album {
   id: ID,
   name: String!
   genre: Genre!
   artist: Artist!
   imageUri: String
-  tracks: [Track!]
-  totalTracks: Int!
   rating: Int
   reviews: [Review!]
 }
