@@ -1,7 +1,7 @@
 type Genre {
   id: ID,
   name: String!
-  imageUri: String
+  image: String
 }
 
 type Album {
@@ -9,7 +9,7 @@ type Album {
   name: String!
   genre: Genre!
   artist: String!
-  imageUri: String
+  image: String
   rating: Int
   reviews: [Review!]
 }
