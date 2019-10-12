@@ -1,25 +1,32 @@
 package io.github.tsegismont.graphql.workshop.webapp;
 
 import graphql.GraphQL;
+import graphql.schema.DataFetcher;
 import graphql.schema.GraphQLSchema;
-import graphql.schema.idl.RuntimeWiring;
-import graphql.schema.idl.SchemaGenerator;
-import graphql.schema.idl.SchemaParser;
-import graphql.schema.idl.TypeDefinitionRegistry;
-import io.vertx.core.AbstractVerticle;
-import io.vertx.ext.web.Router;
-import io.vertx.ext.web.handler.BodyHandler;
-import io.vertx.ext.web.handler.ErrorHandler;
-import io.vertx.ext.web.handler.StaticHandler;
-import io.vertx.ext.web.handler.graphql.GraphQLHandler;
+import graphql.schema.idl.*;
+import hu.akarnokd.rxjava2.interop.SingleInterop;
+import io.reactivex.Completable;
+import io.vertx.ext.web.client.WebClientOptions;
 import io.vertx.ext.web.handler.graphql.GraphQLHandlerOptions;
-import io.vertx.ext.web.handler.graphql.GraphiQLHandler;
 import io.vertx.ext.web.handler.graphql.GraphiQLHandlerOptions;
+import io.vertx.ext.web.handler.graphql.VertxPropertyDataFetcher;
+import io.vertx.reactivex.core.AbstractVerticle;
+import io.vertx.reactivex.ext.web.Router;
+import io.vertx.reactivex.ext.web.client.WebClient;
+import io.vertx.reactivex.ext.web.handler.BodyHandler;
+import io.vertx.reactivex.ext.web.handler.ErrorHandler;
+import io.vertx.reactivex.ext.web.handler.StaticHandler;
+import io.vertx.reactivex.ext.web.handler.graphql.GraphQLHandler;
+import io.vertx.reactivex.ext.web.handler.graphql.GraphiQLHandler;
 
 public class WebappServer extends AbstractVerticle {
 
+  private GenresRepository genresRepository;
+
   @Override
-  public void start() throws Exception {
+  public Completable rxStart() {
+    WebClient inventoryClient = WebClient.create(vertx, new WebClientOptions().setDefaultPort(8081));
+    genresRepository = new GenresRepository(inventoryClient);
 
     Router router = Router.router(vertx);
 
@@ -32,10 +39,10 @@ public class WebappServer extends AbstractVerticle {
 
     router.route().failureHandler(ErrorHandler.create(true));
 
-    vertx.createHttpServer()
+    return vertx.createHttpServer()
       .requestHandler(router)
-      .listen(8080);
-
+      .rxListen(8080)
+      .ignoreElement();
   }
 
   private GraphiQLHandler createGraphiQLHandler() {
@@ -56,13 +63,31 @@ public class WebappServer extends AbstractVerticle {
     SchemaParser schemaParser = new SchemaParser();
     TypeDefinitionRegistry typeDefinitionRegistry = schemaParser.parse(schema);
 
-    RuntimeWiring runtimeWiring = RuntimeWiring.newRuntimeWiring()
-      .build();
+    RuntimeWiring runtimeWiring = runtimeWiring();
 
     SchemaGenerator schemaGenerator = new SchemaGenerator();
     GraphQLSchema graphQLSchema = schemaGenerator.makeExecutableSchema(typeDefinitionRegistry, runtimeWiring);
 
     return GraphQL.newGraphQL(graphQLSchema)
       .build();
+  }
+
+  private RuntimeWiring runtimeWiring() {
+    return RuntimeWiring.newRuntimeWiring()
+      .type("Query", this::query)
+      .wiringFactory(new CustomWiringFactory())
+      .build();
+  }
+
+  private TypeRuntimeWiring.Builder query(TypeRuntimeWiring.Builder builder) {
+    return builder.dataFetcher("genres", env -> genresRepository.findAll().to(SingleInterop.get()));
+  }
+
+  private static class CustomWiringFactory implements WiringFactory {
+    @Override
+    public DataFetcher getDefaultDataFetcher(FieldWiringEnvironment environment) {
+      return new VertxPropertyDataFetcher(environment.getFieldDefinition().getName());
+
+    }
   }
 }
