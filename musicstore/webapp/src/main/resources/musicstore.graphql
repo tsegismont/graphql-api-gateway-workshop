@@ -4,12 +4,18 @@ type Genre {
   image: String
 }
 
+type Track {
+  number: Int!
+  name: String!
+}
+
 type Album {
   id: ID,
   name: String!
   genre: Genre!
   artist: String!
   image: String
+  tracks: [Track!]!
   rating: Int
   reviews: [Review!]
 }

@@ -6,28 +6,38 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
+import io.vertx.ext.web.handler.ErrorHandler;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collector;
 
+import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
 
 public class InventoryServer extends AbstractVerticle {
 
   private JsonArray genres;
   private JsonArray albums;
+  private Map<Integer, JsonArray> tracksByAlbum;
 
   @Override
   public void start() throws Exception {
 
     genres = loadGenreData();
     albums = loadAlbumData();
+    tracksByAlbum = loadTrackData();
 
     Router router = Router.router(vertx);
 
     router.route().handler(this::setResponseContentType);
     router.get("/genres").handler(this::allGenres);
     router.get("/albums").handler(this::allAlbums);
+    router.get("/album/:id").handler(this::album);
+    router.get("/album/:id/tracks").handler(this::tracks);
+    router.route().failureHandler(ErrorHandler.create(true));
 
     vertx.createHttpServer()
       .requestHandler(router)
@@ -70,6 +80,29 @@ public class InventoryServer extends AbstractVerticle {
       .collect(JsonArray::new, JsonArray::add, JsonArray::addAll);
   }
 
+  private Map<Integer, JsonArray> loadTrackData() {
+    String content = vertx.fileSystem().readFileBlocking("data/tracks.csv").toString();
+    String[] lines = content.split("\n");
+    return Arrays.stream(lines)
+      .skip(1)
+      .map(line -> line.split(","))
+      .map(row -> new JsonObject()
+        .put("album", Integer.parseInt(row[0].trim()))
+        .put("number", Integer.parseInt(row[1].trim()))
+        .put("name", row[2].trim())
+      )
+      .collect(
+        groupingBy(
+          json -> json.getInteger("album"),
+          Collector.of(
+            JsonArray::new,
+            (array, value) -> array.add(new JsonObject().put("number", value.getInteger("number")).put("name", value.getString("name"))),
+            JsonArray::addAll
+          )
+        )
+      );
+  }
+
   private void setResponseContentType(RoutingContext rc) {
     rc.response().putHeader(HttpHeaders.CONTENT_TYPE, "application/json");
     rc.next();
@@ -89,6 +122,29 @@ public class InventoryServer extends AbstractVerticle {
         .filter(album -> filter.contains(album.getJsonObject("genre").getInteger("id")))
         .collect(JsonArray::new, JsonArray::add, JsonArray::addAll);
       rc.response().end(filtered.toBuffer());
+    }
+  }
+
+  private void album(RoutingContext rc) {
+    boolean withTracks = rc.queryParams().contains("withTracks");
+    Optional<JsonObject> album = albums.stream()
+      .map(JsonObject.class::cast)
+      .filter(json -> json.getInteger("id").equals(Integer.parseInt(rc.pathParam("id"))))
+      .findFirst()
+      .map(json -> withTracks ? json.copy().put("tracks", tracksByAlbum.get(json.getInteger("id"))) : json);
+    if (album.isPresent()) {
+      rc.response().end(album.get().toBuffer());
+    } else {
+      rc.fail(404);
+    }
+  }
+
+  private void tracks(RoutingContext rc) {
+    JsonArray tracks = tracksByAlbum.get(Integer.parseInt(rc.pathParam("id")));
+    if (tracks != null) {
+      rc.response().end(tracks.toBuffer());
+    } else {
+      rc.fail(404);
     }
   }
 }

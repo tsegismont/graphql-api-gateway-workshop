@@ -6,6 +6,9 @@ import graphql.schema.GraphQLSchema;
 import graphql.schema.idl.*;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
 import io.reactivex.Completable;
+import io.reactivex.Single;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.WebClientOptions;
 import io.vertx.ext.web.handler.graphql.GraphQLHandlerOptions;
 import io.vertx.ext.web.handler.graphql.GraphiQLHandlerOptions;
@@ -23,12 +26,14 @@ public class WebappServer extends AbstractVerticle {
 
   private GenresRepository genresRepository;
   private AlbumsRepository albumsRepository;
+  private TracksRepository tracksRepository;
 
   @Override
   public Completable rxStart() {
     WebClient inventoryClient = WebClient.create(vertx, new WebClientOptions().setDefaultPort(8081));
     genresRepository = new GenresRepository(inventoryClient);
     albumsRepository = new AlbumsRepository(inventoryClient);
+    tracksRepository = new TracksRepository(inventoryClient);
 
     Router router = Router.router(vertx);
 
@@ -77,6 +82,7 @@ public class WebappServer extends AbstractVerticle {
   private RuntimeWiring runtimeWiring() {
     return RuntimeWiring.newRuntimeWiring()
       .type("Query", this::query)
+      .type("Album", this::album)
       .wiringFactory(new CustomWiringFactory())
       .build();
   }
@@ -87,6 +93,24 @@ public class WebappServer extends AbstractVerticle {
       .dataFetcher("albums", env -> {
         String genre = env.getArgument("genre");
         return albumsRepository.findAll(genre == null ? null : Integer.valueOf(genre)).to(SingleInterop.get());
+      })
+      .dataFetcher("album", env -> {
+        String id = env.getArgument("id");
+        return albumsRepository.findById(Integer.valueOf(id), true).to(SingleInterop.get());
+      });
+  }
+
+  private TypeRuntimeWiring.Builder album(TypeRuntimeWiring.Builder builder) {
+    return builder
+      .dataFetcher("tracks", env -> {
+        JsonObject album = env.getSource();
+        Single<JsonArray> tracks;
+        if (album.containsKey("tracks")) {
+          tracks = Single.just(album.getJsonArray("tracks"));
+        } else {
+          tracks = tracksRepository.findByAlbum(album.getInteger("id"));
+        }
+        return tracks.to(SingleInterop.get());
       });
   }
 
@@ -94,7 +118,6 @@ public class WebappServer extends AbstractVerticle {
     @Override
     public DataFetcher getDefaultDataFetcher(FieldWiringEnvironment environment) {
       return new VertxPropertyDataFetcher(environment.getFieldDefinition().getName());
-
     }
   }
 }
