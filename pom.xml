@@ -15,7 +15,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
     <vertx.version>3.8.2</vertx.version>
-    <vertx-maven-plugin.version>1.0.20</vertx-maven-plugin.version>
+    <vertx-maven-plugin.version>1.0.21</vertx-maven-plugin.version>
   </properties>
 
   <modules>

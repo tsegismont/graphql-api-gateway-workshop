@@ -37,7 +37,7 @@ public class InventoryServer extends AbstractVerticle {
     router.get("/albums").handler(this::allAlbums);
     router.get("/album/:id").handler(this::album);
     router.get("/album/:id/tracks").handler(this::tracks);
-    router.route().failureHandler(ErrorHandler.create(true));
+    router.route().failureHandler(ErrorHandler.create());
 
     vertx.createHttpServer()
       .requestHandler(router)

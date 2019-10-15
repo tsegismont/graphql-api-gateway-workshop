@@ -44,7 +44,7 @@ public class WebappServer extends AbstractVerticle {
 
     router.get().handler(StaticHandler.create());
 
-    router.route().failureHandler(ErrorHandler.create(true));
+    router.route().failureHandler(ErrorHandler.create());
 
     return vertx.createHttpServer()
       .requestHandler(router)
@@ -53,8 +53,7 @@ public class WebappServer extends AbstractVerticle {
   }
 
   private GraphiQLHandler createGraphiQLHandler() {
-    GraphiQLHandlerOptions options = new GraphiQLHandlerOptions()
-      .setEnabled(true);
+    GraphiQLHandlerOptions options = new GraphiQLHandlerOptions();
     return GraphiQLHandler.create(options);
   }
 
