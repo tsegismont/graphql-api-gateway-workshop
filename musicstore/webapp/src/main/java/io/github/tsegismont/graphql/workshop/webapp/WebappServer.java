@@ -2,6 +2,7 @@ package io.github.tsegismont.graphql.workshop.webapp;
 
 import graphql.GraphQL;
 import graphql.schema.DataFetcher;
+import graphql.schema.DataFetchingEnvironment;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.idl.*;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
@@ -22,11 +23,14 @@ import io.vertx.reactivex.ext.web.handler.StaticHandler;
 import io.vertx.reactivex.ext.web.handler.graphql.GraphQLHandler;
 import io.vertx.reactivex.ext.web.handler.graphql.GraphiQLHandler;
 
+import java.util.Map;
+
 public class WebappServer extends AbstractVerticle {
 
   private GenresRepository genresRepository;
   private AlbumsRepository albumsRepository;
   private TracksRepository tracksRepository;
+  private ReviewRepository reviewRepository;
 
   @Override
   public Completable rxStart() {
@@ -34,6 +38,9 @@ public class WebappServer extends AbstractVerticle {
     genresRepository = new GenresRepository(inventoryClient);
     albumsRepository = new AlbumsRepository(inventoryClient);
     tracksRepository = new TracksRepository(inventoryClient);
+
+    WebClient reviewClient = WebClient.create(vertx, new WebClientOptions().setDefaultPort(8082));
+    reviewRepository = new ReviewRepository(reviewClient);
 
     Router router = Router.router(vertx);
 
@@ -81,6 +88,7 @@ public class WebappServer extends AbstractVerticle {
   private RuntimeWiring runtimeWiring() {
     return RuntimeWiring.newRuntimeWiring()
       .type("Query", this::query)
+      .type("Mutation", this::mutation)
       .type("Album", this::album)
       .wiringFactory(new CustomWiringFactory())
       .build();
@@ -94,9 +102,26 @@ public class WebappServer extends AbstractVerticle {
         return albumsRepository.findAll(genre == null ? null : Integer.valueOf(genre)).to(SingleInterop.get());
       })
       .dataFetcher("album", env -> {
-        String id = env.getArgument("id");
-        return albumsRepository.findById(Integer.valueOf(id), true).to(SingleInterop.get());
+        Integer id = Integer.valueOf(env.getArgument("id"));
+        Single<JsonObject> inventoryData = albumsRepository.findById(id, true);
+        Single<JsonObject> reviewData = reviewRepository.findRatingAndReviewsByAlbum(id);
+        Single<JsonObject> result = inventoryData.zipWith(reviewData, (i, r) -> r.mergeIn(i));
+        return result.to(SingleInterop.get());
       });
+  }
+
+  private TypeRuntimeWiring.Builder mutation(TypeRuntimeWiring.Builder builder) {
+    return builder
+      .dataFetcher("addReview", env -> {
+        Integer albumId = Integer.valueOf(env.getArgument("albumId"));
+        JsonObject input = new JsonObject((Map<String, Object>) env.getArgument("review"));
+        input.put("name", getCurrentUserName(env));
+        return reviewRepository.addReview(albumId, input).to(SingleInterop.get());
+      });
+  }
+
+  private String getCurrentUserName(DataFetchingEnvironment env) {
+    return "Anonymous";
   }
 
   private TypeRuntimeWiring.Builder album(TypeRuntimeWiring.Builder builder) {
@@ -110,6 +135,27 @@ public class WebappServer extends AbstractVerticle {
           tracks = tracksRepository.findByAlbum(album.getInteger("id"));
         }
         return tracks.to(SingleInterop.get());
+      })
+      .dataFetcher("rating", env -> {
+        JsonObject album = env.getSource();
+        Single<Integer> rating;
+        if (album.containsKey("rating")) {
+          rating = Single.just(album.getInteger("rating"));
+        } else {
+          rating = reviewRepository.findRatingByAlbum(album.getInteger("id"))
+            .map(json -> json.getInteger("value"));
+        }
+        return rating.to(SingleInterop.get());
+      })
+      .dataFetcher("reviews", env -> {
+        JsonObject album = env.getSource();
+        Single<JsonArray> reviews;
+        if (album.containsKey("reviews")) {
+          reviews = Single.just(album.getJsonArray("reviews"));
+        } else {
+          reviews = reviewRepository.findReviewsByAlbum(album.getInteger("id"));
+        }
+        return reviews.to(SingleInterop.get());
       });
   }
 

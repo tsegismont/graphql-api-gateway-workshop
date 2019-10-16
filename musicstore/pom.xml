@@ -15,6 +15,7 @@
 
   <modules>
     <module>inventory</module>
+    <module>review</module>
     <module>webapp</module>
   </modules>
 
