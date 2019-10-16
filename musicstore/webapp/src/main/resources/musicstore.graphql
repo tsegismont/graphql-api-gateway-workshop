@@ -26,12 +26,6 @@ type Review {
   comment: String
 }
 
-type User {
-  login: String!
-  firstName: String!
-  lastName: String!
-}
-
 type CartItem {
   album: Album
   quantity: Int
