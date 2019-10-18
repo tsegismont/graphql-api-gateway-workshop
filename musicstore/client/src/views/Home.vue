@@ -43,7 +43,7 @@
             }
         },
         created() {
-            this.fetchData()
+            this.fetchData();
         },
         watch: {
             '$route': 'fetchData'
