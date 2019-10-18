@@ -6,49 +6,53 @@
     <div v-if="error" class="alert alert-danger">
       {{ error }}
     </div>
-    <div class="row" v-if="album">
-      <div class="col-sm">
-        <img :src="'/images/albums/'+album.image" :alt="album.name">
-      </div>
-      <div class="col-sm">
-        <h2>{{ album.name }}</h2>
-        <p class="text-secondary">{{ album.artist }}, {{ album.genre.name }}</p>
-        <p>
-          <Stars :rating="album.rating"/>
-          <span v-if="reviews">
+    <template v-if="album">
+      <div class="row">
+        <div class="col-sm">
+          <img :src="'/images/albums/'+album.image" :alt="album.name">
+        </div>
+        <div class="col-sm">
+          <h2>{{ album.name }}</h2>
+          <p class="text-secondary">{{ album.artist }}, {{ album.genre.name }}</p>
+          <p>
+            <Stars :rating="album.rating"/>
+            <span v-if="reviews">
               -
               <a href="#reviews">Read reviews</a>
             </span>
-        </p>
+          </p>
+        </div>
       </div>
-    </div>
-    <div class="row" v-if="album">
-      <h3>Tracks</h3>
-      <table class="table">
-        <thead class="thead-light">
-        <tr>
-          <th scope="col">#</th>
-          <th scope="col">Name</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr v-for="track in album.tracks" v-bind:key="track.number">
-          <th scope="row">{{ track.number }}</th>
-          <td>{{ track.name }}</td>
-        </tr>
-        </tbody>
-      </table>
-    </div>
-    <hr>
-    <h3>Reviews</h3>
-    <div id="reviews" v-if="reviews">
-      <div class="row">
-        <ReviewCard
-          v-for="(review, index) in reviews"
-          v-bind:review="review"
-          v-bind:key="index"/>
+      <div class="row" v-if="album">
+        <h3>Tracks</h3>
+        <table class="table">
+          <thead class="thead-light">
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Name</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr v-for="track in album.tracks" v-bind:key="track.number">
+            <th scope="row">{{ track.number }}</th>
+            <td>{{ track.name }}</td>
+          </tr>
+          </tbody>
+        </table>
       </div>
-    </div>
+    </template>
+    <template v-if="reviews">
+      <hr>
+      <h3>Reviews</h3>
+      <div id="reviews">
+        <div class="row">
+          <ReviewCard
+            v-for="(review, index) in reviews"
+            v-bind:review="review"
+            v-bind:key="index"/>
+        </div>
+      </div>
+    </template>
   </div>
 </template>
 
