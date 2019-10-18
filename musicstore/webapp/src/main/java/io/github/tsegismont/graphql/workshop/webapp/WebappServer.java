@@ -8,20 +8,24 @@ import graphql.schema.idl.*;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
 import io.reactivex.Completable;
 import io.reactivex.Single;
+import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.auth.User;
+import io.vertx.ext.auth.htpasswd.HtpasswdAuthOptions;
+import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.client.WebClientOptions;
 import io.vertx.ext.web.handler.graphql.GraphQLHandlerOptions;
 import io.vertx.ext.web.handler.graphql.GraphiQLHandlerOptions;
 import io.vertx.ext.web.handler.graphql.VertxPropertyDataFetcher;
 import io.vertx.reactivex.core.AbstractVerticle;
+import io.vertx.reactivex.ext.auth.htpasswd.HtpasswdAuth;
 import io.vertx.reactivex.ext.web.Router;
 import io.vertx.reactivex.ext.web.client.WebClient;
-import io.vertx.reactivex.ext.web.handler.BodyHandler;
-import io.vertx.reactivex.ext.web.handler.ErrorHandler;
-import io.vertx.reactivex.ext.web.handler.StaticHandler;
+import io.vertx.reactivex.ext.web.handler.*;
 import io.vertx.reactivex.ext.web.handler.graphql.GraphQLHandler;
 import io.vertx.reactivex.ext.web.handler.graphql.GraphiQLHandler;
+import io.vertx.reactivex.ext.web.sstore.LocalSessionStore;
 
 import java.util.Map;
 
@@ -45,6 +49,18 @@ public class WebappServer extends AbstractVerticle {
     Router router = Router.router(vertx);
 
     router.route().handler(BodyHandler.create());
+
+    HtpasswdAuthOptions authOptions = new HtpasswdAuthOptions()
+      .setHtpasswdFile("passwordfile")
+      .setPlainTextEnabled(true);
+    HtpasswdAuth authProvider = HtpasswdAuth.create(vertx, authOptions);
+
+    router.route().handler(SessionHandler.create(LocalSessionStore.create(vertx)).setAuthProvider(authProvider));
+    router.post("/login.html").handler(FormLoginHandler.create(authProvider).setDirectLoggedInOKURL("/"));
+    router.get("/logout").handler(rc -> {
+      rc.clearUser();
+      rc.response().setStatusCode(301).putHeader(HttpHeaders.LOCATION, "/").end();
+    });
 
     router.route("/graphql").handler(createGraphQLHandler());
     router.get("/graphiql/*").handler(createGraphiQLHandler());
@@ -107,6 +123,11 @@ public class WebappServer extends AbstractVerticle {
         Single<JsonObject> reviewData = reviewRepository.findRatingAndReviewsByAlbum(id);
         Single<JsonObject> result = inventoryData.zipWith(reviewData, (i, r) -> r.mergeIn(i));
         return result.to(SingleInterop.get());
+      })
+      .dataFetcher("currentUser", env -> {
+        RoutingContext routingContext = env.getContext();
+        User user = routingContext.user();
+        return user==null ? null:user.principal().getString("username");
       });
   }
 

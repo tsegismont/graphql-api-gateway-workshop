@@ -42,6 +42,7 @@ type Query {
   albums(genre: ID): [Album!]
   album(id: ID!): Album
   cart: Cart
+  currentUser: String
 }
 
 input ReviewInput {
