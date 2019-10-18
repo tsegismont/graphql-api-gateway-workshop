@@ -21,6 +21,7 @@
               <a href="#reviews">Read reviews</a>
             </span>
           </p>
+          <button type="button" class="btn btn-primary" v-on:click="addToCart()">Add to cart</button>
         </div>
       </div>
       <div class="row" v-if="album">
@@ -160,6 +161,9 @@
                 }).finally(() => {
                     this.loading = false;
                 });
+            },
+            addToCart() {
+                window.alert('Done!')
             }
         },
         components: {
