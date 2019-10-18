@@ -164,9 +164,3 @@
         }
     }
 </script>
-
-<style scoped>
-  div.row {
-    margin-top: 2em;
-  }
-</style>

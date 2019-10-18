@@ -24,9 +24,3 @@
         }
     }
 </script>
-
-<style scoped>
-  div.card {
-    margin: 1em;
-  }
-</style>

@@ -10,3 +10,17 @@
     <router-view/>
   </div>
 </template>
+
+<style>
+  nav {
+    margin-bottom: 2em;
+  }
+
+  div.row {
+    margin-top: 2em;
+  }
+
+  div.card {
+    margin: 0 2em 2em 0;
+  }
+</style>

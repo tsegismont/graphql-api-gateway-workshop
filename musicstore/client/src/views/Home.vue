@@ -69,9 +69,3 @@
         }
     }
 </script>
-
-<style scoped>
-  div.container {
-    margin-top: 2em;
-  }
-</style>
