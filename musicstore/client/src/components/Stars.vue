@@ -4,7 +4,7 @@
     <span v-if="roundedRating < 1">
       <font-awesome-icon :icon="['far', 'star']"/>
     </span>
-    <span v-if="roundedRating >= 1">
+    <span v-else>
       <font-awesome-icon :icon="['fas', 'star']" class="text-warning" v-for="n in this.count" :key="n"/>
     </span>
   </span>
