@@ -12,7 +12,7 @@ import io.vertx.ext.web.handler.ErrorHandler;
 import java.util.HashMap;
 import java.util.Map;
 
-import static java.util.stream.Collectors.averagingDouble;
+import static java.util.stream.Collectors.averagingInt;
 
 public class ReviewServer extends AbstractVerticle {
 
@@ -56,7 +56,7 @@ public class ReviewServer extends AbstractVerticle {
 
   private void rating(RoutingContext rc) {
     JsonArray reviews = rc.get("reviews");
-    Double rating = avgRating(reviews);
+    int rating = avgRating(reviews);
     rc.response().end(new JsonObject().put("value", rating).toBuffer());
   }
 
@@ -72,9 +72,10 @@ public class ReviewServer extends AbstractVerticle {
     ratingAndReviews(rc);
   }
 
-  private Double avgRating(JsonArray reviews) {
-    return reviews.stream()
+  private Integer avgRating(JsonArray reviews) {
+    double rating = reviews.stream()
       .map(JsonObject.class::cast)
-      .collect(averagingDouble(review -> review.getDouble("rating")));
+      .collect(averagingInt(review -> review.getInteger("rating")));
+    return (int) Math.round(rating);
   }
 }

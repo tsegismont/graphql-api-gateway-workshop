@@ -9,6 +9,7 @@ import hu.akarnokd.rxjava2.interop.SingleInterop;
 import io.reactivex.Completable;
 import io.reactivex.Single;
 import io.vertx.core.http.HttpHeaders;
+import io.vertx.core.impl.NoStackTraceThrowable;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
@@ -124,11 +125,7 @@ public class WebappServer extends AbstractVerticle {
         Single<JsonObject> result = inventoryData.zipWith(reviewData, (i, r) -> r.mergeIn(i));
         return result.to(SingleInterop.get());
       })
-      .dataFetcher("currentUser", env -> {
-        RoutingContext routingContext = env.getContext();
-        User user = routingContext.user();
-        return user==null ? null:user.principal().getString("username");
-      });
+      .dataFetcher("currentUser", this::getCurrentUserName);
   }
 
   private TypeRuntimeWiring.Builder mutation(TypeRuntimeWiring.Builder builder) {
@@ -136,13 +133,22 @@ public class WebappServer extends AbstractVerticle {
       .dataFetcher("addReview", env -> {
         Integer albumId = Integer.valueOf(env.getArgument("albumId"));
         JsonObject input = new JsonObject((Map<String, Object>) env.getArgument("review"));
-        input.put("name", getCurrentUserName(env));
-        return reviewRepository.addReview(albumId, input).to(SingleInterop.get());
+        String currentUserName = getCurrentUserName(env);
+        Single<JsonObject> result;
+        if (currentUserName==null) {
+          result = Single.error(new NoStackTraceThrowable("Not logged in"));
+        } else {
+          input.put("name", currentUserName);
+          result = reviewRepository.addReview(albumId, input);
+        }
+        return result.to(SingleInterop.get());
       });
   }
 
   private String getCurrentUserName(DataFetchingEnvironment env) {
-    return "Anonymous";
+    RoutingContext routingContext = env.getContext();
+    User user = routingContext.user();
+    return user==null ? null:user.principal().getString("username");
   }
 
   private TypeRuntimeWiring.Builder album(TypeRuntimeWiring.Builder builder) {
