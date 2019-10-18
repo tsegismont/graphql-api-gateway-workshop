@@ -21,7 +21,7 @@
 <script>
     import AlbumCard from '../components/AlbumCard'
     import apolloClient from '../shared/apollo-client';
-    import {gql} from "apollo-boost";
+    import gql from 'graphql-tag';
 
     const allAlbums = gql`
       query ($genre: ID!) {

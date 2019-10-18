@@ -21,7 +21,7 @@
 <script>
     import GenreCard from '../components/GenreCard'
     import apolloClient from '../shared/apollo-client';
-    import {gql} from "apollo-boost";
+    import gql from 'graphql-tag';
 
     const allGenres = gql`
       {

@@ -61,7 +61,7 @@
     import Stars from '../components/Stars';
     import ReviewCard from "../components/ReviewCard";
     import apolloClient from '../shared/apollo-client';
-    import {gql} from "apollo-boost";
+    import gql from 'graphql-tag';
 
     const findAlbum = gql`
       query ($id: ID!) {
