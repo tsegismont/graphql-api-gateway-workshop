@@ -60,7 +60,8 @@ public class WebappServer extends AbstractVerticle {
     router.post("/login.html").handler(FormLoginHandler.create(authProvider).setDirectLoggedInOKURL("/"));
     router.get("/logout").handler(rc -> {
       rc.clearUser();
-      rc.response().setStatusCode(301).putHeader(HttpHeaders.LOCATION, "/").end();
+      rc.session().destroy();
+      rc.response().setStatusCode(307).putHeader(HttpHeaders.LOCATION, "/").end();
     });
 
     router.route("/graphql").handler(createGraphQLHandler());
