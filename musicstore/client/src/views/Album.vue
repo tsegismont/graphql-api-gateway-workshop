@@ -14,44 +14,48 @@
           <p class="text-secondary">{{ album.artist }}, {{ album.genre.name }}</p>
           <p>
             <Stars :rating="rating"/>
-            -
-            <a href="#reviews">Reviews</a>
+            <template v-if="showReviews()">
+              -
+              <a href="#reviews">Reviews</a>
+            </template>
           </p>
           <button type="button" class="btn btn-primary" v-on:click="addToCart()">Add to cart</button>
         </div>
       </div>
       <TrackList :album="album"/>
     </template>
-    <hr>
-    <h3>Reviews</h3>
-    <div id="reviews">
-      <template v-if="review.errors.length">
-        <p>Please correct the following error(s):</p>
-        <ul>
-          <li v-for="(error,index) in review.errors" v-bind:key="index">{{ error }}</li>
-        </ul>
-      </template>
-      <form id="reviewForm" class="form-inline" v-on:submit.prevent="checkForm">
-        <label for="reviewComment" class="mb-2 mr-sm-2 sr-only">Comment</label>
-        <input class="form-control mb-2 mr-sm-2" id="reviewComment" placeholder="Enter comment"
-               v-model="review.comment">
-        <label class="mb-2 mr-sm-2" for="reviewRating">Rating</label>
-        <select class="custom-select mb-2 mr-sm-2" id="reviewRating" v-model="review.rating">
-          <option value="1">1</option>
-          <option value="2">2</option>
-          <option value="3">3</option>
-          <option value="4">4</option>
-          <option value="5">5</option>
-        </select>
-        <button type="submit" class="btn btn-primary mb-2 mr-sm-2" form="reviewForm">Submit</button>
-      </form>
-      <div class="row" v-if="reviews">
-        <ReviewCard
-          v-for="(review, index) in reviews"
-          v-bind:review="review"
-          v-bind:key="index"/>
+    <template v-if="showReviews()">
+      <hr>
+      <h3>Reviews</h3>
+      <div id="reviews">
+        <template v-if="review.errors.length">
+          <p>Please correct the following error(s):</p>
+          <ul>
+            <li v-for="(error,index) in review.errors" v-bind:key="index">{{ error }}</li>
+          </ul>
+        </template>
+        <form id="reviewForm" class="form-inline" v-on:submit.prevent="checkForm">
+          <label for="reviewComment" class="mb-2 mr-sm-2 sr-only">Comment</label>
+          <input class="form-control mb-2 mr-sm-2" id="reviewComment" placeholder="Enter comment"
+                 v-model="review.comment">
+          <label class="mb-2 mr-sm-2" for="reviewRating">Rating</label>
+          <select class="custom-select mb-2 mr-sm-2" id="reviewRating" v-model="review.rating">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+          </select>
+          <button type="submit" class="btn btn-primary mb-2 mr-sm-2" form="reviewForm">Submit</button>
+        </form>
+        <div class="row" v-if="reviews">
+          <ReviewCard
+            v-for="(review, index) in reviews"
+            v-bind:review="review"
+            v-bind:key="index"/>
+        </div>
       </div>
-    </div>
+    </template>
   </div>
 </template>
 
@@ -115,6 +119,9 @@
                 error: null
             }
         },
+        props: {
+            currentUser: String
+        },
         created() {
             this.fetchData();
         },
@@ -122,6 +129,9 @@
             '$route': 'fetchData'
         },
         methods: {
+            showReviews() {
+                return this.reviews || this.currentUser;
+            },
             fetchData() {
                 this.error = this.album = this.rating = this.reviews = null;
                 this.loading = true;
