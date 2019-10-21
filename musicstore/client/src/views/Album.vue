@@ -20,23 +20,7 @@
           <button type="button" class="btn btn-primary" v-on:click="addToCart()">Add to cart</button>
         </div>
       </div>
-      <div class="row">
-        <h3>Tracks</h3>
-        <table class="table">
-          <thead class="thead-light">
-          <tr>
-            <th scope="col">#</th>
-            <th scope="col">Name</th>
-          </tr>
-          </thead>
-          <tbody>
-          <tr v-for="track in album.tracks" v-bind:key="track.number">
-            <th scope="row">{{ track.number }}</th>
-            <td>{{ track.name }}</td>
-          </tr>
-          </tbody>
-        </table>
-      </div>
+      <TrackList :album="album"/>
     </template>
     <hr>
     <h3>Reviews</h3>
@@ -72,6 +56,7 @@
 </template>
 
 <script>
+    import TrackList from "../components/TrackList";
     import Stars from '../components/Stars';
     import ReviewCard from "../components/ReviewCard";
     import apolloClient from '../shared/apollo-client';
@@ -185,6 +170,7 @@
             }
         },
         components: {
+            TrackList,
             Stars,
             ReviewCard
         }
