@@ -1,5 +1,5 @@
 type Genre {
-  id: ID,
+  id: ID
   name: String!
   image: String
 }
@@ -10,7 +10,7 @@ type Track {
 }
 
 type Album {
-  id: ID,
+  id: ID
   name: String!
   genre: Genre!
   artist: String!
@@ -59,4 +59,9 @@ type Mutation {
   addToCart(albumId: ID!): Cart
   removeFromCart(albumId: ID!): Cart
   addReview(albumId: ID!, review: ReviewInput): ReviewResult
+}
+
+schema {
+  query: Query
+  mutation: Mutation
 }
