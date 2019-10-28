@@ -141,7 +141,7 @@
             addOne(albumId) {
                 this.beforeQuery();
                 apolloClient.mutate({
-                    query: addToCart,
+                    mutation: addToCart,
                     variables: {albumId}
                 }).then(result => {
                     this.items = result.data.addToCart.items;
@@ -151,7 +151,7 @@
             removeOne(albumId) {
                 this.beforeQuery();
                 apolloClient.mutate({
-                    query: removeFromCart,
+                    mutation: removeFromCart,
                     variables: {albumId}
                 }).then(result => {
                     this.items = result.data.removeFromCart.items;
