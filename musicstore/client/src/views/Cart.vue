@@ -124,7 +124,8 @@
             this.fetchData();
         },
         watch: {
-            '$route': 'fetchData'
+            '$route': 'fetchData',
+            'currentUser': 'fetchData'
         },
         methods: {
             fetchData() {
