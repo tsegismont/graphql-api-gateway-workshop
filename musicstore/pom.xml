@@ -16,6 +16,7 @@
   <modules>
     <module>inventory</module>
     <module>review</module>
+    <module>client</module>
     <module>webapp</module>
   </modules>
 

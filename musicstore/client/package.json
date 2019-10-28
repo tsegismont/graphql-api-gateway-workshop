@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
+    "build": "vue-cli-service build && mkdir -p src/main/resources/webroot/ && cp -TR dist/ src/main/resources/webroot/",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {

@@ -30,6 +30,11 @@
 
   <dependencies>
     <dependency>
+      <groupId>io.github.tsegismont</groupId>
+      <artifactId>graphql-api-gateway-client</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-rx-java2</artifactId>
     </dependency>
