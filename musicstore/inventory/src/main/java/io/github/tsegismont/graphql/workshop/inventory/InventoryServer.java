@@ -7,6 +7,8 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.ErrorHandler;
+import io.vertx.ext.web.handler.LoggerFormat;
+import io.vertx.ext.web.handler.LoggerHandler;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,6 +25,8 @@ public class InventoryServer extends AbstractVerticle {
     dataRepository = new DataRepository(vertx);
 
     Router router = Router.router(vertx);
+
+    router.route().handler(LoggerHandler.create(LoggerFormat.TINY));
 
     router.route().handler(this::setResponseContentType);
 

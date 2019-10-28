@@ -8,6 +8,8 @@ import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.ErrorHandler;
+import io.vertx.ext.web.handler.LoggerFormat;
+import io.vertx.ext.web.handler.LoggerHandler;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -22,6 +24,8 @@ public class ReviewServer extends AbstractVerticle {
   public void start() throws Exception {
 
     Router router = Router.router(vertx);
+
+    router.route().handler(LoggerHandler.create(LoggerFormat.TINY));
 
     router.route().handler(this::setResponseContentType);
 
