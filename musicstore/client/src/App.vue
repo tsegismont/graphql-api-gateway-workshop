@@ -5,6 +5,7 @@
         <div class="collapse navbar-collapse">
           <router-link class="navbar-brand mr-auto" to="/">Music Store</router-link>
           <ul class="navbar-nav">
+            <cart-nav v-bind:cart-total="cartTotal"/>
             <li class="nav-item dropdown">
               <a class="nav-link dropdown-toggle" id="navbarDropdown" role="button" data-toggle="dropdown"
                  aria-haspopup="true" aria-expanded="false">
@@ -27,33 +28,64 @@
 </template>
 
 <script>
+    import CartNav from "./components/CartNav";
     import apolloClient from "./shared/apollo-client";
     import gql from 'graphql-tag';
+
+    const getCartTotal = gql`
+      {
+        cart {
+          items {
+            quantity
+          }
+        }
+      }
+    `;
 
     const getCurrentUser = gql`
       {
         currentUser
       }
     `;
+
     export default {
         name: 'App',
+        components: {
+            CartNav
+        },
         data() {
             return {
                 currentUser: null,
+                cartTotal: 0,
             }
         },
         created() {
-            this.fetchData();
+            this.fetchCurrentUser();
+            this.$on('update-cart', this.updateCart);
         },
         methods: {
-            fetchData() {
+            fetchCurrentUser() {
                 apolloClient.query({
                     query: getCurrentUser
                 }).then(result => {
                     this.currentUser = result.data.currentUser;
+                    if (this.currentUser) this.fetchCartTotal();
                 }).catch(reason => {
                     console.error(reason);
                 });
+            },
+            fetchCartTotal() {
+                apolloClient.query({
+                    query: getCartTotal
+                }).then(result => {
+                    const items = result.data.cart.items;
+                    this.cartTotal = items.reduce((total, item) => total + item.quantity, 0);
+                }).catch(reason => {
+                    console.error(reason);
+                });
+            },
+            updateCart(total) {
+                this.cartTotal = total;
             }
         }
     }

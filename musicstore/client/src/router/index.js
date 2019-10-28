@@ -3,6 +3,7 @@ import VueRouter from 'vue-router'
 import Home from '../views/Home.vue'
 import Genre from '../views/Genre.vue'
 import Album from '../views/Album.vue'
+import Cart from "../views/Cart";
 
 Vue.use(VueRouter);
 
@@ -21,6 +22,10 @@ const routes = [
     path: '/album/:id',
     name: 'album',
     component: Album,
+  }, {
+    path: '/cart',
+    name: 'cart',
+    component: Cart,
   }
 ];
 

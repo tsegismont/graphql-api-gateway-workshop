@@ -5,8 +5,10 @@ import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.idl.*;
+import hu.akarnokd.rxjava2.interop.MaybeInterop;
 import hu.akarnokd.rxjava2.interop.SingleInterop;
 import io.reactivex.Completable;
+import io.reactivex.Maybe;
 import io.reactivex.Single;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.impl.NoStackTraceThrowable;
@@ -19,6 +21,7 @@ import io.vertx.ext.web.client.WebClientOptions;
 import io.vertx.ext.web.handler.graphql.GraphQLHandlerOptions;
 import io.vertx.ext.web.handler.graphql.GraphiQLHandlerOptions;
 import io.vertx.ext.web.handler.graphql.VertxPropertyDataFetcher;
+import io.vertx.pgclient.PgConnectOptions;
 import io.vertx.reactivex.core.AbstractVerticle;
 import io.vertx.reactivex.ext.auth.htpasswd.HtpasswdAuth;
 import io.vertx.reactivex.ext.web.Router;
@@ -27,18 +30,37 @@ import io.vertx.reactivex.ext.web.handler.*;
 import io.vertx.reactivex.ext.web.handler.graphql.GraphQLHandler;
 import io.vertx.reactivex.ext.web.handler.graphql.GraphiQLHandler;
 import io.vertx.reactivex.ext.web.sstore.LocalSessionStore;
+import io.vertx.reactivex.pgclient.PgPool;
+import io.vertx.sqlclient.PoolOptions;
 
 import java.util.Map;
 
 public class WebappServer extends AbstractVerticle {
 
+  private static final String CREATE_TABLE =
+    "create table if not exists cart ("
+      + "username varchar not null"
+      + ", "
+      + "album_id int not null"
+      + ", "
+      + "quantity int not null"
+      + ", "
+      + "unique (username, album_id)"
+      + ")";
+
   private GenresRepository genresRepository;
   private AlbumsRepository albumsRepository;
   private TracksRepository tracksRepository;
   private ReviewRepository reviewRepository;
+  private CartRepository cartRepository;
 
   @Override
   public Completable rxStart() {
+    PgPool pool = createPgPool("musicstore", "musicstore", "musicstore");
+    cartRepository = new CartRepository(pool);
+
+    Completable dbSetup = pool.rxQuery(CREATE_TABLE).ignoreElement();
+
     WebClient inventoryClient = WebClient.create(vertx, new WebClientOptions().setDefaultPort(8081));
     genresRepository = new GenresRepository(inventoryClient);
     albumsRepository = new AlbumsRepository(inventoryClient);
@@ -71,10 +93,20 @@ public class WebappServer extends AbstractVerticle {
 
     router.route().failureHandler(ErrorHandler.create());
 
-    return vertx.createHttpServer()
+    Completable httpSetup = vertx.createHttpServer()
       .requestHandler(router)
       .rxListen(8080)
       .ignoreElement();
+
+    return dbSetup.andThen(httpSetup);
+  }
+
+  private PgPool createPgPool(String database, String user, String password) {
+    PgConnectOptions pgConnectOptions = new PgConnectOptions()
+      .setDatabase(database)
+      .setUser(user)
+      .setPassword(password);
+    return PgPool.pool(vertx, pgConnectOptions, new PoolOptions());
   }
 
   private GraphiQLHandler createGraphiQLHandler() {
@@ -108,6 +140,7 @@ public class WebappServer extends AbstractVerticle {
       .type("Query", this::query)
       .type("Mutation", this::mutation)
       .type("Album", this::album)
+      .type("CartItem", this::cartItem)
       .wiringFactory(new CustomWiringFactory())
       .build();
   }
@@ -117,39 +150,64 @@ public class WebappServer extends AbstractVerticle {
       .dataFetcher("genres", env -> genresRepository.findAll().to(SingleInterop.get()))
       .dataFetcher("albums", env -> {
         String genre = env.getArgument("genre");
-        return albumsRepository.findAll(genre == null ? null : Integer.valueOf(genre)).to(SingleInterop.get());
+        return albumsRepository.findAll(genre==null ? null:Integer.valueOf(genre)).to(SingleInterop.get());
       })
       .dataFetcher("album", env -> {
         Integer id = Integer.valueOf(env.getArgument("id"));
         Single<JsonObject> inventoryData = albumsRepository.findById(id, true);
         Single<JsonObject> reviewData = reviewRepository.findRatingAndReviewsByAlbum(id);
-        Single<JsonObject> result = inventoryData.zipWith(reviewData, (i, r) -> r.mergeIn(i));
-        return result.to(SingleInterop.get());
+        return inventoryData.zipWith(reviewData, (i, r) -> r.mergeIn(i)).to(SingleInterop.get());
       })
-      .dataFetcher("currentUser", this::getCurrentUserName);
+      .dataFetcher("currentUser", env -> getCurrentUserName(env).to(MaybeInterop.get()))
+      .dataFetcher("cart", env -> {
+        return this.getCurrentUserName(env)
+          .flatMapSingleElement(cartRepository::findCart)
+          .map(items -> new JsonObject().put("items", items))
+          .to(MaybeInterop.get());
+      });
   }
 
   private TypeRuntimeWiring.Builder mutation(TypeRuntimeWiring.Builder builder) {
     return builder
       .dataFetcher("addReview", env -> {
-        Integer albumId = Integer.valueOf(env.getArgument("albumId"));
-        JsonObject input = new JsonObject((Map<String, Object>) env.getArgument("review"));
-        String currentUserName = getCurrentUserName(env);
-        Single<JsonObject> result;
-        if (currentUserName==null) {
-          result = Single.error(new NoStackTraceThrowable("Not logged in"));
-        } else {
-          input.put("name", currentUserName);
-          result = reviewRepository.addReview(albumId, input);
-        }
-        return result.to(SingleInterop.get());
+        return getCurrentUserName(env)
+          .switchIfEmpty(Single.error(new NoStackTraceThrowable("Not logged in")))
+          .flatMap(currentUserName -> {
+            Integer albumId = Integer.valueOf(env.getArgument("albumId"));
+            JsonObject input = new JsonObject((Map<String, Object>) env.getArgument("review"));
+            input.put("name", currentUserName);
+            return reviewRepository.addReview(albumId, input);
+          }).to(SingleInterop.get());
+      })
+      .dataFetcher("addToCart", env -> {
+        return getCurrentUserName(env)
+          .switchIfEmpty(Single.error(new NoStackTraceThrowable("Not logged in")))
+          .flatMap(currentUserName -> {
+            Integer albumId = Integer.valueOf(env.getArgument("albumId"));
+            return cartRepository.addToCart(currentUserName, albumId).andThen(cartRepository.findCart(currentUserName));
+          })
+          .map(items -> new JsonObject().put("items", items))
+          .to(SingleInterop.get());
+      })
+      .dataFetcher("removeFromCart", env -> {
+        return getCurrentUserName(env)
+          .switchIfEmpty(Single.error(new NoStackTraceThrowable("Not logged in")))
+          .flatMap(currentUserName -> {
+            Integer albumId = Integer.valueOf(env.getArgument("albumId"));
+            return cartRepository.removeFromCart(currentUserName, albumId).andThen(cartRepository.findCart(currentUserName));
+          })
+          .map(items -> new JsonObject().put("items", items))
+          .to(SingleInterop.get());
       });
   }
 
-  private String getCurrentUserName(DataFetchingEnvironment env) {
+  private Maybe<String> getCurrentUserName(DataFetchingEnvironment env) {
     RoutingContext routingContext = env.getContext();
     User user = routingContext.user();
-    return user==null ? null:user.principal().getString("username");
+    if (user!=null) {
+      return Maybe.just(user.principal().getString("username"));
+    }
+    return Maybe.empty();
   }
 
   private TypeRuntimeWiring.Builder album(TypeRuntimeWiring.Builder builder) {
@@ -184,6 +242,14 @@ public class WebappServer extends AbstractVerticle {
           reviews = reviewRepository.findReviewsByAlbum(album.getInteger("id"));
         }
         return reviews.to(SingleInterop.get());
+      });
+  }
+
+  private TypeRuntimeWiring.Builder cartItem(TypeRuntimeWiring.Builder builder) {
+    return builder
+      .dataFetcher("album", env -> {
+        JsonObject cartItem = env.getSource();
+        return albumsRepository.findById(cartItem.getInteger("albumId"), false).to(SingleInterop.get());
       });
   }
 

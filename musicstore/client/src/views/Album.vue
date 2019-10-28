@@ -19,7 +19,7 @@
               <a href="#reviews">Reviews</a>
             </template>
           </p>
-          <button type="button" class="btn btn-primary" v-on:click="addToCart()">Add to cart</button>
+          <button type="button" class="btn btn-primary" v-if="currentUser" v-on:click="addToCart()">Add to cart</button>
         </div>
       </div>
       <TrackList :album="album"/>
@@ -103,6 +103,16 @@
       }
     `;
 
+    const addToCart = gql`
+      mutation ($albumId: ID!) {
+        addToCart(albumId: $albumId) {
+          items {
+            quantity
+          }
+        }
+      }
+    `;
+
     export default {
         name: "album",
         data() {
@@ -150,7 +160,19 @@
                 });
             },
             addToCart() {
-                window.alert('Done!')
+                apolloClient.mutate({
+                    mutation: addToCart,
+                    variables: {
+                        "albumId": this.$route.params.id
+                    }
+                }).then(result => {
+                    const items = result.data.addToCart.items;
+                    const cartTotal = items.reduce((total, item) => total + item.quantity, 0);
+                    window.alert('Done!');
+                    this.$parent.$emit('update-cart', cartTotal);
+                }).catch(reason => {
+                    console.error(reason);
+                });
             },
             checkForm() {
                 this.review.errors = [];
