@@ -31,7 +31,8 @@ jobs:
         - docker run -v ${PWD}:/documents/ asciidoctor/docker-asciidoctor asciidoctor /documents/${INPUT_FILE} -o /documents/${DEPLOY_LOCAL_DIR}/${OUTPUT_FILE}
       deploy:
         provider: pages
+        github_token: ${GITHUB_TOKEN}
+        skip_cleanup: true
         local_dir: ${DEPLOY_LOCAL_DIR}
         file: ${OUTPUT_FILE}
-        github_token: ${GITHUB_TOKEN}
         keep_history: true
