@@ -1,0 +1,67 @@
+type Genre {
+  id: ID
+  name: String!
+  image: String
+}
+
+type Track {
+  number: Int!
+  name: String!
+}
+
+type Album {
+  id: ID
+  name: String!
+  genre: Genre!
+  artist: String!
+  image: String
+  tracks: [Track!]!
+  rating: Float
+  reviews: [Review!]
+}
+
+type Review {
+  name: String!
+  rating: Int!
+  comment: String
+}
+
+type CartItem {
+  album: Album
+  quantity: Int
+}
+
+type Cart {
+  items: [CartItem!]
+}
+
+type Query {
+  genres: [Genre!]
+  bestRated(limit: Int = 3): [Album!]
+  recentlyViewed(limit: Int = 3): [Album!]
+  albums(genre: ID): [Album!]
+  album(id: ID!): Album
+  cart: Cart
+  currentUser: String
+}
+
+input ReviewInput {
+  rating: Int!
+  comment: String
+}
+
+type ReviewResult {
+  rating: Int!
+  reviews: [Review!]!
+}
+
+type Mutation {
+  addToCart(albumId: ID!): Cart
+  removeFromCart(albumId: ID!): Cart
+  addReview(albumId: ID!, review: ReviewInput): ReviewResult
+}
+
+schema {
+  query: Query
+  mutation: Mutation
+}

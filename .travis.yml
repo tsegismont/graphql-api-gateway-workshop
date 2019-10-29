@@ -1,0 +1,34 @@
+language: java
+services:
+  - docker
+branches:
+  only:
+    - master
+cache:
+  directories:
+    - $HOME/.m2
+env:
+  global:
+    - INPUT_FILE=workshop.adoc
+    - OUTPUT_FILE=index.html
+install: true
+jobs:
+  include:
+    - stage: build
+      name: "Build - OpenJDK 8"
+      script: mvn -B verify
+      jdk: openjdk8
+    - stage: build
+      name: "Build - OpenJDK 11"
+      script: mvn -B verify
+      jdk: openjdk11
+    - stage: deploy
+      name: "Deploy doc"
+      if: type != pull_request AND branch = master
+      script: docker run -v ${PWD}:/documents/ asciidoctor/docker-asciidoctor asciidoctor /documents/${INPUT_FILE} -o /documents/${OUTPUT_FILE}
+      deploy:
+        provider: pages
+        skip_cleanup: true
+        file: ${OUTPUT_FILE}
+        github_token: ${GITHUB_TOKEN}
+        keep_history: true
