@@ -11,6 +11,7 @@ env:
   global:
     - INPUT_FILE=workshop.adoc
     - OUTPUT_FILE=index.html
+    - DEPLOY_LOCAL_DIR=gh-pages
 install: true
 jobs:
   include:
@@ -25,10 +26,13 @@ jobs:
     - stage: deploy
       name: "Deploy doc"
       if: type != pull_request AND branch = master
-      script: docker run -v ${PWD}:/documents/ asciidoctor/docker-asciidoctor asciidoctor /documents/${INPUT_FILE} -o /documents/${OUTPUT_FILE}
+      script:
+        - docker run -v ${PWD}:/documents/ asciidoctor/docker-asciidoctor asciidoctor /documents/${INPUT_FILE} -o /documents/${OUTPUT_FILE}
+        - mkdir ${DEPLOY_LOCAL_DIR}
+        - cp ${OUTPUT_FILE} ${DEPLOY_LOCAL_DIR}
       deploy:
         provider: pages
-        skip_cleanup: true
+        local_dir: ${DEPLOY_LOCAL_DIR}
         file: ${OUTPUT_FILE}
         github_token: ${GITHUB_TOKEN}
         keep_history: true
