@@ -449,7 +449,12 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
 <ul class="sectlevel1">
-<li><a href="#_preface">Preface</a></li>
+<li><a href="#_introduction">Introduction</a>
+<ul class="sectlevel2">
+<li><a href="#_microservices_architecture">Microservices architecture</a></li>
+<li><a href="#_the_api_gateway_pattern">The API Gateway pattern</a></li>
+</ul>
+</li>
 <li><a href="#_graphql">GraphQL</a></li>
 <li><a href="#_vert_x">Vert.x</a></li>
 <li><a href="#_the_musicstore_application">The MusicStore Application</a></li>
@@ -472,9 +477,78 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 <div id="content">
 <div class="sect1">
-<h2 id="_preface">Preface</h2>
+<h2 id="_introduction">Introduction</h2>
 <div class="sectionbody">
-
+<div class="sect2">
+<h3 id="_microservices_architecture">Microservices architecture</h3>
+<div class="paragraph">
+<p>In a <a href="https://microservices.io/patterns/microservices.html">microservices architecture</a>, several loosely coupled, independently deployable services comprise a large software application.</p>
+</div>
+<div class="paragraph">
+<p>This type of design can provide quite a few benefits, including:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>ability to release more often and more reliably</p>
+</li>
+<li>
+<p>codebases easier to reason about</p>
+</li>
+<li>
+<p>independence to a particular technology</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>For example, an online store application could be composed of, among others, an inventory and a rating service:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="microservices-architecture.svg" alt="microservices architecture" width="550" height="130">
+</div>
+<div class="title">Figure 1. Online store application, microservices architecture</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_the_api_gateway_pattern">The API Gateway pattern</h3>
+<div class="paragraph">
+<p>The client side of the application may have to contact several services to display a single screen or page.
+For instance, to display a product details page, it needs product info from the inventory service and customer reviews from the rating service.</p>
+</div>
+<div class="paragraph">
+<p>But each network communication comes with a cost.
+This applies to desktop browsers with DSL or fiber links, but the impact is particularly significant on mobile networks.</p>
+</div>
+<div class="paragraph">
+<p>This is one important reason why the API Gateway pattern has emerged.
+In practice, the client communicates with a single service, the gateway, which communicates with the backend services:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="api-gateway-pattern.svg" alt="api gateway pattern" width="744" height="166">
+</div>
+<div class="title">Figure 2. API Gateway pattern</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>The API Gateway does not eliminate the coordination required to make sense of the backend data.
+In fact, it adds a new network hop in the the sequence of service calls.</p>
+</div>
+<div class="paragraph">
+<p>But it moves most of the interactions inside the datacenter, where network latencies are considerably better.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
 </div>
 </div>
 <div class="sect1">
@@ -512,10 +586,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 <div class="sect2">
 <h3 id="_ide">IDE</h3>
-<div class="sect3">
-<h4 id="_no_ide">No IDE ?</h4>
 
-</div>
 </div>
 </div>
 </div>
@@ -535,7 +606,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2019-10-29 11:19:29 UTC
+Last updated 2019-10-29 17:35:07 UTC
 </div>
 </div>
 </body>
