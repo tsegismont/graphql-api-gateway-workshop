@@ -1,5 +1,0 @@
-= Implementing the API Gateway pattern with GraphQL
-
-image:https://travis-ci.org/tsegismont/graphql-api-gateway-workshop.svg?branch=master["Build Status", link="https://travis-ci.org/tsegismont/graphql-api-gateway-workshop"]
-
-Take the workshop online: https://tsegismont.github.io/graphql-api-gateway-workshop/
