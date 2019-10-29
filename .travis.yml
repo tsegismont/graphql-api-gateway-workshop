@@ -8,8 +8,9 @@ cache:
   directories:
     - $HOME/.m2
 env:
-  - INPUT_FILE=workshop.adoc
-  - OUTPUT_FILE=index.html
+  global:
+    - INPUT_FILE=workshop.adoc
+    - OUTPUT_FILE=index.html
 install: true
 jobs:
   include:
