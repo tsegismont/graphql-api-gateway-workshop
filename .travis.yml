@@ -27,9 +27,8 @@ jobs:
       name: "Deploy doc"
       if: type != pull_request AND branch = master
       script:
-        - docker run -v ${PWD}:/documents/ asciidoctor/docker-asciidoctor asciidoctor /documents/${INPUT_FILE} -o /documents/${OUTPUT_FILE}
         - mkdir ${DEPLOY_LOCAL_DIR}
-        - cp ${OUTPUT_FILE} ${DEPLOY_LOCAL_DIR}
+        - docker run -v ${PWD}:/documents/ asciidoctor/docker-asciidoctor asciidoctor /documents/${INPUT_FILE} -o /documents/${DEPLOY_LOCAL_DIR}/${OUTPUT_FILE}
       deploy:
         provider: pages
         local_dir: ${DEPLOY_LOCAL_DIR}
