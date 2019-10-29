@@ -5,13 +5,16 @@ set -e -x
 WORKDIR=$(mktemp -d)
 REMOTE_REPO=git@github.com:tsegismont/graphql-api-gateway-workshop.git
 WEBSITE_BRANCH=gh-pages
+LOCAL_REPO="${WORKDIR}/${WEBSITE_BRANCH}"
 INPUT_FILE=workshop.adoc
 OUTPUT_FILE=index.html
 
-git clone -b ${WEBSITE_BRANCH} ${REMOTE_REPO} "${WORKDIR}"
+mkdir -p "${LOCAL_REPO}"
+git clone -b ${WEBSITE_BRANCH} ${REMOTE_REPO} "${LOCAL_REPO}"
 cp ${INPUT_FILE} "${WORKDIR}"
-cd "${WORKDIR}"
-docker run -v "${PWD}":/documents/ asciidoctor/docker-asciidoctor asciidoctor /documents/${INPUT_FILE} -o /documents/${OUTPUT_FILE}
+docker run -v "${WORKDIR}":/documents/ -v "${LOCAL_REPO}":/output/ asciidoctor/docker-asciidoctor asciidoctor -r asciidoctor-diagram /documents/${INPUT_FILE} -D /output -o ${OUTPUT_FILE}
+cd "${LOCAL_REPO}"
 git add ${OUTPUT_FILE}
+git add ./*.svg
 git commit -m "Auto generated doc"
 git push origin ${WEBSITE_BRANCH}

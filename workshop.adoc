@@ -2,7 +2,79 @@
 Vladimir Dejanovic <https://twitter.com/vladimird_42[@vladimird_42]>; Thomas Segismont <https://twitter.com/tsegismont[@tsegismont]>
 :toc: left
 
-== Preface
+== Introduction
+
+=== Microservices architecture
+
+In a https://microservices.io/patterns/microservices.html[microservices architecture], several loosely coupled, independently deployable services comprise a large software application.
+
+This type of design can provide quite a few benefits, including:
+
+* ability to release more often and more reliably
+* codebases easier to reason about
+* independence to a particular technology
+
+For example, an online store application could be composed of, among others, an inventory and a rating service:
+
+[graphviz, microservices-architecture, svg]
+.Online store application, microservices architecture
+----
+strict digraph {
+    rankdir=LR;
+    splines="line";
+    client [label="Client" shape="ellipse" color="#585858" style="filled" fillcolor="#848484" fontcolor="white"]
+    inventory [label="Inventory service" shape="polygon" color="#585858" style="rounded,filled" fillcolor="#782b90" fontcolor="white"]
+    rating [label="Rating service" shape="polygon" color="#585858" style="rounded,filled" fillcolor="#782b90" fontcolor="white"]
+    inventorydb [label="Inventory DB"  shape=cylinder color="#585858" style="filled" fillcolor="#008bb9" fontcolor="white"]
+    ratingdb [label="Rating DB"  shape=cylinder color="#585858" style="filled" fillcolor="#008bb9" fontcolor="white"]
+    client -> inventory
+    client -> rating
+    inventory -> inventorydb
+    rating -> ratingdb
+}
+----
+
+=== The API Gateway pattern
+
+The client side of the application may have to contact several services to display a single screen or page.
+For instance, to display a product details page, it needs product info from the inventory service and customer reviews from the rating service.
+
+But each network communication comes with a cost.
+This applies to desktop browsers with DSL or fiber links, but the impact is particularly significant on mobile networks.
+
+This is one important reason why the API Gateway pattern has emerged.
+In practice, the client communicates with a single service, the gateway, which communicates with the backend services:
+
+[graphviz, api-gateway-pattern, svg]
+.API Gateway pattern
+----
+strict digraph {
+    rankdir=LR;
+    splines="line";
+    client [label="Client" shape="ellipse" color="#585858" style="filled" fillcolor="#848484" fontcolor="white"]
+    gateway [label="API Gateway" shape="polygon" color="#585858" style="rounded,filled" fillcolor="#782b90" fontcolor="white"]
+    inventory [label="Inventory service" shape="polygon" color="#585858" style="rounded,filled" fillcolor="#782b90" fontcolor="white"]
+    rating [label="Rating service" shape="polygon" color="#585858" style="rounded,filled" fillcolor="#782b90" fontcolor="white"]
+    gatewaydb [label="Gateway DB"  shape=cylinder color="#585858" style="filled" fillcolor="#008bb9" fontcolor="white"]
+    inventorydb [label="Inventory DB"  shape=cylinder color="#585858" style="filled" fillcolor="#008bb9" fontcolor="white"]
+    ratingdb [label="Rating DB"  shape=cylinder color="#585858" style="filled" fillcolor="#008bb9" fontcolor="white"]
+    client -> gateway
+    gateway -> gatewaydb
+    gateway -> rating
+    gateway -> inventory
+    inventory -> inventorydb
+    rating -> ratingdb
+    {rank = same; gateway; gatewaydb;}
+}
+----
+
+[NOTE]
+====
+The API Gateway does not eliminate the coordination required to make sense of the backend data.
+In fact, it adds a new network hop in the the sequence of service calls.
+
+But it moves most of the interactions inside the datacenter, where network latencies are considerably better.
+====
 
 == GraphQL
 
@@ -15,13 +87,13 @@ Vladimir Dejanovic <https://twitter.com/vladimird_42[@vladimird_42]>; Thomas Seg
 === Hardware
 
 === Java Development Kit
+
 === Maven
+
 === IDE
-==== No IDE ?
 
 == Let’s start !
 
 === Getting the code
+
 === Build
-
-
