@@ -15,20 +15,21 @@ env:
 install: true
 jobs:
   include:
-    - stage: build
-      name: "Build - OpenJDK 8"
-      script: mvn -B verify
-      jdk: openjdk8
-    - stage: build
-      name: "Build - OpenJDK 11"
-      script: mvn -B verify
-      jdk: openjdk11
+#    - stage: build
+#      name: "Build - OpenJDK 8"
+#      script: mvn -B verify
+#      jdk: openjdk8
+#    - stage: build
+#      name: "Build - OpenJDK 11"
+#      script: mvn -B verify
+#      jdk: openjdk11
     - stage: deploy
       name: "Deploy doc"
       if: type != pull_request AND branch = master
       script:
         - mkdir ${DEPLOY_LOCAL_DIR}
         - docker run -v ${PWD}:/documents/ -v ${DEPLOY_LOCAL_DIR}:/output/ asciidoctor/docker-asciidoctor asciidoctor -r asciidoctor-diagram /documents/${INPUT_FILE} -D /output -o ${OUTPUT_FILE}
+        - ls -lrtRa ${DEPLOY_LOCAL_DIR}
       deploy:
         provider: pages
         github_token: ${GITHUB_TOKEN}
