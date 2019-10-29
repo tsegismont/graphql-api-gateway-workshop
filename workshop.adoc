@@ -1,0 +1,27 @@
+= Implementing the API Gateway pattern with GraphQL
+Vladimir Dejanovic <https://twitter.com/vladimird_42[@vladimird_42]>; Thomas Segismont <https://twitter.com/tsegismont[@tsegismont]>
+:toc: left
+
+== Preface
+
+== GraphQL
+
+== Vert.x
+
+== The MusicStore Application
+
+== Prerequisites
+
+=== Hardware
+
+=== Java Development Kit
+=== Maven
+=== IDE
+==== No IDE ?
+
+== Let’s start !
+
+=== Getting the code
+=== Build
+
+
