@@ -42,7 +42,7 @@ For instance, to display a product details page, it needs product info from the 
 But each network communication comes with a cost.
 This applies to desktop browsers with DSL or fiber links, but the impact is particularly significant on mobile networks.
 
-This is one important reason why the API Gateway pattern has emerged.
+This is one important reason why the _API Gateway_ pattern has emerged.
 In practice, the client communicates with a single service, the gateway, which communicates with the backend services:
 
 [graphviz, api-gateway-pattern, svg]
@@ -76,23 +76,81 @@ In fact, it adds a new network hop in the the sequence of service calls.
 But it moves most of the interactions inside the datacenter, where network latencies are considerably better.
 ====
 
-== GraphQL
+Very often, the API Gateway implements cross-cutting concerns like security.
+For example, it could generate a token after authenticating the client and communicate it to the backend services as a proof of identity.
 
-== Vert.x
+Also, it may provide its own features, if they are only relevant to the frontend.
+An e-commerce application, for instance, could manage customers' shopping carts at the API Gateway level.
 
-== The MusicStore Application
+=== Serving many clients
 
-== Prerequisites
+A lot of applications nowadays must be available from a wide range of clients: browsers, smartphones, tablets, wearables... etc.
+These clients all have different capabilities in terms of display and networking.
 
-=== Hardware
+Let's consider the product details use case.
+For a desktop user, it makes sense to show:
 
-=== Java Development Kit
+* the product info (inventory service)
+* the average rating (rating service)
+* users' reviews (rating service)
 
-=== Maven
+However, in a smartphone app the reviews would probably be accessible in a separate view because of the screen size and shape.
 
-=== IDE
+But if the mobile developer uses the same endpoint as the web developer, the API Gateway wastes:
 
-== Let’s start !
+* time (_latency_) waiting for rating service responses, and
+* bandwith sending a lot of unnecessary data.
+
+To overcome this problem, it is possible to create a backend specific to each type of frontend.
+
+[graphviz,backend-for-frontends,svg]
+.Backend for Frontends pattern
+----
+strict digraph {
+    rankdir=LR;
+    splines="line";
+    webclient [label="Web Client" shape="ellipse" color="#585858" style="filled" fillcolor="#848484" fontcolor="white"]
+    mobileclient [label="Mobile Client" shape="ellipse" color="#585858" style="filled" fillcolor="#848484" fontcolor="white"]
+    webgateway [label="Web Gateway" shape="polygon" color="#585858" style="rounded,filled" fillcolor="#782b90" fontcolor="white"]
+    mobilegateway [label="Mobile Gateway" shape="polygon" color="#585858" style="rounded,filled" fillcolor="#782b90" fontcolor="white"]
+    inventory [label="Inventory service" shape="polygon" color="#585858" style="rounded,filled" fillcolor="#782b90" fontcolor="white"]
+    rating [label="Rating service" shape="polygon" color="#585858" style="rounded,filled" fillcolor="#782b90" fontcolor="white"]
+    inventorydb [label="Inventory DB"  shape=cylinder color="#585858" style="filled" fillcolor="#008bb9" fontcolor="white"]
+    ratingdb [label="Rating DB"  shape=cylinder color="#585858" style="filled" fillcolor="#008bb9" fontcolor="white"]
+    webclient -> webgateway
+    mobileclient -> mobilegateway
+    webgateway -> rating
+    webgateway -> inventory
+    mobilegateway -> rating
+    mobilegateway -> inventory
+    inventory -> inventorydb
+    rating -> ratingdb
+    {rank = clients; mobileclient; webclient;}
+    {rank = gateways; mobilegateway; webgateway;}
+}
+----
+
+Nevertheless, this design, also known as the _Backend for Frontends_ pattern, has a few drawbacks:
+
+* each specific API Gateway is another component to maintain
+* a lot of code is duplicated
+* each new feature has to be supported in all gateways before all clients can start using it
+
+=== GraphQL
+
+== Getting started
+
+=== The MusicStore Application
+
+=== Prerequisites
+
+==== Java Development Kit
+
+==== Maven
+
+==== IDE
+
+==== Postgres Database
 
 === Getting the code
 
