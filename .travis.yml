@@ -29,7 +29,6 @@ jobs:
       script:
         - mkdir ${DEPLOY_LOCAL_DIR}
         - docker run -v ${PWD}:/documents/ -v ${PWD}/${DEPLOY_LOCAL_DIR}:/output/ asciidoctor/docker-asciidoctor asciidoctor -r asciidoctor-diagram /documents/${INPUT_FILE} -D /output -o ${OUTPUT_FILE}
-        - rm -rf ${DEPLOY_LOCAL_DIR}/.asciidoctor
       deploy:
         provider: pages
         github_token: ${GITHUB_TOKEN}

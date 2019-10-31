@@ -14,7 +14,6 @@ git clone -b ${WEBSITE_BRANCH} ${REMOTE_REPO} "${LOCAL_REPO}"
 cp ${INPUT_FILE} "${WORKDIR}"
 docker run -v "${WORKDIR}":/documents/ -v "${LOCAL_REPO}":/output/ asciidoctor/docker-asciidoctor asciidoctor -r asciidoctor-diagram /documents/${INPUT_FILE} -D /output -o ${OUTPUT_FILE}
 cd "${LOCAL_REPO}"
-git add ${OUTPUT_FILE}
-git add ./*.svg
+git add .
 git commit -m "Auto generated doc"
 git push origin ${WEBSITE_BRANCH}
