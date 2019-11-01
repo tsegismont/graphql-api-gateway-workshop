@@ -463,9 +463,11 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </li>
 </ul>
 </li>
-<li><a href="#_what_you_will_build">What you will build</a>
+<li><a href="#_the_musicstore_application">The MusicStore Application</a>
 <ul class="sectlevel2">
-<li><a href="#_the_musicstore_application">The MusicStore Application</a></li>
+<li><a href="#_web_client">Web Client</a></li>
+<li><a href="#_inventory_service">Inventory Service</a></li>
+<li><a href="#_rating_service">Rating Service</a></li>
 </ul>
 </li>
 <li><a href="#_getting_started">Getting started</a>
@@ -820,21 +822,129 @@ And the runtime will execute the corresponding data fetchers:</p>
 </div>
 </div>
 <div class="paragraph">
-<p>And the runtime will <strong>NOT</strong> execute the data fetchers for users' reviews and, obviously, will not send the unnecessary data.</p>
+<p>And the runtime will <strong>NOT</strong> execute the data fetchers for customers' reviews and, obviously, will not send the unnecessary data.</p>
 </div>
 </div>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_what_you_will_build">What you will build</h2>
+<h2 id="_the_musicstore_application">The MusicStore Application</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>You will build a gateway for a music store microservices-based application.</p>
+<p>The <em>MusicStore</em> is an online music shop.
+You can browse its catalog by genre, read customer reviews, see the list of tracks.
+When logged-in, you may add albums to your cart, manage your cart items or post your own reviews.</p>
+</div>
+<div class="paragraph">
+<p>Technically, it is comprised of the following components:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>the <a href="#_web_client">Web Client</a></p>
+</li>
+<li>
+<p>the API Gateway which:</p>
+<div class="ulist">
+<ul>
+<li>
+<p>serves the static content</p>
+</li>
+<li>
+<p>runs the GraphQL runtime</p>
+</li>
+<li>
+<p>authenticates the customers</p>
+</li>
+<li>
+<p>records cart items</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>the <a href="#_inventory_service">Inventory Service</a></p>
+</li>
+<li>
+<p>the <a href="#_rating_service">Rating Service</a></p>
+</li>
+</ul>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="musicstore-app.svg" alt="musicstore app" width="696" height="171">
+</div>
+<div class="title">Figure 6. The MusicStore application</div>
+</div>
+<div class="paragraph">
+<p>You will build the API Gateway for this microservices-based application.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+In a real-world application, the static content would often be served from a separate component.
+</td>
+</tr>
+</table>
 </div>
 <div class="sect2">
-<h3 id="_the_musicstore_application">The MusicStore Application</h3>
-
+<h3 id="_web_client">Web Client</h3>
+<div class="paragraph">
+<p>A <em>Single Page Application</em> implemented with <a href="https://vuejs.org/">Vue.js</a> and <a href="https://www.apollographql.com/docs/react/">Apollo client</a>.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_inventory_service">Inventory Service</h3>
+<div class="paragraph">
+<p>The <em>Inventory Service</em> exposes product data over HTTP in JSON format:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>genres</p>
+</li>
+<li>
+<p>albums (name, artist, genre, &#8230;&#8203;etc)</p>
+</li>
+<li>
+<p>tracks</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>For the sake of simplicity, inventory data is loaded on startup from text files and stored into memory.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_rating_service">Rating Service</h3>
+<div class="paragraph">
+<p>The <em>Rating Service</em> receives customers' reviews on albums:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>customer name</p>
+</li>
+<li>
+<p>rating</p>
+</li>
+<li>
+<p>comment</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>It exposes this data over HTTP in JSON format.
+It can also compute an average rating for an album.</p>
+</div>
+<div class="paragraph">
+<p>Again, for simplicity, reviews are stored only in memory.</p>
+</div>
 </div>
 </div>
 </div>
@@ -1020,7 +1130,7 @@ Open a terminal in the directory of your choice and type:</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2019-11-01 21:29:42 UTC
+Last updated 2019-11-01 23:01:29 UTC
 </div>
 </div>
 <style>
