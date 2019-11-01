@@ -138,11 +138,179 @@ Nevertheless, this design, also known as the _Backend for Frontends_ pattern, ha
 * a lot of code is duplicated
 * each new feature has to be supported in all gateways before all clients can start using it
 
-=== GraphQL
+=== GraphQL in a nutshell
 
-== Getting started
+==== What it is
+
+https://graphql.org/[GraphQL] is a query and schema definition language for your backend services.
+
+It allows backend developers to describe the data in a language-agnostic fashion:
+
+[source,graphql]
+.GraphQL Schema file
+----
+type Genre {
+  id: ID
+  name: String!
+}
+
+type Album {
+  id: ID
+  name: String!
+  genre: Genre!
+  artist: String!
+  reviews: [Review!]
+}
+
+type Review {
+  name: String!
+  rating: Int!
+  comment: String
+}
+
+type Query {
+  albums(genre: ID): [Album!]
+}
+
+schema {
+  query: Query
+}
+----
+
+And then frontend developers to request exactly the information they need:
+
+[source,graphql]
+.GraphQL query
+----
+query ($id: ID!) {
+  album(id: $id) {
+    id
+    name
+    genre {
+      name
+    }
+    artist
+  }
+}
+----
+
+Which, given an `id` variable, would result in:
+
+[source,json]
+.GraphQL results
+----
+{
+  "album": {
+    "name": "Revolver",
+    "genre": {
+      "name": "Pop"
+    },
+    "artist": "The Beatles"
+  }
+}
+----
+
+While the https://graphql.github.io/graphql-spec/[GraphQL specification] does not prescribe any transport, in practice it's often used over HTTP and Websockets.
+
+TIP: You will find a GraphQL schema definition and query authoring introduction on https://graphql.org/learn/.
+
+==== How it works
+
+When a GraphQL server runtime starts, it:
+
+. parses the schema file to discover types and fields
+. binds each field to data fetching functions
+
+[graphviz,graphql-server-runtime,svg]
+.GraphQL server runtime creation
+----
+strict digraph {
+    splines="line";
+    schema [label="Types and Fields" shape="ellipse" color="#585858" style="filled" fillcolor="#848484" fontcolor="white"]
+    fetchers [label="Data Fetchers" shape="ellipse" color="#585858" style="filled" fillcolor="#848484" fontcolor="white"]
+    runtime [label="GraphQL Runtime" shape="polygon" color="#585858" style="rounded,filled" fillcolor="#782b90" fontcolor="white"]
+    schema -> runtime
+    fetchers -> runtime
+}
+----
+
+Then when a request is received, it:
+
+. validates the query
+. invokes each data fetching function needed to produce the result
+. sends the result to the client
+
+[graphviz,graphql-query-execution,svg]
+.GraphQL query execution phases
+----
+strict digraph {
+    rankdir=LR;
+    splines="line";
+    validation [label="Validation" shape="ellipse" color="#585858" style="filled" fillcolor="#848484" fontcolor="white"]
+    execution [label="Execution" shape="ellipse" color="#585858" style="filled" fillcolor="#848484" fontcolor="white"]
+    result [label="Result" shape="ellipse" color="#585858" style="filled" fillcolor="#782b90" fontcolor="white"]
+    validation -> execution
+    execution -> result
+}
+----
+
+==== API Gateway engine
+
+GraphQL becomes more and more popular, including as a replacement for _RESTful_ or HTTP/JSON APis.
+
+But it particularly shines when building API Gateways.
+Why?
+Let's consider the product details use case again.
+
+When the desktop client sends a request to the GraphQL runtime, it will ask for product info as well as users' review.
+And the runtime will execute the corresponding data fetchers:
+
+[source,graphql]
+.Desktop client query
+----
+query ($id: ID!) {
+  album(id: $id) {
+    id
+    name
+    genre {
+      name
+    }
+    artist
+    reviews {
+      name
+      comment
+      rating
+    }
+  }
+}
+----
+
+However, the smartphone client will only ask for the product info:
+
+[source,graphql]
+.Smartphone client query
+----
+query ($id: ID!) {
+  album(id: $id) {
+    id
+    name
+    genre {
+      name
+    }
+    artist
+  }
+}
+----
+
+And the runtime will **NOT** execute the data fetchers for users' reviews and, obviously, will not send the unnecessary data.
+
+== What you will build
+
+You will build a gateway for a music store microservices-based application.
 
 === The MusicStore Application
+
+== Getting started
 
 === Prerequisites
 
