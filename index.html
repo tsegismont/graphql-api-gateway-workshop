@@ -924,7 +924,33 @@ Linux and Mac users can simply execute the <code>run-postgres.sh</code> script a
 </table>
 </div>
 <div class="paragraph">
-<p>Otherwise, browse to <a href="https://www.postgresql.org/download/" class="bare">https://www.postgresql.org/download/</a> and follow the instructions for your machine type.</p>
+<p>Otherwise:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>download Postgres from <a href="https://www.postgresql.org/download/" class="bare">https://www.postgresql.org/download/</a> and follow the instructions for your machine type</p>
+</li>
+<li>
+<p>create a <code>musicstore</code> database</p>
+</li>
+<li>
+<p>create a <code>musicstore</code> user with password <code>musicstore</code></p>
+</li>
+<li>
+<p>grant the <code>musicstore</code> user with the permission to create tables on the the <code>musicstore</code> database</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>As a <em>superuser</em> you could run these queries:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="sql"><span class="k">CREATE</span> <span class="k">DATABASE</span> <span class="n">musicstore</span><span class="p">;</span>
+<span class="k">CREATE</span> <span class="k">USER</span> <span class="n">musicstore</span> <span class="k">WITH</span> <span class="k">ENCRYPTED</span> <span class="n">PASSWORD</span> <span class="s1">'musicstore'</span><span class="p">;</span>
+<span class="k">GRANT</span> <span class="k">ALL</span> <span class="k">PRIVILEGES</span> <span class="k">ON</span> <span class="k">DATABASE</span> <span class="n">musicstore</span> <span class="k">TO</span> <span class="n">musicstore</span><span class="p">;</span></code></pre>
+</div>
 </div>
 </div>
 </div>
@@ -994,7 +1020,7 @@ Open a terminal in the directory of your choice and type:</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2019-11-01 21:10:48 UTC
+Last updated 2019-11-01 21:29:42 UTC
 </div>
 </div>
 <style>
