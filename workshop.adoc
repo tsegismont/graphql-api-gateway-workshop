@@ -146,11 +146,45 @@ Nevertheless, this design, also known as the _Backend for Frontends_ pattern, ha
 
 ==== Java Development Kit
 
+JDK 8 or later must be installed on our machine.
+If you don't have it already, you can get one from:
+
+* https://adoptopenjdk.net, or
+* https://www.oracle.com/technetwork/java/javase/downloads/index.html
+
+You can use either OpenJDK or Oracle JDK.
+
 ==== Maven
+
+Download Apache Maven from https://maven.apache.org/download.cgi.
+
+Extract the archive contents to a directory of your choice and add it to the `PATH`.
 
 ==== IDE
 
-==== Postgres Database
+It is recommended to use an IDE. It does not matter if it's IntelliJ, Eclipse or Netbeans.
+
+If you don’t have an IDE, follow these instructions to get started with Eclipse:
+
+* browse to the https://www.eclipse.org/downloads/packages/[Eclipse downloads page]
+* select the _Eclipse IDE for Java Developers_ package and download it
+* extract the archive contents to a directory of your choice
+* in the destination directory, execute the Eclipse binary
+* create a workspace
+
+==== Postgres database
+
+If you have Docker running on your machine, you can start the Postgres database in a container:
+
+[source,shell]
+.Starting a Postgres Database with Docker
+----
+docker run -p 5432:5432 -e POSTGRES_USER=musicstore -e POSTGRES_PASSWORD=musicstore -d postgres
+----
+
+TIP: Linux and Mac users can simply execute the `run-postgres.sh` script after having imported the code in the next step.
+
+Otherwise, browse to https://www.postgresql.org/download/ and follow the instructions for your machine type.
 
 === Getting the code
 
