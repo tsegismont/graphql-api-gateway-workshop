@@ -302,13 +302,74 @@ query ($id: ID!) {
 }
 ----
 
-And the runtime will **NOT** execute the data fetchers for users' reviews and, obviously, will not send the unnecessary data.
+And the runtime will **NOT** execute the data fetchers for customers' reviews and, obviously, will not send the unnecessary data.
 
-== What you will build
+== The MusicStore Application
 
-You will build a gateway for a music store microservices-based application.
+The _MusicStore_ is an online music shop.
+You can browse its catalog by genre, read customer reviews, see the list of tracks.
+When logged-in, you may add albums to your cart, manage your cart items or post your own reviews.
 
-=== The MusicStore Application
+Technically, it is comprised of the following components:
+
+* the <<Web Client>>
+* the API Gateway which:
+** serves the static content
+** runs the GraphQL runtime
+** authenticates the customers
+** records cart items
+* the <<Inventory Service>>
+* the <<Rating Service>>
+
+[graphviz,musicstore-app,svg]
+.The MusicStore application
+----
+strict digraph {
+    rankdir=LR;
+    splines="line";
+    client [label="Web Client" shape="ellipse" color="#585858" style="filled" fillcolor="#848484" fontcolor="white"]
+    gateway [label="API Gateway" shape="polygon" color="#782b90" style="rounded" fontcolor="#782b90" fontsize="25" penwidth="2" height=".6"]
+    inventory [label="Inventory service" shape="polygon" color="#585858" style="rounded,filled" fillcolor="#782b90" fontcolor="white"]
+    rating [label="Rating service" shape="polygon" color="#585858" style="rounded,filled" fillcolor="#782b90" fontcolor="white"]
+    gatewaydb [label="MusicStore DB"  shape=cylinder color="#585858" style="filled" fillcolor="#008bb9" fontcolor="white"]
+    client -> gateway
+    gateway -> gatewaydb
+    gateway -> rating
+    gateway -> inventory
+    {rank = same; gateway; gatewaydb;}
+}
+----
+
+You will build the API Gateway for this microservices-based application.
+
+NOTE: In a real-world application, the static content would often be served from a separate component.
+
+=== Web Client
+
+A _Single Page Application_ implemented with https://vuejs.org/[Vue.js] and https://www.apollographql.com/docs/react/[Apollo client].
+
+=== Inventory Service
+
+The _Inventory Service_ exposes product data over HTTP in JSON format:
+
+* genres
+* albums (name, artist, genre, ...etc)
+* tracks
+
+For the sake of simplicity, inventory data is loaded on startup from text files and stored into memory.
+
+=== Rating Service
+
+The _Rating Service_ receives customers' reviews on albums:
+
+* customer name
+* rating
+* comment
+
+It exposes this data over HTTP in JSON format.
+It can also compute an average rating for an album.
+
+Again, for simplicity, reviews are stored only in memory.
 
 == Getting started
 
