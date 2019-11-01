@@ -354,7 +354,21 @@ docker run -p 5432:5432 -e POSTGRES_USER=musicstore -e POSTGRES_PASSWORD=musicst
 
 TIP: Linux and Mac users can simply execute the `run-postgres.sh` script after having imported the code in the next step.
 
-Otherwise, browse to https://www.postgresql.org/download/ and follow the instructions for your machine type.
+Otherwise:
+
+* download Postgres from https://www.postgresql.org/download/ and follow the instructions for your machine type
+* create a `musicstore` database
+* create a `musicstore` user with password `musicstore`
+* grant the `musicstore` user with the permission to create tables on the the `musicstore` database
+
+As a _superuser_ you could run these queries:
+
+[source,sql]
+----
+CREATE DATABASE musicstore;
+CREATE USER musicstore WITH ENCRYPTED PASSWORD 'musicstore';
+GRANT ALL PRIVILEGES ON DATABASE musicstore TO musicstore;
+----
 
 === Getting the code
 
