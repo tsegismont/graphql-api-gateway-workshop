@@ -1,6 +1,8 @@
 = Implementing the API Gateway pattern with GraphQL
 Vladimir Dejanovic <https://twitter.com/vladimird_42[@vladimird_42]>; Thomas Segismont <https://twitter.com/tsegismont[@tsegismont]>
 :toc: left
+:toclevels: 3
+:source-highlighter: rouge
 
 == Introduction
 
@@ -188,4 +190,34 @@ Otherwise, browse to https://www.postgresql.org/download/ and follow the instruc
 
 === Getting the code
 
-=== Build
+The project code is hosted on GitHub.
+Open a terminal in the directory of your choice and type:
+
+[source,shell]
+----
+git clone https://github.com/tsegismont/graphql-api-gateway-workshop.git
+----
+
+Alternatively, you may download the https://codeload.github.com/tsegismont/graphql-api-gateway-workshop/zip/master[project archive] from GitHub and extract the content.
+
+Inside the project directory, run Maven to build the project:
+
+[source,shell]
+----
+mvn install
+----
+
+Now open the IDE and import the project.
+
+In Eclipse:
+
+* click on _File_ > _Import_
+* select _Maven_ > _Existing Maven Projects_
+* in _Root Directory_, type the project directory path or select it with the _Browse..._ button
+* make sure the root project and all sub-projects checkboxes are ticked and click _Finish_
+
+In IntelliJ:
+
+* click on _File_ > _New_ > _Project from Existing Sources_
+* select the `pom.xml` file at the root of the project directory path and click _OK_
+* click _Next_ on the following wizard panels and then _Finish_
