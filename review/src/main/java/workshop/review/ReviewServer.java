@@ -1,4 +1,4 @@
-package io.github.tsegismont.graphql.workshop.review;
+package workshop.review;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.http.HttpHeaders;

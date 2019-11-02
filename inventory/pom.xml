@@ -5,15 +5,15 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>io.github.tsegismont</groupId>
-    <artifactId>graphql-api-gateway-workshop</artifactId>
+    <groupId>graphql-api-gateway-workshop</groupId>
+    <artifactId>parent</artifactId>
     <version>1.0-SNAPSHOT</version>
   </parent>
 
-  <artifactId>graphql-api-gateway-inventory</artifactId>
+  <artifactId>inventory</artifactId>
 
   <properties>
-    <vertx.verticle>io.github.tsegismont.graphql.workshop.inventory.InventoryServer</vertx.verticle>
+    <vertx.verticle>workshop.inventory.InventoryServer</vertx.verticle>
   </properties>
 
   <dependencyManagement>

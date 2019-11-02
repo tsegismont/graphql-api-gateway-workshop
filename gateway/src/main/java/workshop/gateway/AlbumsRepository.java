@@ -1,4 +1,4 @@
-package io.github.tsegismont.graphql.workshop.gateway;
+package workshop.gateway;
 
 import io.reactivex.Single;
 import io.vertx.core.json.JsonArray;

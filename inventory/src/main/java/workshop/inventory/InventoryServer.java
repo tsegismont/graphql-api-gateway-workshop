@@ -1,4 +1,4 @@
-package io.github.tsegismont.graphql.workshop.inventory;
+package workshop.inventory;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.http.HttpHeaders;

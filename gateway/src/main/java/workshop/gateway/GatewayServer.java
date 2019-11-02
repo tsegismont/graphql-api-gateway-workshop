@@ -1,4 +1,4 @@
-package io.github.tsegismont.graphql.workshop.gateway;
+package workshop.gateway;
 
 import graphql.GraphQL;
 import graphql.schema.DataFetcher;
