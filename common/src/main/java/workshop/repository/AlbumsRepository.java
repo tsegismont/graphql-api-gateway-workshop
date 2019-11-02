@@ -1,13 +1,14 @@
 package workshop.repository;
 
 import io.reactivex.Single;
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.ext.web.client.HttpRequest;
 import io.vertx.reactivex.ext.web.client.HttpResponse;
 import io.vertx.reactivex.ext.web.client.WebClient;
 import io.vertx.reactivex.ext.web.client.predicate.ResponsePredicate;
 import io.vertx.reactivex.ext.web.codec.BodyCodec;
+import workshop.model.Album;
+
+import java.util.List;
 
 public class AlbumsRepository {
 
@@ -17,11 +18,11 @@ public class AlbumsRepository {
     this.inventoryClient = inventoryClient;
   }
 
-  public Single<JsonArray> findAll(Integer genre) {
-    HttpRequest<JsonArray> request = inventoryClient.get("/albums")
+  public Single<List<Album>> findAll(Integer genre) {
+    HttpRequest<List<Album>> request = inventoryClient.get("/albums")
       .expect(ResponsePredicate.SC_OK)
       .expect(ResponsePredicate.JSON)
-      .as(BodyCodec.jsonArray());
+      .as(ListOfCodec.create(Album.class));
     if (genre != null) {
       request.addQueryParam("genre", genre.toString());
     }
@@ -30,11 +31,11 @@ public class AlbumsRepository {
       .map(HttpResponse::body);
   }
 
-  public Single<JsonObject> findById(Integer id, boolean withTracks) {
-    HttpRequest<JsonObject> request = inventoryClient.get("/album/" + id)
+  public Single<Album> findById(Integer id, boolean withTracks) {
+    HttpRequest<Album> request = inventoryClient.get("/album/" + id)
       .expect(ResponsePredicate.SC_OK)
       .expect(ResponsePredicate.JSON)
-      .as(BodyCodec.jsonObject());
+      .as(BodyCodec.json(Album.class));
     if (withTracks) {
       request.addQueryParam("withTracks", "");
     }

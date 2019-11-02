@@ -16,7 +16,7 @@ type Album {
   artist: String!
   image: String
   tracks: [Track!]!
-  rating: Float
+  rating: Int
   reviews: [Review!]
 }
 

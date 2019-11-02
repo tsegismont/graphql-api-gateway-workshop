@@ -1,11 +1,12 @@
 package workshop.repository;
 
 import io.reactivex.Single;
-import io.vertx.core.json.JsonArray;
 import io.vertx.reactivex.ext.web.client.HttpResponse;
 import io.vertx.reactivex.ext.web.client.WebClient;
 import io.vertx.reactivex.ext.web.client.predicate.ResponsePredicate;
-import io.vertx.reactivex.ext.web.codec.BodyCodec;
+import workshop.model.Track;
+
+import java.util.List;
 
 public class TracksRepository {
 
@@ -15,11 +16,11 @@ public class TracksRepository {
     this.inventoryClient = inventoryClient;
   }
 
-  public Single<JsonArray> findByAlbum(Integer id) {
+  public Single<List<Track>> findByAlbum(Integer id) {
     return inventoryClient.get("/album/" + id + "/tracks")
       .expect(ResponsePredicate.SC_OK)
       .expect(ResponsePredicate.JSON)
-      .as(BodyCodec.jsonArray())
+      .as(ListOfCodec.create(Track.class))
       .rxSend()
       .map(HttpResponse::body);
   }

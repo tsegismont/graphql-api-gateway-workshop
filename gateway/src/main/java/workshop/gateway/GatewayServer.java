@@ -1,7 +1,6 @@
 package workshop.gateway;
 
 import graphql.GraphQL;
-import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 import graphql.schema.GraphQLSchema;
 import graphql.schema.idl.*;
@@ -12,7 +11,6 @@ import io.reactivex.Maybe;
 import io.reactivex.Single;
 import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.impl.NoStackTraceThrowable;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.htpasswd.HtpasswdAuthOptions;
@@ -20,7 +18,6 @@ import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.client.WebClientOptions;
 import io.vertx.ext.web.handler.graphql.GraphQLHandlerOptions;
 import io.vertx.ext.web.handler.graphql.GraphiQLHandlerOptions;
-import io.vertx.ext.web.handler.graphql.VertxPropertyDataFetcher;
 import io.vertx.pgclient.PgConnectOptions;
 import io.vertx.reactivex.core.AbstractVerticle;
 import io.vertx.reactivex.ext.auth.htpasswd.HtpasswdAuth;
@@ -32,8 +29,10 @@ import io.vertx.reactivex.ext.web.handler.graphql.GraphiQLHandler;
 import io.vertx.reactivex.ext.web.sstore.LocalSessionStore;
 import io.vertx.reactivex.pgclient.PgPool;
 import io.vertx.sqlclient.PoolOptions;
+import workshop.model.*;
 import workshop.repository.*;
 
+import java.util.List;
 import java.util.Map;
 
 public class GatewayServer extends AbstractVerticle {
@@ -142,7 +141,6 @@ public class GatewayServer extends AbstractVerticle {
       .type("Mutation", this::mutation)
       .type("Album", this::album)
       .type("CartItem", this::cartItem)
-      .wiringFactory(new CustomWiringFactory())
       .build();
   }
 
@@ -155,15 +153,19 @@ public class GatewayServer extends AbstractVerticle {
       })
       .dataFetcher("album", env -> {
         Integer id = Integer.valueOf(env.getArgument("id"));
-        Single<JsonObject> inventoryData = albumsRepository.findById(id, true);
-        Single<JsonObject> reviewData = ratingRepository.findRatingAndReviewsByAlbum(id);
-        return inventoryData.zipWith(reviewData, (i, r) -> r.mergeIn(i)).to(SingleInterop.get());
+        Single<Album> inventoryData = albumsRepository.findById(id, true);
+        Single<RatingInfo> ratingData = ratingRepository.findRatingAndReviewsByAlbum(id);
+        Single<Album> album = inventoryData.zipWith(ratingData, (a, r) -> {
+          a.setRating(r.getRating());
+          a.setReviews(r.getReviews());
+          return a;
+        });
+        return album.to(SingleInterop.get());
       })
       .dataFetcher("currentUser", env -> getCurrentUserName(env).to(MaybeInterop.get()))
       .dataFetcher("cart", env -> {
         return this.getCurrentUserName(env)
           .flatMapSingleElement(cartRepository::findCart)
-          .map(items -> new JsonObject().put("items", items))
           .to(MaybeInterop.get());
       });
   }
@@ -171,34 +173,35 @@ public class GatewayServer extends AbstractVerticle {
   private TypeRuntimeWiring.Builder mutation(TypeRuntimeWiring.Builder builder) {
     return builder
       .dataFetcher("addReview", env -> {
-        return getCurrentUserName(env)
-          .switchIfEmpty(Single.error(new NoStackTraceThrowable("Not logged in")))
-          .flatMap(currentUserName -> {
-            Integer albumId = Integer.valueOf(env.getArgument("albumId"));
-            JsonObject input = new JsonObject((Map<String, Object>) env.getArgument("review"));
-            input.put("name", currentUserName);
-            return ratingRepository.addReview(albumId, input);
-          }).to(SingleInterop.get());
+        Single<String> currentUser = getCurrentUserName(env)
+          .switchIfEmpty(Single.error(new NoStackTraceThrowable("Not logged in")));
+        Single<RatingInfo> reviewResult = currentUser.flatMap(currentUserName -> {
+          Integer albumId = Integer.valueOf(env.getArgument("albumId"));
+          JsonObject input = new JsonObject((Map<String, Object>) env.getArgument("review"));
+          input.put("name", currentUserName);
+          return ratingRepository.addReview(albumId, input);
+        });
+        return reviewResult.to(SingleInterop.get());
       })
       .dataFetcher("addToCart", env -> {
-        return getCurrentUserName(env)
-          .switchIfEmpty(Single.error(new NoStackTraceThrowable("Not logged in")))
-          .flatMap(currentUserName -> {
-            Integer albumId = Integer.valueOf(env.getArgument("albumId"));
-            return cartRepository.addToCart(currentUserName, albumId).andThen(cartRepository.findCart(currentUserName));
-          })
-          .map(items -> new JsonObject().put("items", items))
-          .to(SingleInterop.get());
+        Single<String> currentUser = getCurrentUserName(env)
+          .switchIfEmpty(Single.error(new NoStackTraceThrowable("Not logged in")));
+        Single<Cart> cart = currentUser.flatMap(currentUserName -> {
+          Integer albumId = Integer.valueOf(env.getArgument("albumId"));
+          return cartRepository.addToCart(currentUserName, albumId)
+            .andThen(cartRepository.findCart(currentUserName));
+        });
+        return cart.to(SingleInterop.get());
       })
       .dataFetcher("removeFromCart", env -> {
-        return getCurrentUserName(env)
-          .switchIfEmpty(Single.error(new NoStackTraceThrowable("Not logged in")))
-          .flatMap(currentUserName -> {
-            Integer albumId = Integer.valueOf(env.getArgument("albumId"));
-            return cartRepository.removeFromCart(currentUserName, albumId).andThen(cartRepository.findCart(currentUserName));
-          })
-          .map(items -> new JsonObject().put("items", items))
-          .to(SingleInterop.get());
+        Single<String> currentUser = getCurrentUserName(env)
+          .switchIfEmpty(Single.error(new NoStackTraceThrowable("Not logged in")));
+        Single<Cart> cart = currentUser.flatMap(currentUserName -> {
+          Integer albumId = Integer.valueOf(env.getArgument("albumId"));
+          return cartRepository.removeFromCart(currentUserName, albumId)
+            .andThen(cartRepository.findCart(currentUserName));
+        });
+        return cart.to(SingleInterop.get());
       });
   }
 
@@ -214,33 +217,32 @@ public class GatewayServer extends AbstractVerticle {
   private TypeRuntimeWiring.Builder album(TypeRuntimeWiring.Builder builder) {
     return builder
       .dataFetcher("tracks", env -> {
-        JsonObject album = env.getSource();
-        Single<JsonArray> tracks;
-        if (album.containsKey("tracks")) {
-          tracks = Single.just(album.getJsonArray("tracks"));
+        Album album = env.getSource();
+        Single<List<Track>> tracks;
+        if (album.getTracks()!=null) {
+          tracks = Single.just(album.getTracks());
         } else {
-          tracks = tracksRepository.findByAlbum(album.getInteger("id"));
+          tracks = tracksRepository.findByAlbum(album.getId());
         }
         return tracks.to(SingleInterop.get());
       })
       .dataFetcher("rating", env -> {
-        JsonObject album = env.getSource();
+        Album album = env.getSource();
         Single<Integer> rating;
-        if (album.containsKey("rating")) {
-          rating = Single.just(album.getInteger("rating"));
+        if (album.getRating()!=null) {
+          rating = Single.just(album.getRating());
         } else {
-          rating = ratingRepository.findRatingByAlbum(album.getInteger("id"))
-            .map(json -> json.getInteger("value"));
+          rating = ratingRepository.findRatingByAlbum(album.getId());
         }
         return rating.to(SingleInterop.get());
       })
       .dataFetcher("reviews", env -> {
-        JsonObject album = env.getSource();
-        Single<JsonArray> reviews;
-        if (album.containsKey("reviews")) {
-          reviews = Single.just(album.getJsonArray("reviews"));
+        Album album = env.getSource();
+        Single<List<Review>> reviews;
+        if (album.getReviews()!=null) {
+          reviews = Single.just(album.getReviews());
         } else {
-          reviews = ratingRepository.findReviewsByAlbum(album.getInteger("id"));
+          reviews = ratingRepository.findReviewsByAlbum(album.getId());
         }
         return reviews.to(SingleInterop.get());
       });
@@ -249,15 +251,8 @@ public class GatewayServer extends AbstractVerticle {
   private TypeRuntimeWiring.Builder cartItem(TypeRuntimeWiring.Builder builder) {
     return builder
       .dataFetcher("album", env -> {
-        JsonObject cartItem = env.getSource();
-        return albumsRepository.findById(cartItem.getInteger("albumId"), false).to(SingleInterop.get());
+        CartItem cartItem = env.getSource();
+        return albumsRepository.findById(cartItem.getAlbumId(), false).to(SingleInterop.get());
       });
-  }
-
-  private static class CustomWiringFactory implements WiringFactory {
-    @Override
-    public DataFetcher getDefaultDataFetcher(FieldWiringEnvironment environment) {
-      return new VertxPropertyDataFetcher(environment.getFieldDefinition().getName());
-    }
   }
 }

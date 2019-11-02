@@ -3,11 +3,11 @@ package workshop.repository;
 import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.Single;
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.pgclient.PgPool;
 import io.vertx.reactivex.sqlclient.Row;
 import io.vertx.reactivex.sqlclient.Tuple;
+import workshop.model.Cart;
+import workshop.model.CartItem;
 
 public class CartRepository {
 
@@ -29,11 +29,11 @@ public class CartRepository {
     this.pool = pool;
   }
 
-  public Single<JsonArray> findCart(String username) {
+  public Single<Cart> findCart(String username) {
     return pool.rxPreparedQuery(FIND_CART, Tuple.of(username))
       .flatMapObservable(Observable::fromIterable)
       .map(CartRepository::rowToCartItem)
-      .collect(JsonArray::new, JsonArray::add);
+      .collectInto(new Cart(), Cart::add);
   }
 
   public Completable addToCart(String username, Integer albumId) {
@@ -46,9 +46,7 @@ public class CartRepository {
       .ignoreElement();
   }
 
-  private static JsonObject rowToCartItem(Row row) {
-    return new JsonObject()
-      .put("albumId", row.getInteger("album_id"))
-      .put("quantity", row.getInteger("quantity"));
+  private static CartItem rowToCartItem(Row row) {
+    return new CartItem(row.getInteger("album_id"), row.getInteger("quantity"));
   }
 }
