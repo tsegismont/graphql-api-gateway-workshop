@@ -1,4 +1,4 @@
-package workshop.gateway;
+package workshop.repository;
 
 import io.reactivex.Single;
 import io.vertx.core.json.JsonArray;

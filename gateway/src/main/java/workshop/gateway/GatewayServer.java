@@ -32,6 +32,7 @@ import io.vertx.reactivex.ext.web.handler.graphql.GraphiQLHandler;
 import io.vertx.reactivex.ext.web.sstore.LocalSessionStore;
 import io.vertx.reactivex.pgclient.PgPool;
 import io.vertx.sqlclient.PoolOptions;
+import workshop.repository.*;
 
 import java.util.Map;
 

@@ -1,4 +1,4 @@
-package workshop.gateway;
+package workshop.repository;
 
 import io.reactivex.Completable;
 import io.reactivex.Observable;
