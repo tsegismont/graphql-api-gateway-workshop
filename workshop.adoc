@@ -434,7 +434,7 @@ CREATE USER musicstore WITH ENCRYPTED PASSWORD 'musicstore';
 GRANT ALL PRIVILEGES ON DATABASE musicstore TO musicstore;
 ----
 
-=== Getting the code
+=== Importing the code
 
 The project code is hosted on GitHub.
 Open a terminal in the directory of your choice and type:
@@ -467,3 +467,16 @@ In IntelliJ:
 * click on _File_ > _New_ > _Project from Existing Sources_
 * select the `pom.xml` file at the root of the project directory path and click _OK_
 * click _Next_ on the following wizard panels and then _Finish_
+
+=== Running backend services
+
+Make sure you have built the project beforehand and started the Postgres database.
+Then open a terminal in the project directory and type:
+
+[source,shell]
+----
+cd inventory
+./run.sh
+----
+
+On Windows, open the file explorer in the `inventory` project directory and execute `run.bat`.
