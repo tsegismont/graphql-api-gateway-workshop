@@ -31,6 +31,11 @@
   <dependencies>
     <dependency>
       <groupId>io.github.tsegismont</groupId>
+      <artifactId>graphql-api-gateway-common</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.github.tsegismont</groupId>
       <artifactId>graphql-api-gateway-client</artifactId>
       <version>${project.version}</version>
     </dependency>

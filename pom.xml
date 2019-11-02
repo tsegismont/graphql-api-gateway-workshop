@@ -19,9 +19,10 @@
   </properties>
 
   <modules>
+    <module>common</module>
+    <module>client</module>
     <module>inventory</module>
     <module>review</module>
-    <module>client</module>
     <module>gateway</module>
   </modules>
 
