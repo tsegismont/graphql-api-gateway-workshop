@@ -162,20 +162,14 @@ public class GatewayServer extends AbstractVerticle {
         });
         return album.to(SingleInterop.get());
       })
-      .dataFetcher("currentUser", env -> getCurrentUserName(env).to(MaybeInterop.get()))
-      .dataFetcher("cart", env -> {
-        return this.getCurrentUserName(env)
-          .flatMapSingleElement(cartRepository::findCart)
-          .to(MaybeInterop.get());
-      });
+      .dataFetcher("currentUser", env -> currentUser(env).to(MaybeInterop.get()))
+      .dataFetcher("cart", env -> currentUser(env).flatMapSingleElement(cartRepository::findCart).to(MaybeInterop.get()));
   }
 
   private TypeRuntimeWiring.Builder mutation(TypeRuntimeWiring.Builder builder) {
     return builder
       .dataFetcher("addReview", env -> {
-        Single<String> currentUser = getCurrentUserName(env)
-          .switchIfEmpty(Single.error(new NoStackTraceThrowable("Not logged in")));
-        Single<RatingInfo> reviewResult = currentUser.flatMap(currentUserName -> {
+        Single<RatingInfo> reviewResult = loggedInUser(env).flatMap(currentUserName -> {
           Integer albumId = Integer.valueOf(env.getArgument("albumId"));
           ReviewInput reviewInput = new JsonObject((Map<String, Object>) env.getArgument("review"))
             .mapTo(ReviewInput.class);
@@ -185,9 +179,7 @@ public class GatewayServer extends AbstractVerticle {
         return reviewResult.to(SingleInterop.get());
       })
       .dataFetcher("addToCart", env -> {
-        Single<String> currentUser = getCurrentUserName(env)
-          .switchIfEmpty(Single.error(new NoStackTraceThrowable("Not logged in")));
-        Single<Cart> cart = currentUser.flatMap(currentUserName -> {
+        Single<Cart> cart = loggedInUser(env).flatMap(currentUserName -> {
           Integer albumId = Integer.valueOf(env.getArgument("albumId"));
           return cartRepository.addToCart(currentUserName, albumId)
             .andThen(cartRepository.findCart(currentUserName));
@@ -195,9 +187,7 @@ public class GatewayServer extends AbstractVerticle {
         return cart.to(SingleInterop.get());
       })
       .dataFetcher("removeFromCart", env -> {
-        Single<String> currentUser = getCurrentUserName(env)
-          .switchIfEmpty(Single.error(new NoStackTraceThrowable("Not logged in")));
-        Single<Cart> cart = currentUser.flatMap(currentUserName -> {
+        Single<Cart> cart = loggedInUser(env).flatMap(currentUserName -> {
           Integer albumId = Integer.valueOf(env.getArgument("albumId"));
           return cartRepository.removeFromCart(currentUserName, albumId)
             .andThen(cartRepository.findCart(currentUserName));
@@ -206,13 +196,18 @@ public class GatewayServer extends AbstractVerticle {
       });
   }
 
-  private Maybe<String> getCurrentUserName(DataFetchingEnvironment env) {
+  private Maybe<String> currentUser(DataFetchingEnvironment env) {
     RoutingContext routingContext = env.getContext();
     User user = routingContext.user();
     if (user!=null) {
       return Maybe.just(user.principal().getString("username"));
     }
     return Maybe.empty();
+  }
+
+  private Single<String> loggedInUser(DataFetchingEnvironment env) {
+    return currentUser(env)
+      .switchIfEmpty(Single.error(new NoStackTraceThrowable("Not logged in")));
   }
 
   private TypeRuntimeWiring.Builder album(TypeRuntimeWiring.Builder builder) {
