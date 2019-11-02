@@ -1,4 +1,4 @@
-package io.github.tsegismont.graphql.workshop.webapp;
+package io.github.tsegismont.graphql.workshop.gateway;
 
 import graphql.GraphQL;
 import graphql.schema.DataFetcher;
@@ -35,7 +35,7 @@ import io.vertx.sqlclient.PoolOptions;
 
 import java.util.Map;
 
-public class WebappServer extends AbstractVerticle {
+public class GatewayServer extends AbstractVerticle {
 
   private static final String CREATE_TABLE =
     "create table if not exists cart ("

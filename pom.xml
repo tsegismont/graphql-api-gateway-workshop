@@ -22,7 +22,7 @@
     <module>inventory</module>
     <module>review</module>
     <module>client</module>
-    <module>webapp</module>
+    <module>gateway</module>
   </modules>
 
   <dependencyManagement>

@@ -1,4 +1,4 @@
-package io.github.tsegismont.graphql.workshop.webapp;
+package io.github.tsegismont.graphql.workshop.gateway;
 
 import io.reactivex.Completable;
 import io.reactivex.Observable;

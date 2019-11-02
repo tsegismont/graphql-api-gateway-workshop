@@ -3,4 +3,4 @@
 set -e -x
 
 mvn clean package -B
-java -jar target/webapp.jar
+java -jar target/gateway.jar

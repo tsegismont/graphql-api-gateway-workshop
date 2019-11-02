@@ -1,6 +1,6 @@
 {
   "name": "Music Store GraphQL Schema",
-  "schemaPath": "musicstore/webapp/src/main/resources/musicstore.graphql",
+  "schemaPath": "gateway/src/main/resources/musicstore.graphql",
   "extensions": {
     "endpoints": {
       "Default GraphQL Endpoint": {
