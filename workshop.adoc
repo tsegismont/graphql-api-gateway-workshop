@@ -484,6 +484,12 @@ cd inventory
 
 On Windows, open the file explorer in the `inventory` directory and execute `run.bat`.
 
+If the service starts correctly, you should see a line similar to this on the console:
+
+----
+[2019-11-02 21:05:24] [INFO   ] Succeeded in deploying verticle
+----
+
 ==== Rating
 
 Open a terminal at the root of the project directory and type:
@@ -495,3 +501,9 @@ cd rating
 ----
 
 On Windows, open the file explorer in the `rating` directory and execute `run.bat`.
+
+If the service starts correctly, you should see a line similar to this on the console:
+
+----
+[2019-11-02 21:05:24] [INFO   ] Succeeded in deploying verticle
+----
