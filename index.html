@@ -480,7 +480,8 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_postgres_database">Postgres database</a></li>
 </ul>
 </li>
-<li><a href="#_getting_the_code">Getting the code</a></li>
+<li><a href="#_importing_the_code">Importing the code</a></li>
+<li><a href="#_running_backend_services">Running backend services</a></li>
 </ul>
 </li>
 </ul>
@@ -1069,7 +1070,7 @@ Linux and Mac users can simply execute the <code>run-postgres.sh</code> script a
 </div>
 </div>
 <div class="sect2">
-<h3 id="_getting_the_code">Getting the code</h3>
+<h3 id="_importing_the_code">Importing the code</h3>
 <div class="paragraph">
 <p>The project code is hosted on GitHub.
 Open a terminal in the directory of your choice and type:</p>
@@ -1129,12 +1130,28 @@ Open a terminal in the directory of your choice and type:</p>
 </ul>
 </div>
 </div>
+<div class="sect2">
+<h3 id="_running_backend_services">Running backend services</h3>
+<div class="paragraph">
+<p>Make sure you have built the project beforehand and started the Postgres database.
+Then open a terminal in the project directory and type:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="shell"><span class="nb">cd </span>inventory
+./run.sh</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>On Windows, open the file explorer in the <code>inventory</code> project directory and execute <code>run.bat</code>.</p>
+</div>
+</div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2019-11-02 16:42:09 UTC
+Last updated 2019-11-02 19:27:16 UTC
 </div>
 </div>
 <style>
