@@ -6,7 +6,7 @@
 
   <parent>
     <groupId>io.github.tsegismont</groupId>
-    <artifactId>graphql-api-gateway-musicstore</artifactId>
+    <artifactId>graphql-api-gateway-workshop</artifactId>
     <version>1.0-SNAPSHOT</version>
   </parent>
 

@@ -19,7 +19,10 @@
   </properties>
 
   <modules>
-    <module>musicstore</module>
+    <module>inventory</module>
+    <module>review</module>
+    <module>client</module>
+    <module>webapp</module>
   </modules>
 
   <dependencyManagement>
