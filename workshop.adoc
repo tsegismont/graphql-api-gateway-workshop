@@ -470,8 +470,11 @@ In IntelliJ:
 
 === Running backend services
 
-Make sure you have built the project beforehand and started the Postgres database.
-Then open a terminal in the project directory and type:
+IMPORTANT: Make sure you have built the project beforehand and started the Postgres database.
+
+==== Inventory
+
+Open a terminal at the root of the project directory and type:
 
 [source,shell]
 ----
@@ -479,4 +482,16 @@ cd inventory
 ./run.sh
 ----
 
-On Windows, open the file explorer in the `inventory` project directory and execute `run.bat`.
+On Windows, open the file explorer in the `inventory` directory and execute `run.bat`.
+
+==== Rating
+
+Open a terminal at the root of the project directory and type:
+
+[source,shell]
+----
+cd rating
+./run.sh
+----
+
+On Windows, open the file explorer in the `rating` directory and execute `run.bat`.
