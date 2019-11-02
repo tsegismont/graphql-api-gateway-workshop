@@ -177,9 +177,10 @@ public class GatewayServer extends AbstractVerticle {
           .switchIfEmpty(Single.error(new NoStackTraceThrowable("Not logged in")));
         Single<RatingInfo> reviewResult = currentUser.flatMap(currentUserName -> {
           Integer albumId = Integer.valueOf(env.getArgument("albumId"));
-          JsonObject input = new JsonObject((Map<String, Object>) env.getArgument("review"));
-          input.put("name", currentUserName);
-          return ratingRepository.addReview(albumId, input);
+          ReviewInput reviewInput = new JsonObject((Map<String, Object>) env.getArgument("review"))
+            .mapTo(ReviewInput.class);
+          reviewInput.setName(currentUserName);
+          return ratingRepository.addReview(albumId, reviewInput);
         });
         return reviewResult.to(SingleInterop.get());
       })

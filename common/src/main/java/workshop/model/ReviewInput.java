@@ -4,6 +4,7 @@ public class ReviewInput {
 
   private Integer rating;
   private String comment;
+  private String name;
 
   public Integer getRating() {
     return rating;
@@ -21,11 +22,20 @@ public class ReviewInput {
     this.comment = comment;
   }
 
+  public String getName() {
+    return name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
+
   @Override
   public String toString() {
     return "ReviewInput{" +
       "rating=" + rating +
       ", comment='" + comment + '\'' +
+      ", name='" + name + '\'' +
       '}';
   }
 }

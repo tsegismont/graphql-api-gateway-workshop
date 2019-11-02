@@ -1,13 +1,13 @@
 package workshop.repository;
 
 import io.reactivex.Single;
-import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.ext.web.client.HttpResponse;
 import io.vertx.reactivex.ext.web.client.WebClient;
 import io.vertx.reactivex.ext.web.client.predicate.ResponsePredicate;
 import io.vertx.reactivex.ext.web.codec.BodyCodec;
 import workshop.model.RatingInfo;
 import workshop.model.Review;
+import workshop.model.ReviewInput;
 
 import java.util.List;
 
@@ -47,12 +47,12 @@ public class RatingRepository {
       .map(HttpResponse::body);
   }
 
-  public Single<RatingInfo> addReview(Integer albumId, JsonObject review) {
+  public Single<RatingInfo> addReview(Integer albumId, ReviewInput reviewInput) {
     return ratingClient.post("/album/" + albumId + "/reviews")
       .expect(ResponsePredicate.SC_OK)
       .expect(ResponsePredicate.JSON)
       .as(BodyCodec.json(RatingInfo.class))
-      .rxSendJsonObject(review)
+      .rxSendJson(reviewInput)
       .map(HttpResponse::body);
   }
 }
