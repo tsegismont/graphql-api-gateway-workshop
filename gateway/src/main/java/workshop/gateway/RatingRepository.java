@@ -8,16 +8,16 @@ import io.vertx.reactivex.ext.web.client.WebClient;
 import io.vertx.reactivex.ext.web.client.predicate.ResponsePredicate;
 import io.vertx.reactivex.ext.web.codec.BodyCodec;
 
-public class ReviewRepository {
+public class RatingRepository {
 
-  private final WebClient reviewClient;
+  private final WebClient ratingClient;
 
-  public ReviewRepository(WebClient reviewClient) {
-    this.reviewClient = reviewClient;
+  public RatingRepository(WebClient ratingClient) {
+    this.ratingClient = ratingClient;
   }
 
   public Single<JsonObject> findRatingByAlbum(Integer albumId) {
-    return reviewClient.get("/album/" + albumId + "/rating")
+    return ratingClient.get("/album/" + albumId + "/rating")
       .expect(ResponsePredicate.SC_OK)
       .expect(ResponsePredicate.JSON)
       .as(BodyCodec.jsonObject())
@@ -26,7 +26,7 @@ public class ReviewRepository {
   }
 
   public Single<JsonArray> findReviewsByAlbum(Integer albumId) {
-    return reviewClient.get("/album/" + albumId + "/reviews")
+    return ratingClient.get("/album/" + albumId + "/reviews")
       .expect(ResponsePredicate.SC_OK)
       .expect(ResponsePredicate.JSON)
       .as(BodyCodec.jsonArray())
@@ -35,7 +35,7 @@ public class ReviewRepository {
   }
 
   public Single<JsonObject> findRatingAndReviewsByAlbum(Integer albumId) {
-    return reviewClient.get("/album/" + albumId)
+    return ratingClient.get("/album/" + albumId)
       .expect(ResponsePredicate.SC_OK)
       .expect(ResponsePredicate.JSON)
       .as(BodyCodec.jsonObject())
@@ -44,7 +44,7 @@ public class ReviewRepository {
   }
 
   public Single<JsonObject> addReview(Integer albumId, JsonObject review) {
-    return reviewClient.post("/album/" + albumId + "/reviews")
+    return ratingClient.post("/album/" + albumId + "/reviews")
       .expect(ResponsePredicate.SC_OK)
       .expect(ResponsePredicate.JSON)
       .as(BodyCodec.jsonObject())

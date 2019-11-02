@@ -370,7 +370,7 @@ The _Rating Service_ receives customers' reviews on albums:
 * comment
 
 It exposes this data over HTTP in JSON format.
-It can also compute an average rating for an album.
+It can also compute an average rating for each album.
 
 Again, for simplicity, reviews are stored only in memory.
 

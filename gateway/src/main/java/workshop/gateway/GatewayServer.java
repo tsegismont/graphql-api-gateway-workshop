@@ -51,7 +51,7 @@ public class GatewayServer extends AbstractVerticle {
   private GenresRepository genresRepository;
   private AlbumsRepository albumsRepository;
   private TracksRepository tracksRepository;
-  private ReviewRepository reviewRepository;
+  private RatingRepository ratingRepository;
   private CartRepository cartRepository;
 
   @Override
@@ -66,8 +66,8 @@ public class GatewayServer extends AbstractVerticle {
     albumsRepository = new AlbumsRepository(inventoryClient);
     tracksRepository = new TracksRepository(inventoryClient);
 
-    WebClient reviewClient = WebClient.create(vertx, new WebClientOptions().setDefaultPort(8082));
-    reviewRepository = new ReviewRepository(reviewClient);
+    WebClient ratingClient = WebClient.create(vertx, new WebClientOptions().setDefaultPort(8082));
+    ratingRepository = new RatingRepository(ratingClient);
 
     Router router = Router.router(vertx);
 
@@ -155,7 +155,7 @@ public class GatewayServer extends AbstractVerticle {
       .dataFetcher("album", env -> {
         Integer id = Integer.valueOf(env.getArgument("id"));
         Single<JsonObject> inventoryData = albumsRepository.findById(id, true);
-        Single<JsonObject> reviewData = reviewRepository.findRatingAndReviewsByAlbum(id);
+        Single<JsonObject> reviewData = ratingRepository.findRatingAndReviewsByAlbum(id);
         return inventoryData.zipWith(reviewData, (i, r) -> r.mergeIn(i)).to(SingleInterop.get());
       })
       .dataFetcher("currentUser", env -> getCurrentUserName(env).to(MaybeInterop.get()))
@@ -176,7 +176,7 @@ public class GatewayServer extends AbstractVerticle {
             Integer albumId = Integer.valueOf(env.getArgument("albumId"));
             JsonObject input = new JsonObject((Map<String, Object>) env.getArgument("review"));
             input.put("name", currentUserName);
-            return reviewRepository.addReview(albumId, input);
+            return ratingRepository.addReview(albumId, input);
           }).to(SingleInterop.get());
       })
       .dataFetcher("addToCart", env -> {
@@ -228,7 +228,7 @@ public class GatewayServer extends AbstractVerticle {
         if (album.containsKey("rating")) {
           rating = Single.just(album.getInteger("rating"));
         } else {
-          rating = reviewRepository.findRatingByAlbum(album.getInteger("id"))
+          rating = ratingRepository.findRatingByAlbum(album.getInteger("id"))
             .map(json -> json.getInteger("value"));
         }
         return rating.to(SingleInterop.get());
@@ -239,7 +239,7 @@ public class GatewayServer extends AbstractVerticle {
         if (album.containsKey("reviews")) {
           reviews = Single.just(album.getJsonArray("reviews"));
         } else {
-          reviews = reviewRepository.findReviewsByAlbum(album.getInteger("id"));
+          reviews = ratingRepository.findReviewsByAlbum(album.getInteger("id"));
         }
         return reviews.to(SingleInterop.get());
       });
