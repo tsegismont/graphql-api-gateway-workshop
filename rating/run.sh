@@ -3,4 +3,4 @@
 set -e -x
 
 mvn clean package -B
-java -jar target/review.jar
+java -jar target/rating.jar

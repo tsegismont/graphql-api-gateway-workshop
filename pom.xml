@@ -22,7 +22,7 @@
     <module>common</module>
     <module>client</module>
     <module>inventory</module>
-    <module>review</module>
+    <module>rating</module>
     <module>gateway</module>
   </modules>
 

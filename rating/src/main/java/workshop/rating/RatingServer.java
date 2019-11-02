@@ -1,4 +1,4 @@
-package workshop.review;
+package workshop.rating;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.http.HttpHeaders;
@@ -16,7 +16,7 @@ import java.util.Map;
 
 import static java.util.stream.Collectors.averagingInt;
 
-public class ReviewServer extends AbstractVerticle {
+public class RatingServer extends AbstractVerticle {
 
   private final Map<Integer, JsonArray> reviewsByAlbum = new HashMap<>();
 

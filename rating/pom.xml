@@ -10,10 +10,10 @@
     <version>1.0-SNAPSHOT</version>
   </parent>
 
-  <artifactId>review</artifactId>
+  <artifactId>rating</artifactId>
 
   <properties>
-    <vertx.verticle>workshop.review.ReviewServer</vertx.verticle>
+    <vertx.verticle>workshop.rating.RatingServer</vertx.verticle>
   </properties>
 
   <dependencyManagement>
@@ -36,7 +36,7 @@
   </dependencies>
 
   <build>
-    <finalName>review</finalName>
+    <finalName>rating</finalName>
     <plugins>
       <plugin>
         <groupId>io.reactiverse</groupId>
