@@ -78,11 +78,14 @@ In fact, it adds a new network hop in the the sequence of service calls.
 But it moves most of the interactions inside the datacenter, where network latencies are considerably better.
 ====
 
-Very often, the API Gateway implements cross-cutting concerns like security.
+Very often, the API Gateway provides cross-cutting concerns like security.
 For example, it could generate a token after authenticating the client and communicate it to the backend services as a proof of identity.
 
-Also, it may provide its own features, if they are only relevant to the frontend.
+It may also provide its own features, if they are only relevant to the frontend.
 An e-commerce application, for instance, could manage customers' shopping carts at the API Gateway level.
+
+From a performance standpoint, an event-driven implementation would give better results under load.
+Indeed, the API Gateway's workload is dominated by I/O, so having threads blocked waiting is not an optimal usage of resources.
 
 === Serving many clients
 
