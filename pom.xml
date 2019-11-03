@@ -24,6 +24,7 @@
     <module>inventory</module>
     <module>rating</module>
     <module>gateway</module>
+    <module>steps</module>
   </modules>
 
   <dependencyManagement>
