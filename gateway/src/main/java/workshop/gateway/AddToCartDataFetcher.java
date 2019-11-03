@@ -19,7 +19,7 @@ public class AddToCartDataFetcher implements RxDataFetcher<Cart> {
     if (currentUser==null) {
       throw new NotLoggedInException();
     }
-    Integer albumId = Integer.valueOf(env.getArgument("albumId"));
+    Integer albumId = EnvironmentUtil.getIntegerArgument(env, "albumId");
     return cartRepository.addToCart(currentUser, albumId).andThen(cartRepository.findCart(currentUser));
   }
 }

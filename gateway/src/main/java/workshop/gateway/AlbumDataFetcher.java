@@ -19,7 +19,7 @@ public class AlbumDataFetcher implements RxDataFetcher<Album> {
 
   @Override
   public Single<Album> rxGet(DataFetchingEnvironment env) {
-    Integer id = Integer.valueOf(env.getArgument("id"));
+    Integer id = EnvironmentUtil.getIntegerArgument(env, "id");
     Single<Album> inventoryData = albumsRepository.findById(id, true);
     Single<RatingInfo> ratingData = ratingRepository.findRatingAndReviewsByAlbum(id);
     return inventoryData.zipWith(ratingData, (a, r) -> {

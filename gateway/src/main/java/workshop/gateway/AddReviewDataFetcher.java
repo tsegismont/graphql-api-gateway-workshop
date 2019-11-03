@@ -2,12 +2,9 @@ package workshop.gateway;
 
 import graphql.schema.DataFetchingEnvironment;
 import io.reactivex.Single;
-import io.vertx.core.json.JsonObject;
 import workshop.model.RatingInfo;
 import workshop.model.ReviewInput;
 import workshop.repository.RatingRepository;
-
-import java.util.Map;
 
 public class AddReviewDataFetcher implements RxDataFetcher<RatingInfo> {
 
@@ -23,9 +20,8 @@ public class AddReviewDataFetcher implements RxDataFetcher<RatingInfo> {
     if (currentUser==null) {
       throw new NotLoggedInException();
     }
-    Integer albumId = Integer.valueOf(env.getArgument("albumId"));
-    ReviewInput reviewInput = new JsonObject((Map<String, Object>) env.getArgument("review"))
-      .mapTo(ReviewInput.class);
+    Integer albumId = EnvironmentUtil.getIntegerArgument(env, "albumId");
+    ReviewInput reviewInput = EnvironmentUtil.getInputArgument(env, "review", ReviewInput.class);
     reviewInput.setName(currentUser);
     return ratingRepository.addReview(albumId, reviewInput);
   }
