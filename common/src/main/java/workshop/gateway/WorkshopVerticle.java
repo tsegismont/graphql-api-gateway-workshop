@@ -68,7 +68,9 @@ public abstract class WorkshopVerticle extends AbstractVerticle {
     return PgPool.pool(vertx, pgConnectOptions, new PoolOptions());
   }
 
-  protected abstract Router createRouter();
+  protected Router createRouter() {
+    return Router.router(vertx);
+  }
 
   protected GraphQL setupGraphQLJava(String schemaFile) {
     String schema = vertx.fileSystem().readFileBlocking(schemaFile).toString();
@@ -85,5 +87,8 @@ public abstract class WorkshopVerticle extends AbstractVerticle {
       .build();
   }
 
-  protected abstract RuntimeWiring runtimeWiring();
+  protected RuntimeWiring runtimeWiring() {
+    return RuntimeWiring.newRuntimeWiring()
+      .build();
+  }
 }
