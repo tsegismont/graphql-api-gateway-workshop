@@ -20,6 +20,7 @@
   <modules>
     <module>step-0</module>
     <module>step-1</module>
+    <module>step-2</module>
   </modules>
 
   <dependencyManagement>
