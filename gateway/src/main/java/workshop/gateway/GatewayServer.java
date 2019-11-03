@@ -24,8 +24,10 @@ public class GatewayServer extends WorkshopVerticle {
       .setPlainTextEnabled(true);
     HtpasswdAuth authProvider = HtpasswdAuth.create(vertx, authOptions);
 
-    router.route().handler(SessionHandler.create(LocalSessionStore.create(vertx)).setAuthProvider(authProvider));
-    router.post("/login.html").handler(FormLoginHandler.create(authProvider).setDirectLoggedInOKURL("/"));
+    SessionHandler sessionHandler = SessionHandler.create(LocalSessionStore.create(vertx)).setAuthProvider(authProvider);
+    router.route().handler(sessionHandler);
+    FormLoginHandler formLoginHandler = FormLoginHandler.create(authProvider).setDirectLoggedInOKURL("/");
+    router.post("/login.html").handler(formLoginHandler);
     router.get("/logout").handler(rc -> {
       rc.clearUser();
       rc.session().destroy();
