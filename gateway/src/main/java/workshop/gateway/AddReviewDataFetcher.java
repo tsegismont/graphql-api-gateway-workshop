@@ -3,7 +3,6 @@ package workshop.gateway;
 import graphql.schema.DataFetchingEnvironment;
 import io.reactivex.Single;
 import io.vertx.core.json.JsonObject;
-import workshop.fetcher.RxDataFetcher;
 import workshop.model.RatingInfo;
 import workshop.model.ReviewInput;
 import workshop.repository.RatingRepository;

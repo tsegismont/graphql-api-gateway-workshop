@@ -1,4 +1,4 @@
-package workshop.fetcher;
+package workshop.gateway;
 
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;

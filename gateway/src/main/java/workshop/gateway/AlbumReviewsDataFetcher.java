@@ -2,7 +2,6 @@ package workshop.gateway;
 
 import graphql.schema.DataFetchingEnvironment;
 import io.reactivex.Single;
-import workshop.fetcher.RxDataFetcher;
 import workshop.model.Album;
 import workshop.model.Review;
 import workshop.repository.RatingRepository;
