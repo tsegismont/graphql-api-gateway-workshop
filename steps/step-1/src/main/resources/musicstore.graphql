@@ -1,0 +1,9 @@
+type Genre {
+}
+
+type Query {
+}
+
+schema {
+  query: Query
+}

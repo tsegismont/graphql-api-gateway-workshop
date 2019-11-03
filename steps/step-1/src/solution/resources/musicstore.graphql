@@ -1,0 +1,13 @@
+type Genre {
+  id: ID
+  name: String!
+  image: String
+}
+
+type Query {
+  genres: [Genre!]
+}
+
+schema {
+  query: Query
+}
