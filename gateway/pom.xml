@@ -70,7 +70,7 @@
   </dependencies>
 
   <build>
-    <finalName>gateway</finalName>
+    <finalName>${project.artifactId}</finalName>
     <plugins>
       <plugin>
         <groupId>io.reactiverse</groupId>
