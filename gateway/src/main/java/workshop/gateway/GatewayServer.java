@@ -1,7 +1,6 @@
 package workshop.gateway;
 
 import graphql.GraphQL;
-import graphql.schema.DataFetcher;
 import graphql.schema.idl.RuntimeWiring;
 import graphql.schema.idl.TypeRuntimeWiring;
 import io.vertx.core.http.HttpHeaders;
@@ -14,8 +13,6 @@ import io.vertx.reactivex.ext.web.handler.graphql.GraphiQLHandler;
 import io.vertx.reactivex.ext.web.sstore.LocalSessionStore;
 
 public class GatewayServer extends WorkshopVerticle {
-
-  private DataFetcher genresDataFetcher;
 
   protected Router createRouter() {
     Router router = Router.router(vertx);
