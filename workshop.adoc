@@ -647,3 +647,39 @@ On Windows, open the file explorer in the step directory and execute `run-soluti
 IMPORTANT: To avoid port conflicts, don't forget to close the server before you start working on the next step.
 
 A complete solution can be found in the `gateway` directory.
+
+==== Step 0: Vert.x Web Router
+
+The Vert.x core library, as explained above, has very low-level abstractions for HTTP servers.
+
+https://vertx.io/docs/vertx-web/java/[Vert.x Web] is a module that builds on top of Vert.x core and provides features commonly found in a web server:
+static file serving, session management, authentication and authorization and much more.
+
+The basic Vert.x Web construct is the _Router_.
+It allows to create _routes_ matching requests by path or HTTP method and delegates execution to _handlers_.
+
+[source,java]
+----
+Router router = Router.router(vertx); // <1>
+
+router.get().handler(StaticHandler.create()); // <2>
+
+router.route().failureHandler(ErrorHandler.create()); // <3>
+----
+<1> Router creation for a given Vert.x instance
+<2> Any `GET` request should be handled by the https://vertx.io/docs/vertx-web/java/#_serving_static_resources[`StaticHandler`] for static file serving
+<3> If anything gets wrong for any type of request, invoke the https://vertx.io/docs/vertx-web/java/#_error_handling[`ErrorHandler`].
+
+===== Exercise
+
+In the IDE, open the `steps/step-0/src/main/java/workshop/gateway/Step0Server.java` file.
+
+Implement the TODOs found in the `createRouter` method.
+
+===== Observations
+
+Browse to http://localhost:8080.
+
+The browser should display the MusicStore welcome page.
+
+NOTE: The error message _Failed to load data..._ is expected as we haven't implemented the GraphQL runtime yet.

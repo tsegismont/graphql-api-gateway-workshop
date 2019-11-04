@@ -9,7 +9,9 @@ public class Step0Server extends WorkshopVerticle {
   protected Router createRouter() {
     Router router = Router.router(vertx);
 
-    // Define routes and set handlers
+    // TODO: create a route for GET requests and set the StaticHandler
+
+    // TODO: create a generic route and set ErrorHandler as the failureHandler
 
     return router;
   }
