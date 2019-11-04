@@ -502,6 +502,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <ul class="sectlevel3">
 <li><a href="#_step_0_vert_x_web_router">Step 0: Vert.x Web Router</a></li>
 <li><a href="#_step_1_the_graphql_java_runtime">Step 1: The GraphQL-Java runtime</a></li>
+<li><a href="#_step_2_field_with_argument">Step 2: field with argument</a></li>
 </ul>
 </li>
 </ul>
@@ -1669,13 +1670,13 @@ The <code>workshop.gateway.WorkshopVerticle</code> class exposes a few repositor
   </span><span class="nl">"data"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
     </span><span class="nl">"genres"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
       </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"1"</span><span class="w">
+        </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="w">
       </span><span class="p">},</span><span class="w">
       </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2"</span><span class="w">
+        </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="w">
       </span><span class="p">},</span><span class="w">
       </span><span class="p">{</span><span class="w">
-        </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"3"</span><span class="w">
+        </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="w">
       </span><span class="p">}</span><span class="w">
     </span><span class="p">]</span><span class="w">
   </span><span class="p">}</span><span class="w">
@@ -1702,13 +1703,144 @@ This can be useful when working with a schema that you do not own.
 </div>
 </div>
 </div>
+<div class="sect3">
+<h4 id="_step_2_field_with_argument">Step 2: field with argument</h4>
+<div class="paragraph">
+<p>GraphQL types can have fields taking arguments.
+This can be useful for filtering or paging results.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="graphql"><span class="k">type</span><span class="w"> </span><span class="n">Query</span><span class="w"> </span><span class="p">{</span><span class="w">
+  </span><span class="n">genres</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="n">Genre</span><span class="p">!]</span><span class="w">
+  </span><span class="n">albums</span><span class="p">(</span><span class="n">genre</span><span class="p">:</span><span class="w"> </span><span class="nb">Int</span><span class="p">):</span><span class="w"> </span><span class="p">[</span><span class="n">Album</span><span class="p">!]</span><span class="w"> # <b class="conum">(1)</b>
+</span><span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>the <code>albums</code> field of the root <code>Query</code> type takes a <code>genre</code> argument of type <code>Int</code></p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>In the data fetcher implementation, the argument value is retrieved from the <code>DataFetchingEnvironment</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="nc">Integer</span> <span class="n">genre</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="na">getArgument</span><span class="o">(</span><span class="s">"genre"</span><span class="o">);</span></code></pre>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_exercise_3">Exercise</h5>
+<div class="paragraph">
+<p>In the IDE, open the <code>steps/step-2/src/main/resources/musicstore.graphql</code> file.</p>
+</div>
+<div class="paragraph">
+<p>Implement the TODOs found in the <code>Album</code> and <code>Query</code> types.</p>
+</div>
+<div class="paragraph">
+<p>Open the <code>steps/step-2/src/main/java/workshop/gateway/Step2Server.java</code> file.</p>
+</div>
+<div class="paragraph">
+<p>Implement the TODO found in the <code>query</code> method.</p>
+</div>
+<div class="paragraph">
+<p>Open the <code>steps/step-2/src/main/java/workshop/gateway/AlbumsDataFetcher.java</code> file.</p>
+</div>
+<div class="paragraph">
+<p>Implement the TODO found in the <code>rxGet</code> method.</p>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_observations_3">Observations</h5>
+<div class="paragraph">
+<p>Browse to <a href="http://localhost:8080/graphiql/" class="bare">http://localhost:8080/graphiql/</a>.</p>
+</div>
+<div class="paragraph">
+<p>In the query panel, type the following query and execute it:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="graphql"><span class="k">query</span><span class="p">(</span><span class="nv">$genre</span><span class="p">:</span><span class="nb">Int</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+  </span><span class="n">albums</span><span class="p">(</span><span class="n">genre</span><span class="p">:</span><span class="w"> </span><span class="nv">$genre</span><span class="p">)</span><span class="w">  </span><span class="p">{</span><span class="w">
+    </span><span class="n">id</span><span class="w">
+    </span><span class="n">name</span><span class="w">
+    </span><span class="n">genre</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="n">name</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+    </span><span class="n">artist</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In the results panel you should see all albums because we haven&#8217;t provided any value for this nullable argument.</p>
+</div>
+<div class="paragraph">
+<p>Then open the query variables panel and type:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="json"><span class="p">{</span><span class="nl">"genre"</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Execute the query again.
+Now in the results panel you should see:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="json"><span class="p">{</span><span class="w">
+  </span><span class="nl">"data"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"albums"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+      </span><span class="p">{</span><span class="w">
+        </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">9</span><span class="p">,</span><span class="w">
+        </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Dark Side Of The Moon"</span><span class="p">,</span><span class="w">
+        </span><span class="nl">"genre"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Rock"</span><span class="w">
+        </span><span class="p">},</span><span class="w">
+        </span><span class="nl">"artist"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Pink Floyd"</span><span class="w">
+      </span><span class="p">},</span><span class="w">
+      </span><span class="p">{</span><span class="w">
+        </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w">
+        </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Appetite For Destruction"</span><span class="p">,</span><span class="w">
+        </span><span class="nl">"genre"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Rock"</span><span class="w">
+        </span><span class="p">},</span><span class="w">
+        </span><span class="nl">"artist"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Guns N' Roses"</span><span class="w">
+      </span><span class="p">},</span><span class="w">
+      </span><span class="p">{</span><span class="w">
+        </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">11</span><span class="p">,</span><span class="w">
+        </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Back In Black"</span><span class="p">,</span><span class="w">
+        </span><span class="nl">"genre"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Rock"</span><span class="w">
+        </span><span class="p">},</span><span class="w">
+        </span><span class="nl">"artist"</span><span class="p">:</span><span class="w"> </span><span class="s2">"AC/DC"</span><span class="w">
+      </span><span class="p">},</span><span class="w">
+      </span><span class="p">{</span><span class="w">
+        </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">12</span><span class="p">,</span><span class="w">
+        </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Master Of Puppets"</span><span class="p">,</span><span class="w">
+        </span><span class="nl">"genre"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Rock"</span><span class="w">
+        </span><span class="p">},</span><span class="w">
+        </span><span class="nl">"artist"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Metallica"</span><span class="w">
+      </span><span class="p">}</span><span class="w">
+    </span><span class="p">]</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span></code></pre>
+</div>
+</div>
+</div>
+</div>
 </div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2019-11-04 22:41:55 UTC
+Last updated 2019-11-04 22:55:12 UTC
 </div>
 </div>
 <style>
