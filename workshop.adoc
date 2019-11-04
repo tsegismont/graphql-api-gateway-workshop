@@ -610,3 +610,37 @@ return inventoryData.zipWith(ratingData, (a, r) -> {
 ----
 
 By default, Vert.x uses a callback style but it also has an https://vertx.io/docs/vertx-rx/java2/[Rxified API].
+
+=== Steps
+
+This lab is divided into several steps incrementally building the API Gateway for the _MusicStore_ application.
+
+Each step can be run separately.
+To do so, open a terminal in the step directory and type:
+
+[source,shell]
+----
+mvn vertx:run
+----
+
+Then start coding.
+The step projects all use the _Vert.x Maven plugin_ which automatically redeploys the code when a file changes.
+
+On Windows, open the file explorer in the step directory and execute `run.bat`.
+
+The files to edit are either in the `src/main/java` or the `src/main/resources` directory.
+
+Each step has its solution in the `src/solution` directory.
+You may run it with:
+
+[source,shell]
+----
+mvn clean package -Psolution
+java -jar target/step-0.jar -Dvertxweb.environment=dev
+----
+
+On Windows, open the file explorer in the step directory and execute `run-solution.bat`.
+
+IMPORTANT: To avoid port conflicts, don't forget to close the server before you start working on the next step.
+
+A complete solution can be found in the `gateway` directory.
