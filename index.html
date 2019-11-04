@@ -502,7 +502,8 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <ul class="sectlevel3">
 <li><a href="#_step_0_vert_x_web_router">Step 0: Vert.x Web Router</a></li>
 <li><a href="#_step_1_the_graphql_java_runtime">Step 1: The GraphQL-Java runtime</a></li>
-<li><a href="#_step_2_field_with_argument">Step 2: field with argument</a></li>
+<li><a href="#_step_2_fields_with_arguments">Step 2: Fields with arguments</a></li>
+<li><a href="#_step_3_fetching_data_efficiently">Step 3: Fetching data efficiently</a></li>
 </ul>
 </li>
 </ul>
@@ -1704,7 +1705,7 @@ This can be useful when working with a schema that you do not own.
 </div>
 </div>
 <div class="sect3">
-<h4 id="_step_2_field_with_argument">Step 2: field with argument</h4>
+<h4 id="_step_2_fields_with_arguments">Step 2: Fields with arguments</h4>
 <div class="paragraph">
 <p>GraphQL types can have fields taking arguments.
 This can be useful for filtering or paging results.</p>
@@ -1834,13 +1835,257 @@ Now in the results panel you should see:</p>
 </div>
 </div>
 </div>
+<div class="sect3">
+<h4 id="_step_3_fetching_data_efficiently">Step 3: Fetching data efficiently</h4>
+<div class="paragraph">
+<p>In this step, the schema has been modified in order to get all albums details in a single query:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="graphql"><span class="k">type</span><span class="w"> </span><span class="n">Genre</span><span class="w"> </span><span class="p">{</span><span class="w">
+  </span><span class="n">id</span><span class="p">:</span><span class="w"> </span><span class="nb">Int</span><span class="p">!</span><span class="w">
+  </span><span class="n">name</span><span class="p">:</span><span class="w"> </span><span class="nb">String</span><span class="p">!</span><span class="w">
+  </span><span class="n">image</span><span class="p">:</span><span class="w"> </span><span class="nb">String</span><span class="w">
+</span><span class="p">}</span><span class="w">
+
+</span><span class="k">type</span><span class="w"> </span><span class="n">Track</span><span class="w"> </span><span class="p">{</span><span class="w">
+  </span><span class="n">number</span><span class="p">:</span><span class="w"> </span><span class="nb">Int</span><span class="p">!</span><span class="w">
+  </span><span class="n">name</span><span class="p">:</span><span class="w"> </span><span class="nb">String</span><span class="p">!</span><span class="w">
+</span><span class="p">}</span><span class="w">
+
+</span><span class="k">type</span><span class="w"> </span><span class="n">Album</span><span class="w"> </span><span class="p">{</span><span class="w">
+  </span><span class="n">id</span><span class="p">:</span><span class="w"> </span><span class="nb">Int</span><span class="p">!</span><span class="w">
+  </span><span class="n">name</span><span class="p">:</span><span class="w"> </span><span class="nb">String</span><span class="p">!</span><span class="w">
+  </span><span class="n">genre</span><span class="p">:</span><span class="w"> </span><span class="n">Genre</span><span class="p">!</span><span class="w">
+  </span><span class="n">artist</span><span class="p">:</span><span class="w"> </span><span class="nb">String</span><span class="p">!</span><span class="w">
+  </span><span class="n">image</span><span class="p">:</span><span class="w"> </span><span class="nb">String</span><span class="w">
+  </span><span class="n">tracks</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="n">Track</span><span class="p">!]!</span><span class="w">
+  </span><span class="n">rating</span><span class="p">:</span><span class="w"> </span><span class="nb">Int</span><span class="w">
+  </span><span class="n">reviews</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="n">Review</span><span class="p">!]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+
+</span><span class="k">type</span><span class="w"> </span><span class="n">Review</span><span class="w"> </span><span class="p">{</span><span class="w">
+  </span><span class="n">name</span><span class="p">:</span><span class="w"> </span><span class="nb">String</span><span class="p">!</span><span class="w">
+  </span><span class="n">rating</span><span class="p">:</span><span class="w"> </span><span class="nb">Int</span><span class="p">!</span><span class="w">
+  </span><span class="n">comment</span><span class="p">:</span><span class="w"> </span><span class="nb">String</span><span class="w">
+</span><span class="p">}</span><span class="w">
+
+</span><span class="k">type</span><span class="w"> </span><span class="n">Query</span><span class="w"> </span><span class="p">{</span><span class="w">
+  </span><span class="n">genres</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="n">Genre</span><span class="p">!]</span><span class="w">
+  </span><span class="n">albums</span><span class="p">(</span><span class="n">genre</span><span class="p">:</span><span class="w"> </span><span class="nb">Int</span><span class="p">):</span><span class="w"> </span><span class="p">[</span><span class="n">Album</span><span class="p">!]</span><span class="w">
+  </span><span class="n">album</span><span class="p">(</span><span class="n">id</span><span class="p">:</span><span class="w"> </span><span class="nb">Int</span><span class="p">!):</span><span class="w"> </span><span class="n">Album</span><span class="w">
+</span><span class="p">}</span><span class="w">
+
+</span><span class="k">schema</span><span class="w"> </span><span class="p">{</span><span class="w">
+  </span><span class="n">query</span><span class="p">:</span><span class="w"> </span><span class="n">Query</span><span class="w">
+</span><span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Then of course the corresponding data fetcher has been defined in runtime wiring:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="kn">package</span> <span class="n">workshop</span><span class="o">.</span><span class="na">gateway</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">graphql.GraphQL</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">graphql.schema.idl.RuntimeWiring</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">graphql.schema.idl.TypeRuntimeWiring</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">io.vertx.reactivex.ext.web.Router</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">io.vertx.reactivex.ext.web.handler.BodyHandler</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">io.vertx.reactivex.ext.web.handler.ErrorHandler</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">io.vertx.reactivex.ext.web.handler.StaticHandler</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">io.vertx.reactivex.ext.web.handler.graphql.GraphQLHandler</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">io.vertx.reactivex.ext.web.handler.graphql.GraphiQLHandler</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Step3Server</span> <span class="kd">extends</span> <span class="nc">WorkshopVerticle</span> <span class="o">{</span>
+
+  <span class="kd">protected</span> <span class="nc">Router</span> <span class="nf">createRouter</span><span class="o">()</span> <span class="o">{</span>
+    <span class="nc">Router</span> <span class="n">router</span> <span class="o">=</span> <span class="nc">Router</span><span class="o">.</span><span class="na">router</span><span class="o">(</span><span class="n">vertx</span><span class="o">);</span>
+
+    <span class="n">router</span><span class="o">.</span><span class="na">route</span><span class="o">().</span><span class="na">handler</span><span class="o">(</span><span class="nc">BodyHandler</span><span class="o">.</span><span class="na">create</span><span class="o">());</span>
+
+    <span class="nc">GraphQL</span> <span class="n">graphQL</span> <span class="o">=</span> <span class="n">setupGraphQLJava</span><span class="o">(</span><span class="s">"musicstore.graphql"</span><span class="o">);</span>
+    <span class="n">router</span><span class="o">.</span><span class="na">route</span><span class="o">(</span><span class="s">"/graphql"</span><span class="o">).</span><span class="na">handler</span><span class="o">(</span><span class="nc">GraphQLHandler</span><span class="o">.</span><span class="na">create</span><span class="o">(</span><span class="n">graphQL</span><span class="o">));</span>
+    <span class="n">router</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="s">"/graphiql/*"</span><span class="o">).</span><span class="na">handler</span><span class="o">(</span><span class="nc">GraphiQLHandler</span><span class="o">.</span><span class="na">create</span><span class="o">());</span>
+
+    <span class="n">router</span><span class="o">.</span><span class="na">get</span><span class="o">().</span><span class="na">handler</span><span class="o">(</span><span class="nc">StaticHandler</span><span class="o">.</span><span class="na">create</span><span class="o">());</span>
+
+    <span class="n">router</span><span class="o">.</span><span class="na">route</span><span class="o">().</span><span class="na">failureHandler</span><span class="o">(</span><span class="nc">ErrorHandler</span><span class="o">.</span><span class="na">create</span><span class="o">());</span>
+
+    <span class="k">return</span> <span class="n">router</span><span class="o">;</span>
+  <span class="o">}</span>
+
+  <span class="kd">protected</span> <span class="nc">RuntimeWiring</span> <span class="nf">runtimeWiring</span><span class="o">()</span> <span class="o">{</span>
+    <span class="k">return</span> <span class="nc">RuntimeWiring</span><span class="o">.</span><span class="na">newRuntimeWiring</span><span class="o">()</span>
+      <span class="o">.</span><span class="na">type</span><span class="o">(</span><span class="s">"Query"</span><span class="o">,</span> <span class="k">this</span><span class="o">::</span><span class="n">query</span><span class="o">)</span>
+      <span class="o">.</span><span class="na">build</span><span class="o">();</span>
+  <span class="o">}</span>
+
+  <span class="kd">private</span> <span class="nc">TypeRuntimeWiring</span><span class="o">.</span><span class="na">Builder</span> <span class="nf">query</span><span class="o">(</span><span class="nc">TypeRuntimeWiring</span><span class="o">.</span><span class="na">Builder</span> <span class="n">builder</span><span class="o">)</span> <span class="o">{</span>
+    <span class="k">return</span> <span class="n">builder</span>
+      <span class="o">.</span><span class="na">dataFetcher</span><span class="o">(</span><span class="s">"genres"</span><span class="o">,</span> <span class="k">new</span> <span class="nc">GenresDataFetcher</span><span class="o">(</span><span class="n">genresRepository</span><span class="o">))</span>
+      <span class="o">.</span><span class="na">dataFetcher</span><span class="o">(</span><span class="s">"albums"</span><span class="o">,</span> <span class="k">new</span> <span class="nc">AlbumsDataFetcher</span><span class="o">(</span><span class="n">albumsRepository</span><span class="o">))</span>
+      <span class="o">.</span><span class="na">dataFetcher</span><span class="o">(</span><span class="s">"album"</span><span class="o">,</span> <span class="k">new</span> <span class="nc">AlbumDataFetcher</span><span class="o">(</span><span class="n">albumsRepository</span><span class="o">,</span> <span class="n">ratingRepository</span><span class="o">))</span>
+      <span class="o">;</span>
+  <span class="o">}</span>
+<span class="o">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In the data fetcher implementation, two concurrent requests are sent to the inventory and rating services and results get merged, thanks to RxJava&#8217;s <code>zip</code> operator:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="nc">Single</span><span class="o">&lt;</span><span class="nc">Album</span><span class="o">&gt;</span> <span class="n">inventoryData</span> <span class="o">=</span> <span class="n">albumsRepository</span><span class="o">.</span><span class="na">findById</span><span class="o">(</span><span class="n">id</span><span class="o">,</span> <span class="kc">true</span><span class="o">);</span> // <b class="conum">(1)</b>
+<span class="nc">Single</span><span class="o">&lt;</span><span class="nc">RatingInfo</span><span class="o">&gt;</span> <span class="n">ratingData</span> <span class="o">=</span> <span class="n">ratingRepository</span><span class="o">.</span><span class="na">findRatingAndReviewsByAlbum</span><span class="o">(</span><span class="n">id</span><span class="o">);</span> // <b class="conum">(2)</b>
+<span class="k">return</span> <span class="n">inventoryData</span><span class="o">.</span><span class="na">zipWith</span><span class="o">(</span><span class="n">ratingData</span><span class="o">,</span> <span class="o">(</span><span class="n">a</span><span class="o">,</span> <span class="n">r</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="o">{</span> // <b class="conum">(3)</b>
+  <span class="n">a</span><span class="o">.</span><span class="na">setRating</span><span class="o">(</span><span class="n">r</span><span class="o">.</span><span class="na">getRating</span><span class="o">());</span>
+  <span class="n">a</span><span class="o">.</span><span class="na">setReviews</span><span class="o">(</span><span class="n">r</span><span class="o">.</span><span class="na">getReviews</span><span class="o">());</span>
+  <span class="k">return</span> <span class="n">a</span><span class="o">;</span>
+<span class="o">});</span></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>Load album data (including tracks) from inventory service</p>
+</li>
+<li>
+<p>Load rating and reviews from rating service</p>
+</li>
+<li>
+<p>Merge rating data into one <code>Album</code> object</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>Why fetching all this data at once?</p>
+</div>
+<div class="paragraph">
+<p>Because if a user sends a query for a specific album, chances are high the full set of fields will be needed.</p>
+</div>
+<div class="paragraph">
+<p>Consequently, it is more efficient to:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>retrieve album data with tracks included in a single backend request</p>
+</li>
+<li>
+<p>retrieve rating data concurrently</p>
+</li>
+</ol>
+</div>
+<div class="sect4">
+<h5 id="_exercise_4">Exercise</h5>
+<div class="paragraph">
+<p>In the IDE, open the <code>steps/step-3/src/main/java/workshop/gateway/AlbumDataFetcher.java</code> file.</p>
+</div>
+<div class="paragraph">
+<p>Implement the TODOs found in the <code>rxGet</code> method.</p>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_observations_4">Observations</h5>
+<div class="paragraph">
+<p>Browse to <a href="http://localhost:8080/graphiql/" class="bare">http://localhost:8080/graphiql/</a>.</p>
+</div>
+<div class="paragraph">
+<p>In the query panel, type the following query and execute it:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="graphql"><span class="p">{</span><span class="w">
+  </span><span class="n">album</span><span class="p">(</span><span class="n">id</span><span class="p">:</span><span class="w"> </span><span class="mi">8</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="n">name</span><span class="w">
+    </span><span class="n">artist</span><span class="w">
+    </span><span class="n">rating</span><span class="w">
+    </span><span class="n">reviews</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="n">name</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+    </span><span class="n">tracks</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="n">number</span><span class="w">
+      </span><span class="n">name</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In the results panel you should see:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="json"><span class="p">{</span><span class="w">
+  </span><span class="nl">"data"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"album"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Thriller"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"artist"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Michael Jackson"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"rating"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"reviews"</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span><span class="w">
+      </span><span class="nl">"tracks"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"number"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Wanna Be Startin' Somethin'"</span><span class="w">
+        </span><span class="p">},</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"number"</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Baby Be Mine"</span><span class="w">
+        </span><span class="p">},</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"number"</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"The Girl Is Mine"</span><span class="w">
+        </span><span class="p">},</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"number"</span><span class="p">:</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Thriller"</span><span class="w">
+        </span><span class="p">},</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"number"</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Beat It"</span><span class="w">
+        </span><span class="p">},</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"number"</span><span class="p">:</span><span class="w"> </span><span class="mi">6</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Billie Jean"</span><span class="w">
+        </span><span class="p">},</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"number"</span><span class="p">:</span><span class="w"> </span><span class="mi">7</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Human Nature"</span><span class="w">
+        </span><span class="p">},</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"number"</span><span class="p">:</span><span class="w"> </span><span class="mi">8</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"P.Y.T. (Pretty Young Thing)"</span><span class="w">
+        </span><span class="p">},</span><span class="w">
+        </span><span class="p">{</span><span class="w">
+          </span><span class="nl">"number"</span><span class="p">:</span><span class="w"> </span><span class="mi">9</span><span class="p">,</span><span class="w">
+          </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"The Lady in My Life"</span><span class="w">
+        </span><span class="p">}</span><span class="w">
+      </span><span class="p">]</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Of course rating data is not available yet.
+But if you open the inventory service console, you will see a single request for each <code>album</code> GraphQL query:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>[2019-11-03 10:12:23] [INFO   ] GET /album/8?withTracks= 200 481 - 1 ms</pre>
+</div>
+</div>
+</div>
+</div>
 </div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2019-11-04 22:55:12 UTC
+Last updated 2019-11-04 23:30:10 UTC
 </div>
 </div>
 <style>
