@@ -813,7 +813,7 @@ TIP: In the top right corner of the web page, click the `Docks` link.
 GraphiQL will open the schema explorer.
 This can be useful when working with a schema that you do not own.
 
-==== Step 2: field with argument
+==== Step 2: Fields with arguments
 
 GraphQL types can have fields taking arguments.
 This can be useful for filtering or paging results.
@@ -920,4 +920,136 @@ Now in the results panel you should see:
     ]
   }
 }
+----
+
+==== Step 3: Fetching data efficiently
+
+In this step, the schema has been modified in order to get all albums details in a single query:
+
+[source,graphql]
+----
+include::steps/step-3/src/main/resources/musicstore.graphql[]
+----
+
+Then of course the corresponding data fetcher has been defined in runtime wiring:
+
+[source,java]
+----
+include::steps/step-3/src/main/java/workshop/gateway/Step3Server.java[]
+----
+
+In the data fetcher implementation, two concurrent requests are sent to the inventory and rating services and results get merged, thanks to RxJava's `zip` operator:
+
+[source,java]
+----
+Single<Album> inventoryData = albumsRepository.findById(id, true); // <1>
+Single<RatingInfo> ratingData = ratingRepository.findRatingAndReviewsByAlbum(id); // <2>
+return inventoryData.zipWith(ratingData, (a, r) -> { // <3>
+  a.setRating(r.getRating());
+  a.setReviews(r.getReviews());
+  return a;
+});
+----
+<1> Load album data (including tracks) from inventory service
+<2> Load rating and reviews from rating service
+<3> Merge rating data into one `Album` object
+
+Why fetching all this data at once?
+
+Because if a user sends a query for a specific album, chances are high the full set of fields will be needed.
+
+Consequently, it is more efficient to:
+
+. retrieve album data with tracks included in a single backend request
+. retrieve rating data concurrently
+
+===== Exercise
+
+In the IDE, open the `steps/step-3/src/main/java/workshop/gateway/AlbumDataFetcher.java` file.
+
+Implement the TODOs found in the `rxGet` method.
+
+===== Observations
+
+Browse to http://localhost:8080/graphiql/.
+
+In the query panel, type the following query and execute it:
+
+[source,graphql]
+----
+{
+  album(id: 8) {
+    name
+    artist
+    rating
+    reviews {
+      name
+    }
+    tracks {
+      number
+      name
+    }
+  }
+}
+----
+
+In the results panel you should see:
+
+[source,json]
+----
+{
+  "data": {
+    "album": {
+      "name": "Thriller",
+      "artist": "Michael Jackson",
+      "rating": 0,
+      "reviews": [],
+      "tracks": [
+        {
+          "number": 1,
+          "name": "Wanna Be Startin' Somethin'"
+        },
+        {
+          "number": 2,
+          "name": "Baby Be Mine"
+        },
+        {
+          "number": 3,
+          "name": "The Girl Is Mine"
+        },
+        {
+          "number": 4,
+          "name": "Thriller"
+        },
+        {
+          "number": 5,
+          "name": "Beat It"
+        },
+        {
+          "number": 6,
+          "name": "Billie Jean"
+        },
+        {
+          "number": 7,
+          "name": "Human Nature"
+        },
+        {
+          "number": 8,
+          "name": "P.Y.T. (Pretty Young Thing)"
+        },
+        {
+          "number": 9,
+          "name": "The Lady in My Life"
+        }
+      ]
+    }
+  }
+}
+----
+
+Of course rating data is not available yet.
+But if you open the inventory service console, you will see a single request for each `album` GraphQL query:
+
+----
+[2019-11-03 10:12:23] [INFO   ] GET /album/8?withTracks= 200 481 - 1 ms
 ----
