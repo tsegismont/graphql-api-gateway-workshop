@@ -33,21 +33,6 @@ type Query {
   currentUser: String
 }
 
-input ReviewInput {
-  rating: Int!
-  comment: String
-}
-
-type ReviewResult {
-  rating: Int!
-  reviews: [Review!]!
-}
-
-type Mutation {
-  addReview(albumId: ID!, review: ReviewInput): ReviewResult
-}
-
 schema {
   query: Query
-  mutation: Mutation
 }

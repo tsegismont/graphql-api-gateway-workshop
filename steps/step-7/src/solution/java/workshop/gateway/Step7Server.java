@@ -12,7 +12,7 @@ import io.vertx.reactivex.ext.web.handler.graphql.GraphQLHandler;
 import io.vertx.reactivex.ext.web.handler.graphql.GraphiQLHandler;
 import io.vertx.reactivex.ext.web.sstore.LocalSessionStore;
 
-public class Step5Server extends WorkshopVerticle {
+public class Step7Server extends WorkshopVerticle {
 
   protected Router createRouter() {
     Router router = Router.router(vertx);
@@ -25,12 +25,12 @@ public class Step5Server extends WorkshopVerticle {
     HtpasswdAuth authProvider = HtpasswdAuth.create(vertx, authOptions);
 
     SessionHandler sessionHandler = SessionHandler.create(LocalSessionStore.create(vertx)).setAuthProvider(authProvider);
-    // Add catch-all route and set sessionHandler
+    router.route().handler(sessionHandler);
     FormLoginHandler formLoginHandler = FormLoginHandler.create(authProvider).setDirectLoggedInOKURL("/");
-    // Add post route to /login.html and set FormLoginHandler
+    router.post("/login.html").handler(formLoginHandler);
     router.get("/logout").handler(rc -> {
-      // Clear user from RoutingContext
-      // Get session and destroy it
+      rc.clearUser();
+      rc.session().destroy();
       rc.response().setStatusCode(307).putHeader(HttpHeaders.LOCATION, "/").end();
     });
 
@@ -48,7 +48,9 @@ public class Step5Server extends WorkshopVerticle {
   protected RuntimeWiring runtimeWiring() {
     return RuntimeWiring.newRuntimeWiring()
       .type("Query", this::query)
+      .type("Mutation", this::mutation)
       .type("Album", this::album)
+      .type("CartItem", this::cartItem)
       .build();
   }
 
@@ -57,7 +59,16 @@ public class Step5Server extends WorkshopVerticle {
       .dataFetcher("genres", new GenresDataFetcher(genresRepository))
       .dataFetcher("albums", new AlbumsDataFetcher(albumsRepository))
       .dataFetcher("album", new AlbumDataFetcher(albumsRepository, ratingRepository))
-      .dataFetcher("currentUser", new CurrentUserDataFetcher());
+      .dataFetcher("currentUser", new CurrentUserDataFetcher())
+      .dataFetcher("cart", new CartDataFetcher(cartRepository));
+  }
+
+  private TypeRuntimeWiring.Builder mutation(TypeRuntimeWiring.Builder builder) {
+    return builder
+      .dataFetcher("addReview", new AddReviewDataFetcher(ratingRepository))
+      .dataFetcher("addToCart", new AddToCartDataFetcher(cartRepository))
+      .dataFetcher("removeFromCart", new RemoveFromCartDataFetcher(cartRepository))
+      ;
   }
 
   private TypeRuntimeWiring.Builder album(TypeRuntimeWiring.Builder builder) {
@@ -65,5 +76,10 @@ public class Step5Server extends WorkshopVerticle {
       .dataFetcher("tracks", new AlbumTracksDataFetcher(tracksRepository))
       .dataFetcher("rating", new AlbumRatingDataFetcher(ratingRepository))
       .dataFetcher("reviews", new AlbumReviewsDataFetcher(ratingRepository));
+  }
+
+  private TypeRuntimeWiring.Builder cartItem(TypeRuntimeWiring.Builder builder) {
+    return builder
+      .dataFetcher("album", new CartItemAlbumDataFetcher(albumsRepository));
   }
 }

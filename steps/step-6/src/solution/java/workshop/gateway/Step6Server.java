@@ -50,7 +50,6 @@ public class Step6Server extends WorkshopVerticle {
       .type("Query", this::query)
       .type("Mutation", this::mutation)
       .type("Album", this::album)
-      .type("CartItem", this::cartItem)
       .build();
   }
 
@@ -59,15 +58,12 @@ public class Step6Server extends WorkshopVerticle {
       .dataFetcher("genres", new GenresDataFetcher(genresRepository))
       .dataFetcher("albums", new AlbumsDataFetcher(albumsRepository))
       .dataFetcher("album", new AlbumDataFetcher(albumsRepository, ratingRepository))
-      .dataFetcher("currentUser", new CurrentUserDataFetcher())
-      .dataFetcher("cart", new CartDataFetcher(cartRepository));
+      .dataFetcher("currentUser", new CurrentUserDataFetcher());
   }
 
   private TypeRuntimeWiring.Builder mutation(TypeRuntimeWiring.Builder builder) {
     return builder
       .dataFetcher("addReview", new AddReviewDataFetcher(ratingRepository))
-      .dataFetcher("addToCart", new AddToCartDataFetcher(cartRepository))
-      .dataFetcher("removeFromCart", new RemoveFromCartDataFetcher(cartRepository))
       ;
   }
 
@@ -76,10 +72,5 @@ public class Step6Server extends WorkshopVerticle {
       .dataFetcher("tracks", new AlbumTracksDataFetcher(tracksRepository))
       .dataFetcher("rating", new AlbumRatingDataFetcher(ratingRepository))
       .dataFetcher("reviews", new AlbumReviewsDataFetcher(ratingRepository));
-  }
-
-  private TypeRuntimeWiring.Builder cartItem(TypeRuntimeWiring.Builder builder) {
-    return builder
-      .dataFetcher("album", new CartItemAlbumDataFetcher(albumsRepository));
   }
 }

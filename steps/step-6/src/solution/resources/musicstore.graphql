@@ -26,20 +26,10 @@ type Review {
   comment: String
 }
 
-type CartItem {
-  album: Album
-  quantity: Int
-}
-
-type Cart {
-  items: [CartItem!]
-}
-
 type Query {
   genres: [Genre!]
   albums(genre: ID): [Album!]
   album(id: ID!): Album
-  cart: Cart
   currentUser: String
 }
 
@@ -54,8 +44,6 @@ type ReviewResult {
 }
 
 type Mutation {
-  addToCart(albumId: ID!): Cart
-  removeFromCart(albumId: ID!): Cart
   addReview(albumId: ID!, review: ReviewInput): ReviewResult
 }
 

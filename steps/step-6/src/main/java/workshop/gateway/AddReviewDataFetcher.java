@@ -20,9 +20,10 @@ public class AddReviewDataFetcher implements RxDataFetcher<RatingInfo> {
     if (currentUser==null) {
       throw new NotLoggedInException();
     }
-    Integer albumId = EnvironmentUtil.getIntegerArgument(env, "albumId");
-    ReviewInput reviewInput = EnvironmentUtil.getInputArgument(env, "review", ReviewInput.class);
-    reviewInput.setName(currentUser);
-    return ratingRepository.addReview(albumId, reviewInput);
+    // Get albumId argument from env
+    // Get review input argument from env
+    // Set currentUser in input
+    // Add review and return rating info
+    return null;
   }
 }

@@ -48,7 +48,6 @@ public class Step5Server extends WorkshopVerticle {
   protected RuntimeWiring runtimeWiring() {
     return RuntimeWiring.newRuntimeWiring()
       .type("Query", this::query)
-      .type("Mutation", this::mutation)
       .type("Album", this::album)
       .build();
   }
@@ -59,12 +58,6 @@ public class Step5Server extends WorkshopVerticle {
       .dataFetcher("albums", new AlbumsDataFetcher(albumsRepository))
       .dataFetcher("album", new AlbumDataFetcher(albumsRepository, ratingRepository))
       .dataFetcher("currentUser", new CurrentUserDataFetcher());
-  }
-
-  private TypeRuntimeWiring.Builder mutation(TypeRuntimeWiring.Builder builder) {
-    return builder
-      .dataFetcher("addReview", new AddReviewDataFetcher(ratingRepository))
-      ;
   }
 
   private TypeRuntimeWiring.Builder album(TypeRuntimeWiring.Builder builder) {
