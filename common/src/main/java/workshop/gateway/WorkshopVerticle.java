@@ -14,9 +14,13 @@ import io.vertx.reactivex.ext.web.Router;
 import io.vertx.reactivex.ext.web.client.WebClient;
 import io.vertx.reactivex.pgclient.PgPool;
 import io.vertx.sqlclient.PoolOptions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import workshop.repository.*;
 
 public abstract class WorkshopVerticle extends AbstractVerticle {
+
+  private static final Logger log = LoggerFactory.getLogger(WorkshopVerticle.class);
 
   private static final String CREATE_TABLE =
     "create table if not exists cart ("
@@ -40,7 +44,10 @@ public abstract class WorkshopVerticle extends AbstractVerticle {
     PgPool pool = createPgPool("musicstore", "musicstore", "musicstore");
     cartRepository = new CartRepository(pool);
 
-    Completable dbSetup = pool.rxQuery(CREATE_TABLE).ignoreElement();
+    Completable dbSetup = pool.rxQuery(CREATE_TABLE)
+      .ignoreElement()
+      .doOnError(throwable -> log.warn("Failed to communicate with Postgres", throwable))
+      .onErrorComplete();
 
     WebClient inventoryClient = WebClient.create(vertx, new WebClientOptions().setDefaultPort(8081));
     genresRepository = new GenresRepository(inventoryClient);
