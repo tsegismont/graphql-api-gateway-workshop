@@ -37,7 +37,7 @@ public class Step2Server extends WorkshopVerticle {
   private TypeRuntimeWiring.Builder query(TypeRuntimeWiring.Builder builder) {
     return builder
       .dataFetcher("genres", new GenresDataFetcher(genresRepository))
-      // Add data fetcher for the albums field of the Query type
+      // TODO: define the AlbumsDataFetcher for the albums field of the Query type
       ;
   }
 }

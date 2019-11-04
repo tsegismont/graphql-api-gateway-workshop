@@ -793,13 +793,13 @@ In the results panel you should see:
   "data": {
     "genres": [
       {
-        "id": "1"
+        "id": 1
       },
       {
-        "id": "2"
+        "id": 2
       },
       {
-        "id": "3"
+        "id": 3
       }
     ]
   }
@@ -812,3 +812,112 @@ The result should have exactly the information you required, no more no less.
 TIP: In the top right corner of the web page, click the `Docks` link.
 GraphiQL will open the schema explorer.
 This can be useful when working with a schema that you do not own.
+
+==== Step 2: field with argument
+
+GraphQL types can have fields taking arguments.
+This can be useful for filtering or paging results.
+
+[source,graphql]
+----
+type Query {
+  genres: [Genre!]
+  albums(genre: Int): [Album!] # <1>
+}
+----
+<1> the `albums` field of the root `Query` type takes a `genre` argument of type `Int`
+
+In the data fetcher implementation, the argument value is retrieved from the `DataFetchingEnvironment`:
+
+[source,java]
+----
+Integer genre = env.getArgument("genre");
+----
+
+===== Exercise
+
+In the IDE, open the `steps/step-2/src/main/resources/musicstore.graphql` file.
+
+Implement the TODOs found in the `Album` and `Query` types.
+
+Open the `steps/step-2/src/main/java/workshop/gateway/Step2Server.java` file.
+
+Implement the TODO found in the `query` method.
+
+Open the `steps/step-2/src/main/java/workshop/gateway/AlbumsDataFetcher.java` file.
+
+Implement the TODO found in the `rxGet` method.
+
+===== Observations
+
+Browse to http://localhost:8080/graphiql/.
+
+In the query panel, type the following query and execute it:
+
+[source,graphql]
+----
+query($genre:Int) {
+  albums(genre: $genre)  {
+    id
+    name
+    genre {
+      name
+    }
+    artist
+  }
+}
+----
+
+In the results panel you should see all albums because we haven't provided any value for this nullable argument.
+
+Then open the query variables panel and type:
+
+[source,json]
+----
+{"genre": 2}
+----
+
+Execute the query again.
+Now in the results panel you should see:
+
+[source,json]
+----
+{
+  "data": {
+    "albums": [
+      {
+        "id": 9,
+        "name": "Dark Side Of The Moon",
+        "genre": {
+          "name": "Rock"
+        },
+        "artist": "Pink Floyd"
+      },
+      {
+        "id": 10,
+        "name": "Appetite For Destruction",
+        "genre": {
+          "name": "Rock"
+        },
+        "artist": "Guns N' Roses"
+      },
+      {
+        "id": 11,
+        "name": "Back In Black",
+        "genre": {
+          "name": "Rock"
+        },
+        "artist": "AC/DC"
+      },
+      {
+        "id": 12,
+        "name": "Master Of Puppets",
+        "genre": {
+          "name": "Rock"
+        },
+        "artist": "Metallica"
+      }
+    ]
+  }
+}
+----

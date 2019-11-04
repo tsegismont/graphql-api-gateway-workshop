@@ -17,7 +17,7 @@ public class AlbumsDataFetcher implements RxDataFetcher<List<Album>> {
 
   @Override
   public Single<List<Album>> rxGet(DataFetchingEnvironment env) {
-    // Get genre argument from env and find albums
+    // TODO: get genre argument from env and find albums
     return null;
   }
 }

@@ -5,10 +5,16 @@ type Genre {
 }
 
 type Album {
+  # TODO: add id field of type Int!
+  # TODO: add name field of type String!
+  # TODO: add genre field of type Genre!
+  # TODO: add artist field of type String!
+  # TODO: add image field of type String
 }
 
 type Query {
   genres: [Genre!]
+  # TODO: add albums field with param genre of type Int
 }
 
 schema {
