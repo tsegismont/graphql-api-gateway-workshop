@@ -15,7 +15,11 @@ public class Step1Server extends WorkshopVerticle {
   protected Router createRouter() {
     Router router = Router.router(vertx);
 
-    // Define GraphQL and GraphiQL routes and set handlers
+    // TODO: define generic route and set the BodyHandler
+
+    // TODO: create GraphQL runtime with setupGraphQLJava method
+    // TODO: define route for /graphql requests and set the GraphQLHandler
+    // TODO: define route for /graphiql/* requests and set the GraphiQLHandler
 
     router.get().handler(StaticHandler.create());
 
@@ -26,13 +30,13 @@ public class Step1Server extends WorkshopVerticle {
 
   protected RuntimeWiring runtimeWiring() {
     return RuntimeWiring.newRuntimeWiring()
-      // Add type wiring for type Query
+      .type("Query", this::query)
       .build();
   }
 
   private TypeRuntimeWiring.Builder query(TypeRuntimeWiring.Builder builder) {
     return builder
-      // Add data fetcher for the genres field of the Query type
+      // TODO: add data fetcher for the genres field of the root Query type
       ;
   }
 }

@@ -36,6 +36,7 @@ public class Step1Server extends WorkshopVerticle {
 
   private TypeRuntimeWiring.Builder query(TypeRuntimeWiring.Builder builder) {
     return builder
-      .dataFetcher("genres", new GenresDataFetcher(genresRepository));
+      .dataFetcher("genres", new GenresDataFetcher(genresRepository))
+      ;
   }
 }

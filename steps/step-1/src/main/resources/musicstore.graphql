@@ -1,7 +1,11 @@
 type Genre {
+  # TODO: add id field of type ID
+  # TODO: add name field of type String!
+  # TODO: add image field of type String
 }
 
 type Query {
+  # TODO: add genres *field* of type [Genre!]
 }
 
 schema {

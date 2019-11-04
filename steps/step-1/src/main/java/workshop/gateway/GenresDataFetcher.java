@@ -17,6 +17,7 @@ public class GenresDataFetcher implements RxDataFetcher<List<Genre>> {
 
   @Override
   public Single<List<Genre>> rxGet(DataFetchingEnvironment env) {
+    // TODO: return all genres with genresRepository#findAll
     return null;
   }
 }

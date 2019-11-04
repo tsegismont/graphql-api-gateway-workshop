@@ -325,7 +325,7 @@ Technically, it is comprised of the following components:
 * the <<Rating Service>>
 
 [graphviz,musicstore-app,svg]
-.The MusicStore application
+.The _MusicStore_ application
 ----
 strict digraph {
     rankdir=LR;
@@ -680,6 +680,95 @@ Implement the TODOs found in the `createRouter` method.
 
 Browse to http://localhost:8080.
 
-The browser should display the MusicStore welcome page.
+The browser should display the _MusicStore_ welcome page.
 
 NOTE: The error message _Failed to load data..._ is expected as we haven't implemented the GraphQL runtime yet.
+
+==== Step 1: The GraphQL-Java runtime
+
+Now that we have a web server, let's configure the GraphQL runtime.
+
+First we need a GraphQL schema file.
+It contains at least a root `Query` type.
+The root `Query` fields are the entry points to the graph.
+
+[source,graphql]
+----
+type Genre {
+  id: ID
+  name: String!
+  image: String # <3>
+}
+
+type Query { # <1>
+  genres: [Genre!] # <2>
+}
+
+schema {
+  query: Query
+}
+----
+<1> root query type
+<2> the `genres` field returns an array of `Genre` objects
+<3> `String` is one of the built-in scalar types
+
+===== Exercise
+
+In the IDE, open the `steps/step-1/src/main/resources/musicstore.graphql` file.
+
+Implement the TODOs found in the `Genre` and `Query` types.
+
+Open the `steps/step-1/src/main/java/workshop/gateway/Step1Server.java` file.
+
+Implement the TODOs found in the `createRouter` and `query` methods.
+
+Open the `steps/step-1/src/main/java/workshop/gateway/GenresDataFetcher.java` file.
+
+Implement the TODOs found in the `rxGet` method.
+
+===== Observations
+
+Browse to http://localhost:8080.
+
+The browser should display the list of genres available in the _MusicStore_.
+
+Browse to http://localhost:8080/graphiql/.
+
+In the query panel, type the following query and execute it:
+
+[source,graphql]
+----
+query {
+  genres {
+    id
+  }
+}
+----
+
+In the results panel you should see:
+
+[source,json]
+----
+{
+  "data": {
+    "genres": [
+      {
+        "id": "1"
+      },
+      {
+        "id": "2"
+      },
+      {
+        "id": "3"
+      }
+    ]
+  }
+}
+----
+
+Modify the query to fetch other fields (`name` or `image`).
+The result should have exactly the information you required, no more no less.
+
+TIP: In the top right corner of the web page, click the `Docks` link.
+GraphiQL will open the schema explorer.
+This can be useful when working with a schema that you do not own.
