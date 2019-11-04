@@ -498,7 +498,11 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_rxjava">RxJava</a></li>
 </ul>
 </li>
-<li><a href="#_steps">Steps</a></li>
+<li><a href="#_steps">Steps</a>
+<ul class="sectlevel3">
+<li><a href="#_step_0_vert_x_web_router">Step 0: Vert.x Web Router</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -1422,13 +1426,79 @@ To avoid port conflicts, don&#8217;t forget to close the server before you start
 <div class="paragraph">
 <p>A complete solution can be found in the <code>gateway</code> directory.</p>
 </div>
+<div class="sect3">
+<h4 id="_step_0_vert_x_web_router">Step 0: Vert.x Web Router</h4>
+<div class="paragraph">
+<p>The Vert.x core library, as explained above, has very low-level abstractions for HTTP servers.</p>
+</div>
+<div class="paragraph">
+<p><a href="https://vertx.io/docs/vertx-web/java/">Vert.x Web</a> is a module that builds on top of Vert.x core and provides features commonly found in a web server:
+static file serving, session management, authentication and authorization and much more.</p>
+</div>
+<div class="paragraph">
+<p>The basic Vert.x Web construct is the <em>Router</em>.
+It allows to create <em>routes</em> matching requests by path or HTTP method and delegates execution to <em>handlers</em>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="nc">Router</span> <span class="n">router</span> <span class="o">=</span> <span class="nc">Router</span><span class="o">.</span><span class="na">router</span><span class="o">(</span><span class="n">vertx</span><span class="o">);</span> // <b class="conum">(1)</b>
+
+<span class="n">router</span><span class="o">.</span><span class="na">get</span><span class="o">().</span><span class="na">handler</span><span class="o">(</span><span class="nc">StaticHandler</span><span class="o">.</span><span class="na">create</span><span class="o">());</span> // <b class="conum">(2)</b>
+
+<span class="n">router</span><span class="o">.</span><span class="na">route</span><span class="o">().</span><span class="na">failureHandler</span><span class="o">(</span><span class="nc">ErrorHandler</span><span class="o">.</span><span class="na">create</span><span class="o">());</span> // <b class="conum">(3)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>Router creation for a given Vert.x instance</p>
+</li>
+<li>
+<p>Any <code>GET</code> request should be handled by the <a href="https://vertx.io/docs/vertx-web/java/#_serving_static_resources"><code>StaticHandler</code></a> for static file serving</p>
+</li>
+<li>
+<p>If anything gets wrong for any type of request, invoke the <a href="https://vertx.io/docs/vertx-web/java/#_error_handling"><code>ErrorHandler</code></a>.</p>
+</li>
+</ol>
+</div>
+<div class="sect4">
+<h5 id="_exercise">Exercise</h5>
+<div class="paragraph">
+<p>In the IDE, open the <code>steps/step-0/src/main/java/workshop/gateway/Step0Server.java</code> file.</p>
+</div>
+<div class="paragraph">
+<p>Implement the TODOs found in the <code>createRouter</code> method.</p>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_observations">Observations</h5>
+<div class="paragraph">
+<p>Browse to <a href="http://localhost:8080" class="bare">http://localhost:8080</a>.</p>
+</div>
+<div class="paragraph">
+<p>The browser should display the MusicStore welcome page.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+The error message <em>Failed to load data&#8230;&#8203;</em> is expected as we haven&#8217;t implemented the GraphQL runtime yet.
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
 </div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2019-11-04 17:07:05 UTC
+Last updated 2019-11-04 17:51:56 UTC
 </div>
 </div>
 <style>
