@@ -489,6 +489,17 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </li>
 </ul>
 </li>
+<li><a href="#_lets_code">Let&#8217;s code!</a>
+<ul class="sectlevel2">
+<li><a href="#_building_blocks">Building blocks</a>
+<ul class="sectlevel3">
+<li><a href="#_graphql_java">GraphQL-Java</a></li>
+<li><a href="#_eclipse_vert_x">Eclipse Vert.x</a></li>
+<li><a href="#_rxjava">RxJava</a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </div>
 </div>
@@ -1198,10 +1209,159 @@ Make sure you have built the project beforehand and started the Postgres databas
 </div>
 </div>
 </div>
+<div class="sect1">
+<h2 id="_lets_code">Let&#8217;s code!</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_building_blocks">Building blocks</h3>
+<div class="sect3">
+<h4 id="_graphql_java">GraphQL-Java</h4>
+<div class="paragraph">
+<p>The <a href="https://www.graphql-java.com/">GraphQL-Java</a> library is the Java implementation of the GraphQL specification.</p>
+</div>
+<div class="paragraph">
+<p>To configure it, you must provide at least:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>a GraphQL schema, either from a definition file or built programmatically</p>
+</li>
+<li>
+<p>data fetchers functions for schema types and fields (<em>runtime wiring</em>)</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>A GraphQL-Java data fetcher must implement the <code>graphql.schema.DataFetcher</code> interface.
+In practice, it must have a <code>get</code> method that takes a <code>graphql.schema.DataFetchingEnvironment</code> argument and returns a result:</p>
+</div>
+<div class="listingblock">
+<div class="title">DataFetcher interface</div>
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">DataFetcher</span><span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span> <span class="o">{</span>
+    <span class="no">T</span> <span class="nf">get</span><span class="o">(</span><span class="nc">DataFetchingEnvironment</span> <span class="n">environment</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">Exception</span><span class="o">;</span>
+<span class="o">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The result can be a <code>CompletionStage</code> if it is provided asynchronously.</p>
+</div>
+<div class="paragraph">
+<p>The <em>environment</em> argument gives information about the current position in the graph: source type, arguments, fields to be fetched&#8230;&#8203; etc</p>
+</div>
+<div class="paragraph">
+<p>The GraphQL-Java runtime job is to execute queries and it does not provide any transport implementation.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_eclipse_vert_x">Eclipse Vert.x</h4>
+<div class="paragraph">
+<p><a href="https://vertx.io">Vert.x</a> is a toolkit to write asynchronous and reactive applications on the JVM.</p>
+</div>
+<div class="paragraph">
+<p>It implements the reactor pattern and uses <em>Netty</em> for the networking layer.
+It is similar to <em>Node.js</em> but it is capable of scaling across CPU cores instead of using a single thread.</p>
+</div>
+<div class="paragraph">
+<p>Vert.x does not mandate any programming model but the easiest way to get started is to create a <em>verticle</em>.</p>
+</div>
+<div class="paragraph">
+<p>A verticle is an entry-point class with a <em>start</em> method:</p>
+</div>
+<div class="listingblock">
+<div class="title">Vert.x verticle</div>
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">MyVerticle</span> <span class="kd">extends</span> <span class="nc">AbstractVerticle</span> <span class="o">{</span>
+
+ <span class="c1">// Called when verticle is deployed</span>
+ <span class="kd">public</span> <span class="kt">void</span> <span class="nf">start</span><span class="o">()</span> <span class="o">{</span>
+ <span class="o">}</span>
+
+ <span class="c1">// Optional - called when verticle is undeployed</span>
+ <span class="kd">public</span> <span class="kt">void</span> <span class="nf">stop</span><span class="o">()</span> <span class="o">{</span>
+ <span class="o">}</span>
+
+<span class="o">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The core library provides low-level abstractions to start HTTP servers, work with the filesystem, &#8230;&#8203;etc.</p>
+</div>
+<div class="paragraph">
+<p><a href="https://vertx.io/docs/vertx-web-graphql/java/">Vert.x Web GraphQL</a> integrates the GraphQL-Java library so that queries and results can be sent over HTTP and Websockets.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_rxjava">RxJava</h4>
+<div class="paragraph">
+<p>Quotinq the <a href="https://github.com/ReactiveX/RxJava">RxJava</a> project website:</p>
+</div>
+<div class="quoteblock">
+<blockquote>
+RxJava – Reactive Extensions for the JVM – a library for composing asynchronous and event-based programs using observable sequences for the Java VM.
+</blockquote>
+<div class="attribution">
+&#8212; RxJava project
+</div>
+</div>
+<div class="paragraph">
+<p>When working with asynchronous APIs, the code can quickly become difficult to understand if you need to execute several sequential operations.
+It&#8217;s even worse when composing results of concurrent operations.</p>
+</div>
+<div class="paragraph">
+<p>This issue is widely known as callback-hell and RxJava provides operators to deal with it.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+<code>CompletableFuture</code> / <code>CompletionStage</code> introduced in JDK 8 helps a lot with asynchronous composition.
+But RxJava comes with a broader range of operators and is also able to deal with asynchronous data flows.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s take a couple of examples:</p>
+</div>
+<div class="listingblock">
+<div class="title">Sequential composition: async Postgres query execution and transformation of row results into a Java object</div>
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="kd">public</span> <span class="nc">Single</span><span class="o">&lt;</span><span class="nc">Cart</span><span class="o">&gt;</span> <span class="nf">findCart</span><span class="o">(</span><span class="nc">String</span> <span class="n">username</span><span class="o">)</span> <span class="o">{</span>
+  <span class="k">return</span> <span class="n">pool</span><span class="o">.</span><span class="na">rxPreparedQuery</span><span class="o">(</span><span class="no">FIND_CART</span><span class="o">,</span> <span class="nc">Tuple</span><span class="o">.</span><span class="na">of</span><span class="o">(</span><span class="n">username</span><span class="o">))</span>
+    <span class="o">.</span><span class="na">flatMapObservable</span><span class="o">(</span><span class="nl">Observable:</span><span class="o">:</span><span class="n">fromIterable</span><span class="o">)</span>
+    <span class="o">.</span><span class="na">map</span><span class="o">(</span><span class="nl">CartRepository:</span><span class="o">:</span><span class="n">rowToCartItem</span><span class="o">)</span>
+    <span class="o">.</span><span class="na">collectInto</span><span class="o">(</span><span class="k">new</span> <span class="nc">Cart</span><span class="o">(),</span> <span class="nl">Cart:</span><span class="o">:</span><span class="n">add</span><span class="o">);</span>
+<span class="o">}</span></code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Concurrent composition: combining results of async web client requests into a single Java object</div>
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="nc">Single</span><span class="o">&lt;</span><span class="nc">Album</span><span class="o">&gt;</span> <span class="n">inventoryData</span> <span class="o">=</span> <span class="n">albumsRepository</span><span class="o">.</span><span class="na">findById</span><span class="o">(</span><span class="n">id</span><span class="o">,</span> <span class="kc">true</span><span class="o">);</span>
+<span class="nc">Single</span><span class="o">&lt;</span><span class="nc">RatingInfo</span><span class="o">&gt;</span> <span class="n">ratingData</span> <span class="o">=</span> <span class="n">ratingRepository</span><span class="o">.</span><span class="na">findRatingAndReviewsByAlbum</span><span class="o">(</span><span class="n">id</span><span class="o">);</span>
+<span class="k">return</span> <span class="n">inventoryData</span><span class="o">.</span><span class="na">zipWith</span><span class="o">(</span><span class="n">ratingData</span><span class="o">,</span> <span class="o">(</span><span class="n">a</span><span class="o">,</span> <span class="n">r</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="o">{</span>
+  <span class="n">a</span><span class="o">.</span><span class="na">setRating</span><span class="o">(</span><span class="n">r</span><span class="o">.</span><span class="na">getRating</span><span class="o">());</span>
+  <span class="n">a</span><span class="o">.</span><span class="na">setReviews</span><span class="o">(</span><span class="n">r</span><span class="o">.</span><span class="na">getReviews</span><span class="o">());</span>
+  <span class="k">return</span> <span class="n">a</span><span class="o">;</span>
+<span class="o">});</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>By default, Vert.x uses a callback style but it also has an <a href="https://vertx.io/docs/vertx-rx/java2/">Rxified API</a>.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2019-11-04 07:49:29 UTC
+Last updated 2019-11-04 10:09:25 UTC
 </div>
 </div>
 <style>
