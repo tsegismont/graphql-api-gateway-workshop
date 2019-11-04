@@ -507,3 +507,106 @@ If the service starts correctly, you should see a line similar to this on the co
 ----
 [2019-11-02 21:05:24] [INFO   ] Succeeded in deploying verticle
 ----
+
+== Let's code!
+
+=== Building blocks
+
+==== GraphQL-Java
+
+The https://www.graphql-java.com/[GraphQL-Java] library is the Java implementation of the GraphQL specification.
+
+To configure it, you must provide at least:
+
+* a GraphQL schema, either from a definition file or built programmatically
+* data fetchers functions for schema types and fields (_runtime wiring_)
+
+A GraphQL-Java data fetcher must implement the `graphql.schema.DataFetcher` interface.
+In practice, it must have a `get` method that takes a `graphql.schema.DataFetchingEnvironment` argument and returns a result:
+
+[source,java]
+.DataFetcher interface
+----
+public interface DataFetcher<T> {
+    T get(DataFetchingEnvironment environment) throws Exception;
+}
+----
+
+The result can be a `CompletionStage` if it is provided asynchronously.
+
+The _environment_ argument gives information about the current position in the graph: source type, arguments, fields to be fetched... etc
+
+The GraphQL-Java runtime job is to execute queries and it does not provide any transport implementation.
+
+==== Eclipse Vert.x
+
+https://vertx.io[Vert.x] is a toolkit to write asynchronous and reactive applications on the JVM.
+
+It implements the reactor pattern and uses _Netty_ for the networking layer.
+It is similar to _Node.js_ but it is capable of scaling across CPU cores instead of using a single thread.
+
+Vert.x does not mandate any programming model but the easiest way to get started is to create a _verticle_.
+
+A verticle is an entry-point class with a _start_ method:
+
+[source,java]
+.Vert.x verticle
+----
+public class MyVerticle extends AbstractVerticle {
+
+ // Called when verticle is deployed
+ public void start() {
+ }
+
+ // Optional - called when verticle is undeployed
+ public void stop() {
+ }
+
+}
+----
+
+The core library provides low-level abstractions to start HTTP servers, work with the filesystem, ...etc.
+
+https://vertx.io/docs/vertx-web-graphql/java/[Vert.x Web GraphQL] integrates the GraphQL-Java library so that queries and results can be sent over HTTP and Websockets.
+
+==== RxJava
+
+Quotinq the https://github.com/ReactiveX/RxJava[RxJava] project website:
+
+[quote, RxJava project]
+RxJava – Reactive Extensions for the JVM – a library for composing asynchronous and event-based programs using observable sequences for the Java VM.
+
+When working with asynchronous APIs, the code can quickly become difficult to understand if you need to execute several sequential operations.
+It's even worse when composing results of concurrent operations.
+
+This issue is widely known as callback-hell and RxJava provides operators to deal with it.
+
+NOTE: `CompletableFuture` / `CompletionStage` introduced in JDK 8 helps a lot with asynchronous composition.
+But RxJava comes with a broader range of operators and is also able to deal with asynchronous data flows.
+
+Let's take a couple of examples:
+
+[source,java]
+.Sequential composition: async Postgres query execution and transformation of row results into a Java object
+----
+public Single<Cart> findCart(String username) {
+  return pool.rxPreparedQuery(FIND_CART, Tuple.of(username))
+    .flatMapObservable(Observable::fromIterable)
+    .map(CartRepository::rowToCartItem)
+    .collectInto(new Cart(), Cart::add);
+}
+----
+
+[source,java]
+.Concurrent composition: combining results of async web client requests into a single Java object
+----
+Single<Album> inventoryData = albumsRepository.findById(id, true);
+Single<RatingInfo> ratingData = ratingRepository.findRatingAndReviewsByAlbum(id);
+return inventoryData.zipWith(ratingData, (a, r) -> {
+  a.setRating(r.getRating());
+  a.setReviews(r.getReviews());
+  return a;
+});
+----
+
+By default, Vert.x uses a callback style but it also has an https://vertx.io/docs/vertx-rx/java2/[Rxified API].
