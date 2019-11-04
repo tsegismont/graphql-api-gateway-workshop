@@ -688,16 +688,16 @@ NOTE: The error message _Failed to load data..._ is expected as we haven't imple
 
 Now that we have a web server, let's configure the GraphQL runtime.
 
-First we need a GraphQL schema file.
-It contains at least a root `Query` type.
-The root `Query` fields are the entry points to the graph.
+Firstly, we need a GraphQL schema file.
+
+The schema must contain at least a root `Query` type and its fields are the entry points to the graph:
 
 [source,graphql]
 ----
 type Genre {
-  id: Int!
-  name: String!
-  image: String # <3>
+  id: Int! # <3>
+  name: String! # <4>
+  image: String
 }
 
 type Query { # <1>
@@ -710,7 +710,45 @@ schema {
 ----
 <1> root query type
 <2> the `genres` field returns an array of `Genre` objects
-<3> `String` is one of the built-in scalar types
+<3> `Integer` is one of the built-in scalar types
+<4> fields are nullable unless marked by `!`
+
+Secondly, we must configure the runtime to define data fetchers.
+In GraphQL-Java this is called _runtime wiring_:
+
+[source,java]
+----
+protected RuntimeWiring runtimeWiring() {
+  return RuntimeWiring.newRuntimeWiring()
+    .type("Query", this::query) // <1>
+    .build();
+}
+
+private TypeRuntimeWiring.Builder query(TypeRuntimeWiring.Builder builder) {
+  return builder
+    .dataFetcher("genres", new GenresDataFetcher(genresRepository)) // <2>
+    ;
+}
+----
+<1> Runtime wiring configuration of the root `Query` type provided by the `query` method
+<2> Define the `GenresDataFetcher` object for the `genres` field of the `Query` type
+
+NOTE: The `workshop.gateway.WorkshopVerticle` class exposes a few repositories that implement the data access layer to the inventory service, the rating service, as well as the Postgres database.
+
+The `GenresDataFetcher` extends `workshop.gateway.RxDataFetcher`, which is an adpater for the RxJava `Single` type that GraphQL-Java does not understand:
+
+[source,java]
+----
+include::common/src/main/java/workshop/gateway/RxDataFetcher.java[]
+----
+
+Lastly, the Vert.x Web router must declare a route for `/graphql` requests and set the `GraphQLHandler`:
+
+[source,java]
+----
+GraphQL graphQL = setupGraphQLJava("musicstore.graphql");
+router.route("/graphql").handler(GraphQLHandler.create(graphQL));
+----
 
 ===== Exercise
 
@@ -733,6 +771,8 @@ Browse to http://localhost:8080.
 The browser should display the list of genres available in the _MusicStore_.
 
 Browse to http://localhost:8080/graphiql/.
+
+GraphiQL is an IDE to author GraphQL queries.
 
 In the query panel, type the following query and execute it:
 

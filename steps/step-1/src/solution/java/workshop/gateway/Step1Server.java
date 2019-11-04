@@ -19,6 +19,7 @@ public class Step1Server extends WorkshopVerticle {
 
     GraphQL graphQL = setupGraphQLJava("musicstore.graphql");
     router.route("/graphql").handler(GraphQLHandler.create(graphQL));
+
     router.get("/graphiql/*").handler(GraphiQLHandler.create());
 
     router.get().handler(StaticHandler.create());

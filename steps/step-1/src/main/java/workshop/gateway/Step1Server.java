@@ -15,11 +15,12 @@ public class Step1Server extends WorkshopVerticle {
   protected Router createRouter() {
     Router router = Router.router(vertx);
 
-    // TODO: define generic route and set the BodyHandler
+    router.route().handler(BodyHandler.create());
 
     // TODO: create GraphQL runtime with setupGraphQLJava method
     // TODO: define route for /graphql requests and set the GraphQLHandler
-    // TODO: define route for /graphiql/* requests and set the GraphiQLHandler
+
+    router.get("/graphiql/*").handler(GraphiQLHandler.create());
 
     router.get().handler(StaticHandler.create());
 
