@@ -15,9 +15,13 @@ public class AlbumRatingDataFetcher implements RxDataFetcher<Integer> {
 
   @Override
   public Single<Integer> rxGet(DataFetchingEnvironment env) throws Exception {
-    // Retrieve source Album from env
-    // If rating is set, return right away with Single#just
-    // Otherwise, find rating by album id
-    return null;
+    Album album = env.getSource();
+    Single<Integer> rating;
+    if (album.getRating()!=null) {
+      rating = Single.just(album.getRating());
+    } else {
+      rating = ratingRepository.findRatingByAlbum(album.getId());
+    }
+    return rating;
   }
 }

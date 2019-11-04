@@ -1053,3 +1053,245 @@ But if you open the inventory service console, you will see a single request for
 ----
 [2019-11-03 10:12:23] [INFO   ] GET /album/8?withTracks= 200 481 - 1 ms
 ----
+
+==== Step 4: On demand data fetching
+
+In the previous step, we made tracks, rating and reviews data available when users execute the `album` query.
+
+But what about a user who would like to get some or all of this data from another entry point in the graph?
+
+For example, if you display a list of albums of a single genre, you might want to present each album's rating on the web page.
+
+To do so, the runtime wiring must define how these `Album` fields can be fetched:
+
+[source,java]
+----
+protected RuntimeWiring runtimeWiring() {
+  return RuntimeWiring.newRuntimeWiring()
+    .type("Query", this::query)
+    .type("Album", this::album) // <1>
+    .build();
+}
+
+private TypeRuntimeWiring.Builder album(TypeRuntimeWiring.Builder builder) { // <2>
+  return builder
+    .dataFetcher("tracks", new AlbumTracksDataFetcher(tracksRepository))
+    .dataFetcher("rating", new AlbumRatingDataFetcher(ratingRepository))
+    .dataFetcher("reviews", new AlbumReviewsDataFetcher(ratingRepository))
+    ;
+}
+----
+<1> Define `Album` runtime wiring in the `album` method
+<2> Data fetchers definitions for fields that are not always present in the `Album` object
+
+Let's take a look at the data fetcher implementation:
+
+[source,java]
+----
+include::steps/step-4/src/main/java/workshop/gateway/AlbumRatingDataFetcher.java[]
+----
+
+IMPORTANT: Notice that the `rating` field is loaded only if not already present.
+Indeed, without this protection, we would send two requests to the rating service when we execute the `album` query.
+
+===== Exercise
+
+In the IDE, open the `steps/step-4/src/main/java/workshop/gateway/Step4Server.java` file.
+
+Implement the TODO found in the `runtimeWiring` method.
+
+Open the `steps/step-4/src/main/java/workshop/gateway/AlbumTracksDataFetcher.java` file.
+
+Implement the TODOs found in the `rxGet` method.
+
+===== Observations
+
+Browse to http://localhost:8080/graphiql/.
+
+In the query panel, type the following query and execute it:
+
+[source,graphql]
+----
+{
+  albums(genre: 2) {
+    name
+    tracks {
+      name
+    }
+  }
+}
+----
+
+In the results panel you should see:
+
+[source,json]
+----
+{
+  "data": {
+    "albums": [
+      {
+        "name": "Dark Side Of The Moon",
+        "tracks": [
+          {
+            "name": "Speak To Me"
+          },
+          {
+            "name": "Breathe (In The Air)"
+          },
+          {
+            "name": "On The Run"
+          },
+          {
+            "name": "Time"
+          },
+          {
+            "name": "The Great Gig In The Sky"
+          },
+          {
+            "name": "Money"
+          },
+          {
+            "name": "Us And Them"
+          },
+          {
+            "name": "Any Colour You Like"
+          },
+          {
+            "name": "Brain Damage"
+          },
+          {
+            "name": "Eclipse"
+          }
+        ]
+      },
+      {
+        "name": "Appetite For Destruction",
+        "tracks": [
+          {
+            "name": "Welcome To The Jungle"
+          },
+          {
+            "name": "It's So Easy"
+          },
+          {
+            "name": "Nightrain"
+          },
+          {
+            "name": "Out Ta Get Me"
+          },
+          {
+            "name": "Mr. Brownstone"
+          },
+          {
+            "name": "Paradise City"
+          },
+          {
+            "name": "My Michelle"
+          },
+          {
+            "name": "Think About You"
+          },
+          {
+            "name": "Sweet Child O' Mine"
+          },
+          {
+            "name": "You're Crazy"
+          },
+          {
+            "name": "Anything Goes"
+          },
+          {
+            "name": "Rocket Queen"
+          }
+        ]
+      },
+      {
+        "name": "Back In Black",
+        "tracks": [
+          {
+            "name": "Hells Bells"
+          },
+          {
+            "name": "Shoot to Thrill"
+          },
+          {
+            "name": "What Do You Do for Money Honey"
+          },
+          {
+            "name": "Givin the Dog a Bone"
+          },
+          {
+            "name": "Let Me Put My Love Into You"
+          },
+          {
+            "name": "Back In Black"
+          },
+          {
+            "name": "You Shook Me All Night Long"
+          },
+          {
+            "name": "Have a Drink on Me"
+          },
+          {
+            "name": "Shake a Leg"
+          },
+          {
+            "name": "Rock and Roll Ain't Noise Pollution"
+          }
+        ]
+      },
+      {
+        "name": "Master Of Puppets",
+        "tracks": [
+          {
+            "name": "Battery"
+          },
+          {
+            "name": "Master Of Puppets"
+          },
+          {
+            "name": "The Thing That Should Not Be"
+          },
+          {
+            "name": "Welcome Home (Sanitarium)"
+          },
+          {
+            "name": "Disposable Heroes"
+          },
+          {
+            "name": "Leper Messiah"
+          },
+          {
+            "name": "Orion"
+          },
+          {
+            "name": "Damage Inc."
+          }
+        ]
+      }
+    ]
+  }
+}
+----
+
+Then type and execute this `albumQuery`:
+
+[source,graphql]
+----
+{
+  album(id: 1) {
+    tracks {
+      number
+      name
+    }
+  }
+}
+----
+
+In the inventory service console, you should a single request logged:
+
+----
+[2019-11-03 10:12:23] [INFO   ] GET /album/1?withTracks= 200 528 - 1 ms
+----
+
+Browse to http://localhost:8080 and explore the _MusicStore_ catalog.

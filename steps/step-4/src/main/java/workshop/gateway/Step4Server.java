@@ -31,7 +31,7 @@ public class Step4Server extends WorkshopVerticle {
   protected RuntimeWiring runtimeWiring() {
     return RuntimeWiring.newRuntimeWiring()
       .type("Query", this::query)
-      // Add type wiring for type Album
+      // TODO: define Album runtime wiring in the album method
       .build();
   }
 
@@ -44,9 +44,9 @@ public class Step4Server extends WorkshopVerticle {
 
   private TypeRuntimeWiring.Builder album(TypeRuntimeWiring.Builder builder) {
     return builder
-      // Add data fetcher for the tracks field of the Album type
-      // Add data fetcher for the rating field of the Album type
-      // Add data fetcher for the reviews field of the Album type
+      .dataFetcher("tracks", new AlbumTracksDataFetcher(tracksRepository))
+      .dataFetcher("rating", new AlbumRatingDataFetcher(ratingRepository))
+      .dataFetcher("reviews", new AlbumReviewsDataFetcher(ratingRepository))
       ;
   }
 }
