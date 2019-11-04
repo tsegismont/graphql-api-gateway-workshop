@@ -19,7 +19,7 @@ public class RemoveFromCartDataFetcher implements RxDataFetcher<Cart> {
     if (currentUser==null) {
       throw new NotLoggedInException();
     }
-    Integer albumId = EnvironmentUtil.getIntegerArgument(env, "albumId");
+    Integer albumId = env.getArgument("albumId");
     return cartRepository.removeFromCart(currentUser, albumId).andThen(cartRepository.findCart(currentUser));
   }
 }

@@ -1,11 +1,11 @@
 type Genre {
-  id: ID
+  id: Int!
   name: String!
   image: String
 }
 
 type Album {
-  id: ID
+  id: Int!
   name: String!
   genre: Genre!
   artist: String!
@@ -14,7 +14,7 @@ type Album {
 
 type Query {
   genres: [Genre!]
-  albums(genre: ID): [Album!]
+  albums(genre: Int): [Album!]
 }
 
 schema {

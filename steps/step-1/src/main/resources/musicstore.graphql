@@ -1,5 +1,5 @@
 type Genre {
-  # TODO: add id field of type ID
+  # TODO: add id field of type Int!
   # TODO: add name field of type String!
   # TODO: add image field of type String
 }

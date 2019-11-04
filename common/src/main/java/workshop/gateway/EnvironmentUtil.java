@@ -11,9 +11,4 @@ public class EnvironmentUtil {
     Map<String, Object> argument = env.getArgument(name);
     return new JsonObject(argument).mapTo(inputType);
   }
-
-  public static Integer getIntegerArgument(DataFetchingEnvironment env, String name) {
-    String argument = env.getArgument(name);
-    return argument!=null ? Integer.valueOf(argument):null;
-  }
 }

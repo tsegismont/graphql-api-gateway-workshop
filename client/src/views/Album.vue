@@ -67,7 +67,7 @@
     import gql from 'graphql-tag';
 
     const findAlbum = gql`
-      query ($id: ID!) {
+      query ($id: Int!) {
         album(id: $id) {
           id
           name
@@ -91,7 +91,7 @@
     `;
 
     const addReview = gql`
-      mutation ($albumId: ID!, $review: ReviewInput!) {
+      mutation ($albumId: Int!, $review: ReviewInput!) {
         addReview(albumId: $albumId, review: $review) {
           rating
           reviews {
@@ -104,7 +104,7 @@
     `;
 
     const addToCart = gql`
-      mutation ($albumId: ID!) {
+      mutation ($albumId: Int!) {
         addToCart(albumId: $albumId) {
           items {
             quantity

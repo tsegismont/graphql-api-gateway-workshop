@@ -1,5 +1,5 @@
 type Genre {
-  id: ID
+  id: Int!
   name: String!
   image: String
 }
@@ -10,7 +10,7 @@ type Track {
 }
 
 type Album {
-  id: ID
+  id: Int!
   name: String!
   genre: Genre!
   artist: String!
@@ -28,8 +28,8 @@ type Review {
 
 type Query {
   genres: [Genre!]
-  albums(genre: ID): [Album!]
-  album(id: ID!): Album
+  albums(genre: Int): [Album!]
+  album(id: Int!): Album
   currentUser: String
 }
 
@@ -44,7 +44,7 @@ type ReviewResult {
 }
 
 type Mutation {
-  addReview(albumId: ID!, review: ReviewInput): ReviewResult
+  addReview(albumId: Int!, review: ReviewInput): ReviewResult
 }
 
 schema {

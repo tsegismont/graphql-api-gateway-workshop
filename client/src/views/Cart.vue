@@ -71,7 +71,7 @@
     `;
 
     const addToCart = gql`
-      mutation ($albumId: ID!) {
+      mutation ($albumId: Int!) {
         addToCart(albumId: $albumId) {
           items {
             album {
@@ -90,7 +90,7 @@
     `;
 
     const removeFromCart = gql`
-      mutation ($albumId: ID!) {
+      mutation ($albumId: Int!) {
         removeFromCart(albumId: $albumId) {
           items {
             album {

@@ -153,12 +153,12 @@ It allows backend developers to describe the data in a language-agnostic fashion
 .GraphQL Schema file
 ----
 type Genre {
-  id: ID
+  id: Int!
   name: String!
 }
 
 type Album {
-  id: ID
+  id: Int!
   name: String!
   genre: Genre!
   artist: String!
@@ -172,7 +172,7 @@ type Review {
 }
 
 type Query {
-  albums(genre: ID): [Album!]
+  albums(genre: Int): [Album!]
 }
 
 schema {
@@ -185,7 +185,7 @@ And then frontend developers to request exactly the information they need:
 [source,graphql]
 .GraphQL query
 ----
-query ($id: ID!) {
+query ($id: Int!) {
   album(id: $id) {
     id
     name
@@ -271,7 +271,7 @@ And the runtime will execute the corresponding data fetchers:
 [source,graphql]
 .Desktop client query
 ----
-query ($id: ID!) {
+query ($id: Int!) {
   album(id: $id) {
     id
     name
@@ -293,7 +293,7 @@ However, the smartphone client will only ask for the product info:
 [source,graphql]
 .Smartphone client query
 ----
-query ($id: ID!) {
+query ($id: Int!) {
   album(id: $id) {
     id
     name
@@ -695,7 +695,7 @@ The root `Query` fields are the entry points to the graph.
 [source,graphql]
 ----
 type Genre {
-  id: ID
+  id: Int!
   name: String!
   image: String # <3>
 }

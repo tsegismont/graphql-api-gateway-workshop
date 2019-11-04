@@ -24,7 +24,7 @@
     import gql from 'graphql-tag';
 
     const allAlbums = gql`
-      query ($genre: ID!) {
+      query ($genre: Int!) {
         albums(genre: $genre) {
           id
           name

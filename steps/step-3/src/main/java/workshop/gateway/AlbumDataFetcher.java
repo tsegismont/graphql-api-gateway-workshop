@@ -19,7 +19,7 @@ public class AlbumDataFetcher implements RxDataFetcher<Album> {
 
   @Override
   public Single<Album> rxGet(DataFetchingEnvironment env) {
-    Integer id = EnvironmentUtil.getIntegerArgument(env, "id");
+    Integer id = env.getArgument("id");
     // Find album by id
     // Find rating info by id
     // Use Single#zipWith operator for concurrent requests execution and merging results

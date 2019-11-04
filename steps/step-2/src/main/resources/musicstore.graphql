@@ -1,5 +1,5 @@
 type Genre {
-  id: ID
+  id: Int!
   name: String!
   image: String
 }

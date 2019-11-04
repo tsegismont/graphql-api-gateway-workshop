@@ -17,7 +17,7 @@ public class AlbumsDataFetcher implements RxDataFetcher<List<Album>> {
 
   @Override
   public Single<List<Album>> rxGet(DataFetchingEnvironment env) {
-    Integer genre = EnvironmentUtil.getIntegerArgument(env, "genre");
+    Integer genre = env.getArgument("genre");
     return albumsRepository.findAll(genre);
   }
 }
