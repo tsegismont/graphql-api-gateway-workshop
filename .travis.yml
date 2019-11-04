@@ -17,11 +17,11 @@ jobs:
   include:
     - stage: build
       name: "Build - OpenJDK 8"
-      script: mvn -B verify -Dvertx-maven-plugin.version=1.0.22
+      script: mvn -Dvertx-maven-plugin.version=1.0.21 -B verify
       jdk: openjdk8
     - stage: build
       name: "Build - OpenJDK 11"
-      script: mvn -B verify -Dvertx-maven-plugin.version=1.0.22
+      script: mvn -Dvertx-maven-plugin.version=1.0.21 -B verify
       jdk: openjdk11
     - stage: deploy
       name: "Deploy doc"
