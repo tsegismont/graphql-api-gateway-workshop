@@ -65,7 +65,7 @@ public class Step7Server extends WorkshopVerticle {
 
   private TypeRuntimeWiring.Builder mutation(TypeRuntimeWiring.Builder builder) {
     return builder
-      // Add data fetcher for the addReview field of the Mutation type
+      .dataFetcher("addReview", new AddReviewDataFetcher(ratingRepository))
       // Add data fetcher for the addToCart field of the Mutation type
       .dataFetcher("removeFromCart", new RemoveFromCartDataFetcher(cartRepository))
       ;
