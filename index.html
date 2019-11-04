@@ -501,6 +501,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_steps">Steps</a>
 <ul class="sectlevel3">
 <li><a href="#_step_0_vert_x_web_router">Step 0: Vert.x Web Router</a></li>
+<li><a href="#_step_1_the_graphql_java_runtime">Step 1: The GraphQL-Java runtime</a></li>
 </ul>
 </li>
 </ul>
@@ -673,12 +674,12 @@ For a desktop user, it makes sense to show:</p>
 <div class="title">GraphQL Schema file</div>
 <div class="content">
 <pre class="rouge highlight"><code data-lang="graphql"><span class="k">type</span><span class="w"> </span><span class="n">Genre</span><span class="w"> </span><span class="p">{</span><span class="w">
-  </span><span class="n">id</span><span class="p">:</span><span class="w"> </span><span class="nb">ID</span><span class="w">
+  </span><span class="n">id</span><span class="p">:</span><span class="w"> </span><span class="nb">Int</span><span class="p">!</span><span class="w">
   </span><span class="n">name</span><span class="p">:</span><span class="w"> </span><span class="nb">String</span><span class="p">!</span><span class="w">
 </span><span class="p">}</span><span class="w">
 
 </span><span class="k">type</span><span class="w"> </span><span class="n">Album</span><span class="w"> </span><span class="p">{</span><span class="w">
-  </span><span class="n">id</span><span class="p">:</span><span class="w"> </span><span class="nb">ID</span><span class="w">
+  </span><span class="n">id</span><span class="p">:</span><span class="w"> </span><span class="nb">Int</span><span class="p">!</span><span class="w">
   </span><span class="n">name</span><span class="p">:</span><span class="w"> </span><span class="nb">String</span><span class="p">!</span><span class="w">
   </span><span class="n">genre</span><span class="p">:</span><span class="w"> </span><span class="n">Genre</span><span class="p">!</span><span class="w">
   </span><span class="n">artist</span><span class="p">:</span><span class="w"> </span><span class="nb">String</span><span class="p">!</span><span class="w">
@@ -692,7 +693,7 @@ For a desktop user, it makes sense to show:</p>
 </span><span class="p">}</span><span class="w">
 
 </span><span class="k">type</span><span class="w"> </span><span class="n">Query</span><span class="w"> </span><span class="p">{</span><span class="w">
-  </span><span class="n">albums</span><span class="p">(</span><span class="n">genre</span><span class="p">:</span><span class="w"> </span><span class="nb">ID</span><span class="p">):</span><span class="w"> </span><span class="p">[</span><span class="n">Album</span><span class="p">!]</span><span class="w">
+  </span><span class="n">albums</span><span class="p">(</span><span class="n">genre</span><span class="p">:</span><span class="w"> </span><span class="nb">Int</span><span class="p">):</span><span class="w"> </span><span class="p">[</span><span class="n">Album</span><span class="p">!]</span><span class="w">
 </span><span class="p">}</span><span class="w">
 
 </span><span class="k">schema</span><span class="w"> </span><span class="p">{</span><span class="w">
@@ -706,7 +707,7 @@ For a desktop user, it makes sense to show:</p>
 <div class="listingblock">
 <div class="title">GraphQL query</div>
 <div class="content">
-<pre class="rouge highlight"><code data-lang="graphql"><span class="k">query</span><span class="w"> </span><span class="p">(</span><span class="nv">$id</span><span class="p">:</span><span class="w"> </span><span class="nb">ID</span><span class="p">!)</span><span class="w"> </span><span class="p">{</span><span class="w">
+<pre class="rouge highlight"><code data-lang="graphql"><span class="k">query</span><span class="w"> </span><span class="p">(</span><span class="nv">$id</span><span class="p">:</span><span class="w"> </span><span class="nb">Int</span><span class="p">!)</span><span class="w"> </span><span class="p">{</span><span class="w">
   </span><span class="n">album</span><span class="p">(</span><span class="n">id</span><span class="p">:</span><span class="w"> </span><span class="nv">$id</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
     </span><span class="n">id</span><span class="w">
     </span><span class="n">name</span><span class="w">
@@ -812,7 +813,7 @@ And the runtime will execute the corresponding data fetchers:</p>
 <div class="listingblock">
 <div class="title">Desktop client query</div>
 <div class="content">
-<pre class="rouge highlight"><code data-lang="graphql"><span class="k">query</span><span class="w"> </span><span class="p">(</span><span class="nv">$id</span><span class="p">:</span><span class="w"> </span><span class="nb">ID</span><span class="p">!)</span><span class="w"> </span><span class="p">{</span><span class="w">
+<pre class="rouge highlight"><code data-lang="graphql"><span class="k">query</span><span class="w"> </span><span class="p">(</span><span class="nv">$id</span><span class="p">:</span><span class="w"> </span><span class="nb">Int</span><span class="p">!)</span><span class="w"> </span><span class="p">{</span><span class="w">
   </span><span class="n">album</span><span class="p">(</span><span class="n">id</span><span class="p">:</span><span class="w"> </span><span class="nv">$id</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
     </span><span class="n">id</span><span class="w">
     </span><span class="n">name</span><span class="w">
@@ -835,7 +836,7 @@ And the runtime will execute the corresponding data fetchers:</p>
 <div class="listingblock">
 <div class="title">Smartphone client query</div>
 <div class="content">
-<pre class="rouge highlight"><code data-lang="graphql"><span class="k">query</span><span class="w"> </span><span class="p">(</span><span class="nv">$id</span><span class="p">:</span><span class="w"> </span><span class="nb">ID</span><span class="p">!)</span><span class="w"> </span><span class="p">{</span><span class="w">
+<pre class="rouge highlight"><code data-lang="graphql"><span class="k">query</span><span class="w"> </span><span class="p">(</span><span class="nv">$id</span><span class="p">:</span><span class="w"> </span><span class="nb">Int</span><span class="p">!)</span><span class="w"> </span><span class="p">{</span><span class="w">
   </span><span class="n">album</span><span class="p">(</span><span class="n">id</span><span class="p">:</span><span class="w"> </span><span class="nv">$id</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
     </span><span class="n">id</span><span class="w">
     </span><span class="n">name</span><span class="w">
@@ -901,7 +902,7 @@ When logged-in, you may add albums to your cart, manage your cart items or post 
 <div class="content">
 <img src="musicstore-app.svg" alt="musicstore app" width="696" height="171">
 </div>
-<div class="title">Figure 6. The MusicStore application</div>
+<div class="title">Figure 6. The <em>MusicStore</em> application</div>
 </div>
 <div class="paragraph">
 <p>You will build the API Gateway for this microservices-based application.</p>
@@ -1476,7 +1477,7 @@ It allows to create <em>routes</em> matching requests by path or HTTP method and
 <p>Browse to <a href="http://localhost:8080" class="bare">http://localhost:8080</a>.</p>
 </div>
 <div class="paragraph">
-<p>The browser should display the MusicStore welcome page.</p>
+<p>The browser should display the <em>MusicStore</em> welcome page.</p>
 </div>
 <div class="admonitionblock note">
 <table>
@@ -1492,13 +1493,222 @@ The error message <em>Failed to load data&#8230;&#8203;</em> is expected as we h
 </div>
 </div>
 </div>
+<div class="sect3">
+<h4 id="_step_1_the_graphql_java_runtime">Step 1: The GraphQL-Java runtime</h4>
+<div class="paragraph">
+<p>Now that we have a web server, let&#8217;s configure the GraphQL runtime.</p>
+</div>
+<div class="paragraph">
+<p>Firstly, we need a GraphQL schema file.</p>
+</div>
+<div class="paragraph">
+<p>The schema must contain at least a root <code>Query</code> type and its fields are the entry points to the graph:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="graphql"><span class="k">type</span><span class="w"> </span><span class="n">Genre</span><span class="w"> </span><span class="p">{</span><span class="w">
+  </span><span class="n">id</span><span class="p">:</span><span class="w"> </span><span class="nb">Int</span><span class="p">!</span><span class="w"> # <b class="conum">(3)</b>
+  </span><span class="n">name</span><span class="p">:</span><span class="w"> </span><span class="nb">String</span><span class="p">!</span><span class="w"> # <b class="conum">(4)</b>
+  </span><span class="n">image</span><span class="p">:</span><span class="w"> </span><span class="nb">String</span><span class="w">
+</span><span class="p">}</span><span class="w">
+
+</span><span class="k">type</span><span class="w"> </span><span class="n">Query</span><span class="w"> </span><span class="p">{</span><span class="w"> # <b class="conum">(1)</b>
+  </span><span class="n">genres</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="n">Genre</span><span class="p">!]</span><span class="w"> # <b class="conum">(2)</b>
+</span><span class="p">}</span><span class="w">
+
+</span><span class="k">schema</span><span class="w"> </span><span class="p">{</span><span class="w">
+  </span><span class="n">query</span><span class="p">:</span><span class="w"> </span><span class="n">Query</span><span class="w">
+</span><span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>root query type</p>
+</li>
+<li>
+<p>the <code>genres</code> field returns an array of <code>Genre</code> objects</p>
+</li>
+<li>
+<p><code>Integer</code> is one of the built-in scalar types</p>
+</li>
+<li>
+<p>fields are nullable unless marked by <code>!</code></p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>Secondly, we must configure the runtime to define data fetchers.
+In GraphQL-Java this is called <em>runtime wiring</em>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="kd">protected</span> <span class="nc">RuntimeWiring</span> <span class="nf">runtimeWiring</span><span class="o">()</span> <span class="o">{</span>
+  <span class="k">return</span> <span class="nc">RuntimeWiring</span><span class="o">.</span><span class="na">newRuntimeWiring</span><span class="o">()</span>
+    <span class="o">.</span><span class="na">type</span><span class="o">(</span><span class="s">"Query"</span><span class="o">,</span> <span class="k">this</span><span class="o">::</span><span class="n">query</span><span class="o">)</span> // <b class="conum">(1)</b>
+    <span class="o">.</span><span class="na">build</span><span class="o">();</span>
+<span class="o">}</span>
+
+<span class="kd">private</span> <span class="nc">TypeRuntimeWiring</span><span class="o">.</span><span class="na">Builder</span> <span class="nf">query</span><span class="o">(</span><span class="nc">TypeRuntimeWiring</span><span class="o">.</span><span class="na">Builder</span> <span class="n">builder</span><span class="o">)</span> <span class="o">{</span>
+  <span class="k">return</span> <span class="n">builder</span>
+    <span class="o">.</span><span class="na">dataFetcher</span><span class="o">(</span><span class="s">"genres"</span><span class="o">,</span> <span class="k">new</span> <span class="nc">GenresDataFetcher</span><span class="o">(</span><span class="n">genresRepository</span><span class="o">))</span> // <b class="conum">(2)</b>
+    <span class="o">;</span>
+<span class="o">}</span></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>Runtime wiring configuration of the root <code>Query</code> type provided by the <code>query</code> method</p>
+</li>
+<li>
+<p>Define the <code>GenresDataFetcher</code> object for the <code>genres</code> field of the <code>Query</code> type</p>
+</li>
+</ol>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+The <code>workshop.gateway.WorkshopVerticle</code> class exposes a few repositories that implement the data access layer to the inventory service, the rating service, as well as the Postgres database.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>The <code>GenresDataFetcher</code> extends <code>workshop.gateway.RxDataFetcher</code>, which is an adpater for the RxJava <code>Single</code> type that GraphQL-Java does not understand:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="kn">package</span> <span class="n">workshop</span><span class="o">.</span><span class="na">gateway</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">graphql.schema.DataFetcher</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">graphql.schema.DataFetchingEnvironment</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">hu.akarnokd.rxjava2.interop.SingleInterop</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">io.reactivex.Single</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.util.concurrent.CompletionStage</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">interface</span> <span class="nc">RxDataFetcher</span><span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span> <span class="kd">extends</span> <span class="nc">DataFetcher</span><span class="o">&lt;</span><span class="nc">CompletionStage</span><span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;&gt;</span> <span class="o">{</span>
+
+  <span class="nd">@Override</span>
+  <span class="k">default</span> <span class="nc">CompletionStage</span><span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span> <span class="nf">get</span><span class="o">(</span><span class="nc">DataFetchingEnvironment</span> <span class="n">environment</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">Exception</span> <span class="o">{</span>
+    <span class="nc">Single</span><span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span> <span class="n">single</span> <span class="o">=</span> <span class="n">rxGet</span><span class="o">(</span><span class="n">environment</span><span class="o">);</span>
+    <span class="k">return</span> <span class="n">single</span><span class="o">==</span><span class="kc">null</span> <span class="o">?</span> <span class="kc">null</span><span class="o">:</span><span class="n">single</span><span class="o">.</span><span class="na">to</span><span class="o">(</span><span class="nc">SingleInterop</span><span class="o">.</span><span class="na">get</span><span class="o">());</span>
+  <span class="o">}</span>
+
+  <span class="nc">Single</span><span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span> <span class="nf">rxGet</span><span class="o">(</span><span class="nc">DataFetchingEnvironment</span> <span class="n">env</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">Exception</span><span class="o">;</span>
+<span class="o">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Lastly, the Vert.x Web router must declare a route for <code>/graphql</code> requests and set the <code>GraphQLHandler</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="nc">GraphQL</span> <span class="n">graphQL</span> <span class="o">=</span> <span class="n">setupGraphQLJava</span><span class="o">(</span><span class="s">"musicstore.graphql"</span><span class="o">);</span>
+<span class="n">router</span><span class="o">.</span><span class="na">route</span><span class="o">(</span><span class="s">"/graphql"</span><span class="o">).</span><span class="na">handler</span><span class="o">(</span><span class="nc">GraphQLHandler</span><span class="o">.</span><span class="na">create</span><span class="o">(</span><span class="n">graphQL</span><span class="o">));</span></code></pre>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_exercise_2">Exercise</h5>
+<div class="paragraph">
+<p>In the IDE, open the <code>steps/step-1/src/main/resources/musicstore.graphql</code> file.</p>
+</div>
+<div class="paragraph">
+<p>Implement the TODOs found in the <code>Genre</code> and <code>Query</code> types.</p>
+</div>
+<div class="paragraph">
+<p>Open the <code>steps/step-1/src/main/java/workshop/gateway/Step1Server.java</code> file.</p>
+</div>
+<div class="paragraph">
+<p>Implement the TODOs found in the <code>createRouter</code> and <code>query</code> methods.</p>
+</div>
+<div class="paragraph">
+<p>Open the <code>steps/step-1/src/main/java/workshop/gateway/GenresDataFetcher.java</code> file.</p>
+</div>
+<div class="paragraph">
+<p>Implement the TODOs found in the <code>rxGet</code> method.</p>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_observations_2">Observations</h5>
+<div class="paragraph">
+<p>Browse to <a href="http://localhost:8080" class="bare">http://localhost:8080</a>.</p>
+</div>
+<div class="paragraph">
+<p>The browser should display the list of genres available in the <em>MusicStore</em>.</p>
+</div>
+<div class="paragraph">
+<p>Browse to <a href="http://localhost:8080/graphiql/" class="bare">http://localhost:8080/graphiql/</a>.</p>
+</div>
+<div class="paragraph">
+<p>GraphiQL is an IDE to author GraphQL queries.</p>
+</div>
+<div class="paragraph">
+<p>In the query panel, type the following query and execute it:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="graphql"><span class="k">query</span><span class="w"> </span><span class="p">{</span><span class="w">
+  </span><span class="n">genres</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="n">id</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In the results panel you should see:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="json"><span class="p">{</span><span class="w">
+  </span><span class="nl">"data"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"genres"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+      </span><span class="p">{</span><span class="w">
+        </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"1"</span><span class="w">
+      </span><span class="p">},</span><span class="w">
+      </span><span class="p">{</span><span class="w">
+        </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2"</span><span class="w">
+      </span><span class="p">},</span><span class="w">
+      </span><span class="p">{</span><span class="w">
+        </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"3"</span><span class="w">
+      </span><span class="p">}</span><span class="w">
+    </span><span class="p">]</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Modify the query to fetch other fields (<code>name</code> or <code>image</code>).
+The result should have exactly the information you required, no more no less.</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+In the top right corner of the web page, click the <code>Docks</code> link.
+GraphiQL will open the schema explorer.
+This can be useful when working with a schema that you do not own.
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
 </div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2019-11-04 17:51:56 UTC
+Last updated 2019-11-04 22:21:14 UTC
 </div>
 </div>
 <style>
