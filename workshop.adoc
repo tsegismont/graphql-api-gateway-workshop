@@ -408,6 +408,9 @@ If you don’t have an IDE, follow these instructions to get started with Eclips
 
 ==== Postgres database
 
+IMPORTANT: The Postgres database is only required to complete the last step or to run the full solution.
+If you cannot get it to work on your machine, you can still complete all the other steps.
+
 If you have Docker running on your machine, you can start the Postgres database in a container:
 
 [source,shell]
