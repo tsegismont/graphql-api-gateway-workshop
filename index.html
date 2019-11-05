@@ -505,6 +505,8 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_step_2_fields_with_arguments">Step 2: Fields with arguments</a></li>
 <li><a href="#_step_3_fetching_data_efficiently">Step 3: Fetching data efficiently</a></li>
 <li><a href="#_step_4_on_demand_data_fetching">Step 4: On demand data fetching</a></li>
+<li><a href="#_step_5_authentication">Step 5: Authentication</a></li>
+<li><a href="#_step_6_mutations">Step 6: Mutations</a></li>
 </ul>
 </li>
 </ul>
@@ -1586,25 +1588,7 @@ The <code>workshop.gateway.WorkshopVerticle</code> class exposes a few repositor
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="java"><span class="kn">package</span> <span class="n">workshop</span><span class="o">.</span><span class="na">gateway</span><span class="o">;</span>
-
-<span class="kn">import</span> <span class="nn">graphql.schema.DataFetcher</span><span class="o">;</span>
-<span class="kn">import</span> <span class="nn">graphql.schema.DataFetchingEnvironment</span><span class="o">;</span>
-<span class="kn">import</span> <span class="nn">hu.akarnokd.rxjava2.interop.SingleInterop</span><span class="o">;</span>
-<span class="kn">import</span> <span class="nn">io.reactivex.Single</span><span class="o">;</span>
-
-<span class="kn">import</span> <span class="nn">java.util.concurrent.CompletionStage</span><span class="o">;</span>
-
-<span class="kd">public</span> <span class="kd">interface</span> <span class="nc">RxDataFetcher</span><span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span> <span class="kd">extends</span> <span class="nc">DataFetcher</span><span class="o">&lt;</span><span class="nc">CompletionStage</span><span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;&gt;</span> <span class="o">{</span>
-
-  <span class="nd">@Override</span>
-  <span class="k">default</span> <span class="nc">CompletionStage</span><span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span> <span class="nf">get</span><span class="o">(</span><span class="nc">DataFetchingEnvironment</span> <span class="n">environment</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">Exception</span> <span class="o">{</span>
-    <span class="nc">Single</span><span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span> <span class="n">single</span> <span class="o">=</span> <span class="n">rxGet</span><span class="o">(</span><span class="n">environment</span><span class="o">);</span>
-    <span class="k">return</span> <span class="n">single</span><span class="o">==</span><span class="kc">null</span> <span class="o">?</span> <span class="kc">null</span><span class="o">:</span><span class="n">single</span><span class="o">.</span><span class="na">to</span><span class="o">(</span><span class="nc">SingleInterop</span><span class="o">.</span><span class="na">get</span><span class="o">());</span>
-  <span class="o">}</span>
-
-  <span class="nc">Single</span><span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span> <span class="nf">rxGet</span><span class="o">(</span><span class="nc">DataFetchingEnvironment</span> <span class="n">env</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">Exception</span><span class="o">;</span>
-<span class="o">}</span></code></pre>
+<pre class="rouge highlight"><code data-lang="java"><span class="nc">Unresolved</span> <span class="n">directive</span> <span class="n">in</span> <span class="n">workshop</span><span class="o">.</span><span class="na">adoc</span> <span class="o">-</span> <span class="nl">include:</span><span class="o">:</span><span class="n">common</span><span class="o">/</span><span class="n">src</span><span class="o">/</span><span class="n">main</span><span class="o">/</span><span class="n">java</span><span class="o">/</span><span class="n">workshop</span><span class="o">/</span><span class="n">gateway</span><span class="o">/</span><span class="nc">RxDataFetcher</span><span class="o">.</span><span class="na">java</span><span class="o">[]</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1843,43 +1827,7 @@ Now in the results panel you should see:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="graphql"><span class="k">type</span><span class="w"> </span><span class="n">Genre</span><span class="w"> </span><span class="p">{</span><span class="w">
-  </span><span class="n">id</span><span class="p">:</span><span class="w"> </span><span class="nb">Int</span><span class="p">!</span><span class="w">
-  </span><span class="n">name</span><span class="p">:</span><span class="w"> </span><span class="nb">String</span><span class="p">!</span><span class="w">
-  </span><span class="n">image</span><span class="p">:</span><span class="w"> </span><span class="nb">String</span><span class="w">
-</span><span class="p">}</span><span class="w">
-
-</span><span class="k">type</span><span class="w"> </span><span class="n">Track</span><span class="w"> </span><span class="p">{</span><span class="w">
-  </span><span class="n">number</span><span class="p">:</span><span class="w"> </span><span class="nb">Int</span><span class="p">!</span><span class="w">
-  </span><span class="n">name</span><span class="p">:</span><span class="w"> </span><span class="nb">String</span><span class="p">!</span><span class="w">
-</span><span class="p">}</span><span class="w">
-
-</span><span class="k">type</span><span class="w"> </span><span class="n">Album</span><span class="w"> </span><span class="p">{</span><span class="w">
-  </span><span class="n">id</span><span class="p">:</span><span class="w"> </span><span class="nb">Int</span><span class="p">!</span><span class="w">
-  </span><span class="n">name</span><span class="p">:</span><span class="w"> </span><span class="nb">String</span><span class="p">!</span><span class="w">
-  </span><span class="n">genre</span><span class="p">:</span><span class="w"> </span><span class="n">Genre</span><span class="p">!</span><span class="w">
-  </span><span class="n">artist</span><span class="p">:</span><span class="w"> </span><span class="nb">String</span><span class="p">!</span><span class="w">
-  </span><span class="n">image</span><span class="p">:</span><span class="w"> </span><span class="nb">String</span><span class="w">
-  </span><span class="n">tracks</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="n">Track</span><span class="p">!]!</span><span class="w">
-  </span><span class="n">rating</span><span class="p">:</span><span class="w"> </span><span class="nb">Int</span><span class="w">
-  </span><span class="n">reviews</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="n">Review</span><span class="p">!]</span><span class="w">
-</span><span class="p">}</span><span class="w">
-
-</span><span class="k">type</span><span class="w"> </span><span class="n">Review</span><span class="w"> </span><span class="p">{</span><span class="w">
-  </span><span class="n">name</span><span class="p">:</span><span class="w"> </span><span class="nb">String</span><span class="p">!</span><span class="w">
-  </span><span class="n">rating</span><span class="p">:</span><span class="w"> </span><span class="nb">Int</span><span class="p">!</span><span class="w">
-  </span><span class="n">comment</span><span class="p">:</span><span class="w"> </span><span class="nb">String</span><span class="w">
-</span><span class="p">}</span><span class="w">
-
-</span><span class="k">type</span><span class="w"> </span><span class="n">Query</span><span class="w"> </span><span class="p">{</span><span class="w">
-  </span><span class="n">genres</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="n">Genre</span><span class="p">!]</span><span class="w">
-  </span><span class="n">albums</span><span class="p">(</span><span class="n">genre</span><span class="p">:</span><span class="w"> </span><span class="nb">Int</span><span class="p">):</span><span class="w"> </span><span class="p">[</span><span class="n">Album</span><span class="p">!]</span><span class="w">
-  </span><span class="n">album</span><span class="p">(</span><span class="n">id</span><span class="p">:</span><span class="w"> </span><span class="nb">Int</span><span class="p">!):</span><span class="w"> </span><span class="n">Album</span><span class="w">
-</span><span class="p">}</span><span class="w">
-
-</span><span class="k">schema</span><span class="w"> </span><span class="p">{</span><span class="w">
-  </span><span class="n">query</span><span class="p">:</span><span class="w"> </span><span class="n">Query</span><span class="w">
-</span><span class="p">}</span></code></pre>
+<pre class="rouge highlight"><code data-lang="graphql"><span class="err">Unresolved</span><span class="w"> </span><span class="err">directive</span><span class="w"> </span><span class="err">in</span><span class="w"> </span><span class="err">workshop.adoc</span><span class="w"> </span><span class="err">-</span><span class="w"> </span><span class="err">include::steps/step-3/src/main/resources/musicstore.graphql[]</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1887,50 +1835,7 @@ Now in the results panel you should see:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="java"><span class="kn">package</span> <span class="n">workshop</span><span class="o">.</span><span class="na">gateway</span><span class="o">;</span>
-
-<span class="kn">import</span> <span class="nn">graphql.GraphQL</span><span class="o">;</span>
-<span class="kn">import</span> <span class="nn">graphql.schema.idl.RuntimeWiring</span><span class="o">;</span>
-<span class="kn">import</span> <span class="nn">graphql.schema.idl.TypeRuntimeWiring</span><span class="o">;</span>
-<span class="kn">import</span> <span class="nn">io.vertx.reactivex.ext.web.Router</span><span class="o">;</span>
-<span class="kn">import</span> <span class="nn">io.vertx.reactivex.ext.web.handler.BodyHandler</span><span class="o">;</span>
-<span class="kn">import</span> <span class="nn">io.vertx.reactivex.ext.web.handler.ErrorHandler</span><span class="o">;</span>
-<span class="kn">import</span> <span class="nn">io.vertx.reactivex.ext.web.handler.StaticHandler</span><span class="o">;</span>
-<span class="kn">import</span> <span class="nn">io.vertx.reactivex.ext.web.handler.graphql.GraphQLHandler</span><span class="o">;</span>
-<span class="kn">import</span> <span class="nn">io.vertx.reactivex.ext.web.handler.graphql.GraphiQLHandler</span><span class="o">;</span>
-
-<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Step3Server</span> <span class="kd">extends</span> <span class="nc">WorkshopVerticle</span> <span class="o">{</span>
-
-  <span class="kd">protected</span> <span class="nc">Router</span> <span class="nf">createRouter</span><span class="o">()</span> <span class="o">{</span>
-    <span class="nc">Router</span> <span class="n">router</span> <span class="o">=</span> <span class="nc">Router</span><span class="o">.</span><span class="na">router</span><span class="o">(</span><span class="n">vertx</span><span class="o">);</span>
-
-    <span class="n">router</span><span class="o">.</span><span class="na">route</span><span class="o">().</span><span class="na">handler</span><span class="o">(</span><span class="nc">BodyHandler</span><span class="o">.</span><span class="na">create</span><span class="o">());</span>
-
-    <span class="nc">GraphQL</span> <span class="n">graphQL</span> <span class="o">=</span> <span class="n">setupGraphQLJava</span><span class="o">(</span><span class="s">"musicstore.graphql"</span><span class="o">);</span>
-    <span class="n">router</span><span class="o">.</span><span class="na">route</span><span class="o">(</span><span class="s">"/graphql"</span><span class="o">).</span><span class="na">handler</span><span class="o">(</span><span class="nc">GraphQLHandler</span><span class="o">.</span><span class="na">create</span><span class="o">(</span><span class="n">graphQL</span><span class="o">));</span>
-    <span class="n">router</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="s">"/graphiql/*"</span><span class="o">).</span><span class="na">handler</span><span class="o">(</span><span class="nc">GraphiQLHandler</span><span class="o">.</span><span class="na">create</span><span class="o">());</span>
-
-    <span class="n">router</span><span class="o">.</span><span class="na">get</span><span class="o">().</span><span class="na">handler</span><span class="o">(</span><span class="nc">StaticHandler</span><span class="o">.</span><span class="na">create</span><span class="o">());</span>
-
-    <span class="n">router</span><span class="o">.</span><span class="na">route</span><span class="o">().</span><span class="na">failureHandler</span><span class="o">(</span><span class="nc">ErrorHandler</span><span class="o">.</span><span class="na">create</span><span class="o">());</span>
-
-    <span class="k">return</span> <span class="n">router</span><span class="o">;</span>
-  <span class="o">}</span>
-
-  <span class="kd">protected</span> <span class="nc">RuntimeWiring</span> <span class="nf">runtimeWiring</span><span class="o">()</span> <span class="o">{</span>
-    <span class="k">return</span> <span class="nc">RuntimeWiring</span><span class="o">.</span><span class="na">newRuntimeWiring</span><span class="o">()</span>
-      <span class="o">.</span><span class="na">type</span><span class="o">(</span><span class="s">"Query"</span><span class="o">,</span> <span class="k">this</span><span class="o">::</span><span class="n">query</span><span class="o">)</span>
-      <span class="o">.</span><span class="na">build</span><span class="o">();</span>
-  <span class="o">}</span>
-
-  <span class="kd">private</span> <span class="nc">TypeRuntimeWiring</span><span class="o">.</span><span class="na">Builder</span> <span class="nf">query</span><span class="o">(</span><span class="nc">TypeRuntimeWiring</span><span class="o">.</span><span class="na">Builder</span> <span class="n">builder</span><span class="o">)</span> <span class="o">{</span>
-    <span class="k">return</span> <span class="n">builder</span>
-      <span class="o">.</span><span class="na">dataFetcher</span><span class="o">(</span><span class="s">"genres"</span><span class="o">,</span> <span class="k">new</span> <span class="nc">GenresDataFetcher</span><span class="o">(</span><span class="n">genresRepository</span><span class="o">))</span>
-      <span class="o">.</span><span class="na">dataFetcher</span><span class="o">(</span><span class="s">"albums"</span><span class="o">,</span> <span class="k">new</span> <span class="nc">AlbumsDataFetcher</span><span class="o">(</span><span class="n">albumsRepository</span><span class="o">))</span>
-      <span class="o">.</span><span class="na">dataFetcher</span><span class="o">(</span><span class="s">"album"</span><span class="o">,</span> <span class="k">new</span> <span class="nc">AlbumDataFetcher</span><span class="o">(</span><span class="n">albumsRepository</span><span class="o">,</span> <span class="n">ratingRepository</span><span class="o">))</span>
-      <span class="o">;</span>
-  <span class="o">}</span>
-<span class="o">}</span></code></pre>
+<pre class="rouge highlight"><code data-lang="java"><span class="nc">Unresolved</span> <span class="n">directive</span> <span class="n">in</span> <span class="n">workshop</span><span class="o">.</span><span class="na">adoc</span> <span class="o">-</span> <span class="nl">include:</span><span class="o">:</span><span class="n">steps</span><span class="o">/</span><span class="n">step</span><span class="o">-</span><span class="mi">3</span><span class="o">/</span><span class="n">src</span><span class="o">/</span><span class="n">main</span><span class="o">/</span><span class="n">java</span><span class="o">/</span><span class="n">workshop</span><span class="o">/</span><span class="n">gateway</span><span class="o">/</span><span class="nc">Step3Server</span><span class="o">.</span><span class="na">java</span><span class="o">[]</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -2127,33 +2032,7 @@ But if you open the inventory service console, you will see a single request for
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="java"><span class="kn">package</span> <span class="n">workshop</span><span class="o">.</span><span class="na">gateway</span><span class="o">;</span>
-
-<span class="kn">import</span> <span class="nn">graphql.schema.DataFetchingEnvironment</span><span class="o">;</span>
-<span class="kn">import</span> <span class="nn">io.reactivex.Single</span><span class="o">;</span>
-<span class="kn">import</span> <span class="nn">workshop.model.Album</span><span class="o">;</span>
-<span class="kn">import</span> <span class="nn">workshop.repository.RatingRepository</span><span class="o">;</span>
-
-<span class="kd">public</span> <span class="kd">class</span> <span class="nc">AlbumRatingDataFetcher</span> <span class="kd">implements</span> <span class="nc">RxDataFetcher</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;</span> <span class="o">{</span>
-
-  <span class="kd">private</span> <span class="kd">final</span> <span class="nc">RatingRepository</span> <span class="n">ratingRepository</span><span class="o">;</span>
-
-  <span class="kd">public</span> <span class="nf">AlbumRatingDataFetcher</span><span class="o">(</span><span class="nc">RatingRepository</span> <span class="n">ratingRepository</span><span class="o">)</span> <span class="o">{</span>
-    <span class="k">this</span><span class="o">.</span><span class="na">ratingRepository</span> <span class="o">=</span> <span class="n">ratingRepository</span><span class="o">;</span>
-  <span class="o">}</span>
-
-  <span class="nd">@Override</span>
-  <span class="kd">public</span> <span class="nc">Single</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;</span> <span class="nf">rxGet</span><span class="o">(</span><span class="nc">DataFetchingEnvironment</span> <span class="n">env</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">Exception</span> <span class="o">{</span>
-    <span class="nc">Album</span> <span class="n">album</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="na">getSource</span><span class="o">();</span>
-    <span class="nc">Single</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;</span> <span class="n">rating</span><span class="o">;</span>
-    <span class="k">if</span> <span class="o">(</span><span class="n">album</span><span class="o">.</span><span class="na">getRating</span><span class="o">()!=</span><span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
-      <span class="n">rating</span> <span class="o">=</span> <span class="nc">Single</span><span class="o">.</span><span class="na">just</span><span class="o">(</span><span class="n">album</span><span class="o">.</span><span class="na">getRating</span><span class="o">());</span>
-    <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
-      <span class="n">rating</span> <span class="o">=</span> <span class="n">ratingRepository</span><span class="o">.</span><span class="na">findRatingByAlbum</span><span class="o">(</span><span class="n">album</span><span class="o">.</span><span class="na">getId</span><span class="o">());</span>
-    <span class="o">}</span>
-    <span class="k">return</span> <span class="n">rating</span><span class="o">;</span>
-  <span class="o">}</span>
-<span class="o">}</span></code></pre>
+<pre class="rouge highlight"><code data-lang="java"><span class="nc">Unresolved</span> <span class="n">directive</span> <span class="n">in</span> <span class="n">workshop</span><span class="o">.</span><span class="na">adoc</span> <span class="o">-</span> <span class="nl">include:</span><span class="o">:</span><span class="n">steps</span><span class="o">/</span><span class="n">step</span><span class="o">-</span><span class="mi">4</span><span class="o">/</span><span class="n">src</span><span class="o">/</span><span class="n">main</span><span class="o">/</span><span class="n">java</span><span class="o">/</span><span class="n">workshop</span><span class="o">/</span><span class="n">gateway</span><span class="o">/</span><span class="nc">AlbumRatingDataFetcher</span><span class="o">.</span><span class="na">java</span><span class="o">[]</span></code></pre>
 </div>
 </div>
 <div class="admonitionblock important">
@@ -2385,13 +2264,296 @@ Indeed, without this protection, we would send two requests to the rating servic
 </div>
 </div>
 </div>
+<div class="sect3">
+<h4 id="_step_5_authentication">Step 5: Authentication</h4>
+<div class="paragraph">
+<p>It is good if an online store lets you browse its product catalog.
+But isn&#8217;t it better if customers can buy items and write reviews?</p>
+</div>
+<div class="paragraph">
+<p>Before doing so, a critical piece is missing on the API Gateway: authentication.</p>
+</div>
+<div class="paragraph">
+<p>In the real-world, authentication for microservices-based applications is often delegated to a separated component.</p>
+</div>
+<div class="paragraph">
+<p>But here we will simply focus on how:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>security can be added to the Vert.x Web server</p>
+</li>
+<li>
+<p>user info can be retrieved from data fetchers</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>Vert.x Web provides security handlers that can be added to the router to implement different authentication mechanisms.</p>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s say we want to authenticate users with a form, storing credentials in an <a href="https://httpd.apache.org/docs/current/en/programs/htpasswd.html"><code>htpassword</code></a> file.
+When authenticating, the server should store user info in the web session.
+If the user logs out, the session data must be destroyed eagerly instead of waiting for session timeout.</p>
+</div>
+<div class="paragraph">
+<p>First, an auth provider must be created:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="nc">HtpasswdAuthOptions</span> <span class="n">authOptions</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">HtpasswdAuthOptions</span><span class="o">()</span>
+  <span class="o">.</span><span class="na">setHtpasswdFile</span><span class="o">(</span><span class="s">"passwordfile"</span><span class="o">)</span>
+  <span class="o">.</span><span class="na">setPlainTextEnabled</span><span class="o">(</span><span class="kc">true</span><span class="o">);</span>
+<span class="nc">HtpasswdAuth</span> <span class="n">authProvider</span> <span class="o">=</span> <span class="nc">HtpasswdAuth</span><span class="o">.</span><span class="na">create</span><span class="o">(</span><span class="n">vertx</span><span class="o">,</span> <span class="n">authOptions</span><span class="o">);</span></code></pre>
+</div>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Warning</div>
+</td>
+<td class="content">
+Do not enable plaintext <code>htpassword</code> files in production!
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Then a session handler added to the router:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="nc">SessionHandler</span> <span class="n">sessionHandler</span> <span class="o">=</span> <span class="nc">SessionHandler</span><span class="o">.</span><span class="na">create</span><span class="o">(</span><span class="nc">LocalSessionStore</span><span class="o">.</span><span class="na">create</span><span class="o">(</span><span class="n">vertx</span><span class="o">)).</span><span class="na">setAuthProvider</span><span class="o">(</span><span class="n">authProvider</span><span class="o">);</span>
+<span class="n">router</span><span class="o">.</span><span class="na">route</span><span class="o">().</span><span class="na">handler</span><span class="o">(</span><span class="n">sessionHandler</span><span class="o">);</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The session handler will inspect all incoming requests to determine if a session cookie is present and add user info the the <code>RoutingContext</code>.</p>
+</div>
+<div class="paragraph">
+<p>HTTP <code>POST</code> requests to the <code>/login.html</code> path shall be handled by a form login handler:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="nc">FormLoginHandler</span> <span class="n">formLoginHandler</span> <span class="o">=</span> <span class="nc">FormLoginHandler</span><span class="o">.</span><span class="na">create</span><span class="o">(</span><span class="n">authProvider</span><span class="o">).</span><span class="na">setDirectLoggedInOKURL</span><span class="o">(</span><span class="s">"/"</span><span class="o">);</span>
+<span class="n">router</span><span class="o">.</span><span class="na">post</span><span class="o">(</span><span class="s">"/login.html"</span><span class="o">).</span><span class="na">handler</span><span class="o">(</span><span class="n">formLoginHandler</span><span class="o">);</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Lastly, HTTP <code>GET</code> requests to the <code>/logout</code> path should trigger session data removal:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="n">router</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="s">"/logout"</span><span class="o">).</span><span class="na">handler</span><span class="o">(</span><span class="n">rc</span> <span class="o">-&gt;</span> <span class="o">{</span>
+  <span class="n">rc</span><span class="o">.</span><span class="na">clearUser</span><span class="o">();</span>
+  <span class="n">rc</span><span class="o">.</span><span class="na">session</span><span class="o">().</span><span class="na">destroy</span><span class="o">();</span>
+  <span class="n">rc</span><span class="o">.</span><span class="na">response</span><span class="o">().</span><span class="na">setStatusCode</span><span class="o">(</span><span class="mi">307</span><span class="o">).</span><span class="na">putHeader</span><span class="o">(</span><span class="nc">HttpHeaders</span><span class="o">.</span><span class="na">LOCATION</span><span class="o">,</span> <span class="s">"/"</span><span class="o">).</span><span class="na">end</span><span class="o">();</span>
+<span class="o">});</span></code></pre>
+</div>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="paragraph">
+<p>This is the first time we implement a Vert.x Web handler.</p>
+</div>
+<div class="paragraph">
+<p>In a nutshell, a Vert.x Web handler is an operation that takes a single <code>RoutingContext</code> argument and interact with the HTTP server request and response.</p>
+</div>
+<div class="paragraph">
+<p>A handler can terminate the routing process by replying to the response or hand-over to the next handler by calling <code>RoutingContext#next()</code>.</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Authentication is now set up, but what about retrieving user info in data fetchers?</p>
+</div>
+<div class="paragraph">
+<p>The <code>DataFetchingEnvironment</code> provides a context object.
+Since the GraphQL runtime is independent of any transport, the content of this object depends on the GraphQL-Java integration.</p>
+</div>
+<div class="paragraph">
+<p>Vert.x Web GraphQL, by default, puts the <code>RoutingContext</code> instance in the GraphQL context.
+Consequently it allows you to retrieve the user info:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="nc">RoutingContext</span> <span class="n">routingContext</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="na">getContext</span><span class="o">();</span>
+<span class="nc">User</span> <span class="n">user</span> <span class="o">=</span> <span class="n">routingContext</span><span class="o">.</span><span class="na">user</span><span class="o">();</span>
+<span class="k">return</span> <span class="n">user</span><span class="o">!=</span><span class="kc">null</span> <span class="o">?</span> <span class="n">user</span><span class="o">.</span><span class="na">principal</span><span class="o">().</span><span class="na">getString</span><span class="o">(</span><span class="s">"username"</span><span class="o">):</span><span class="kc">null</span><span class="o">;</span></code></pre>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_exercise_6">Exercise</h5>
+<div class="paragraph">
+<p>In the IDE, open the <code>steps/step-5/src/main/java/workshop/gateway/Step5Server.java</code> file.</p>
+</div>
+<div class="paragraph">
+<p>Implement the TODOs found in the <code>createRouter</code> method.</p>
+</div>
+<div class="paragraph">
+<p>Open the <code>steps/step-5/src/main/java/workshop/gateway/UserUtil.java</code> file.</p>
+</div>
+<div class="paragraph">
+<p>Implement the TODOs found in the <code>currentUser</code> method.</p>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_observations_6">Observations</h5>
+<div class="paragraph">
+<p>Browse to <a href="http://localhost:8080" class="bare">http://localhost:8080</a> and click on the login menu button located at the top right.</p>
+</div>
+<div class="paragraph">
+<p>You can either connect with username <code>vladimir</code> or <code>thomas</code>.
+The password is the username.</p>
+</div>
+<div class="paragraph">
+<p>Browse to <a href="http://localhost:8080/album/9" class="bare">http://localhost:8080/album/9</a>.</p>
+</div>
+<div class="paragraph">
+<p>The <em>Add to cart</em> button should now be visibile as well as the review input section at the bottom of the page.</p>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_step_6_mutations">Step 6: Mutations</h4>
+<div class="paragraph">
+<p>We have seen that a GraphQL schema must contain at least a root <code>Query</code>.</p>
+</div>
+<div class="paragraph">
+<p>Another entry point to the graph is the <code>Mutation</code> type.</p>
+</div>
+<div class="paragraph">
+<p>Mutations, in the schema file, look like their queries counterpart, except that:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>the different semantic is a signal for ther server runtime and client implementations that backend data is going to change</p>
+</li>
+<li>
+<p>they can take an <code>Input</code> argument</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Here is how the schema is changed to support customer reviews:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="graphql"><span class="w">
+</span><span class="k">input</span><span class="w"> </span><span class="n">ReviewInput</span><span class="w"> </span><span class="p">{</span><span class="w">
+  </span><span class="n">rating</span><span class="p">:</span><span class="w"> </span><span class="nb">Int</span><span class="p">!</span><span class="w">
+  </span><span class="n">comment</span><span class="p">:</span><span class="w"> </span><span class="nb">String</span><span class="w">
+</span><span class="p">}</span><span class="w">
+
+</span><span class="k">type</span><span class="w"> </span><span class="n">ReviewResult</span><span class="w"> </span><span class="p">{</span><span class="w">
+  </span><span class="n">rating</span><span class="p">:</span><span class="w"> </span><span class="nb">Int</span><span class="p">!</span><span class="w">
+  </span><span class="n">reviews</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="n">Review</span><span class="p">!]!</span><span class="w">
+</span><span class="p">}</span><span class="w">
+
+</span><span class="k">type</span><span class="w"> </span><span class="n">Mutation</span><span class="w"> </span><span class="p">{</span><span class="w">
+  </span><span class="n">addReview</span><span class="p">(</span><span class="n">albumId</span><span class="p">:</span><span class="w"> </span><span class="nb">Int</span><span class="p">!,</span><span class="w"> </span><span class="n">review</span><span class="p">:</span><span class="w"> </span><span class="n">ReviewInput</span><span class="p">):</span><span class="w"> </span><span class="n">ReviewResult</span><span class="w">
+</span><span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>On the server-side, GraphQL-Java executes queries and mutations differently:
+while it does not invoke data fetchers for query fields in any particular order, those of mutations are, as per the specification, always invoked <strong>serially</strong> and <strong>in the order defined by the schema</strong>.</p>
+</div>
+<div class="paragraph">
+<p>Otherwise mutation data fetchers are configured exactly in the same way:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="kd">protected</span> <span class="nc">RuntimeWiring</span> <span class="nf">runtimeWiring</span><span class="o">()</span> <span class="o">{</span>
+  <span class="k">return</span> <span class="nc">RuntimeWiring</span><span class="o">.</span><span class="na">newRuntimeWiring</span><span class="o">()</span>
+    <span class="o">.</span><span class="na">type</span><span class="o">(</span><span class="s">"Query"</span><span class="o">,</span> <span class="k">this</span><span class="o">::</span><span class="n">query</span><span class="o">)</span>
+    <span class="o">.</span><span class="na">type</span><span class="o">(</span><span class="s">"Mutation"</span><span class="o">,</span> <span class="k">this</span><span class="o">::</span><span class="n">mutation</span><span class="o">)</span>
+    <span class="o">.</span><span class="na">type</span><span class="o">(</span><span class="s">"Album"</span><span class="o">,</span> <span class="k">this</span><span class="o">::</span><span class="n">album</span><span class="o">)</span>
+    <span class="o">.</span><span class="na">build</span><span class="o">();</span>
+<span class="o">}</span>
+
+<span class="kd">private</span> <span class="nc">TypeRuntimeWiring</span><span class="o">.</span><span class="na">Builder</span> <span class="nf">mutation</span><span class="o">(</span><span class="nc">TypeRuntimeWiring</span><span class="o">.</span><span class="na">Builder</span> <span class="n">builder</span><span class="o">)</span> <span class="o">{</span>
+  <span class="k">return</span> <span class="n">builder</span>
+    <span class="o">.</span><span class="na">dataFetcher</span><span class="o">(</span><span class="s">"addReview"</span><span class="o">,</span> <span class="k">new</span> <span class="nc">AddReviewDataFetcher</span><span class="o">(</span><span class="n">ratingRepository</span><span class="o">))</span>
+    <span class="o">;</span>
+<span class="o">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In the data fetcher implementation, the input argument is retrieved from the <code>DataFetchingEnvironment</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="nc">String</span> <span class="n">currentUser</span> <span class="o">=</span> <span class="nc">UserUtil</span><span class="o">.</span><span class="na">currentUser</span><span class="o">(</span><span class="n">env</span><span class="o">);</span>
+<span class="k">if</span> <span class="o">(</span><span class="n">currentUser</span><span class="o">==</span><span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+  <span class="k">throw</span> <span class="k">new</span> <span class="nf">NotLoggedInException</span><span class="o">();</span>
+<span class="o">}</span>
+<span class="nc">Integer</span> <span class="n">albumId</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="na">getArgument</span><span class="o">(</span><span class="s">"albumId"</span><span class="o">);</span>
+<span class="nc">ReviewInput</span> <span class="n">reviewInput</span> <span class="o">=</span> <span class="nc">EnvironmentUtil</span><span class="o">.</span><span class="na">getInputArgument</span><span class="o">(</span><span class="n">env</span><span class="o">,</span> <span class="s">"review"</span><span class="o">,</span> <span class="nc">ReviewInput</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+<span class="n">reviewInput</span><span class="o">.</span><span class="na">setName</span><span class="o">(</span><span class="n">currentUser</span><span class="o">);</span>
+<span class="k">return</span> <span class="n">ratingRepository</span><span class="o">.</span><span class="na">addReview</span><span class="o">(</span><span class="n">albumId</span><span class="o">,</span> <span class="n">reviewInput</span><span class="o">);</span></code></pre>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_exercise_7">Exercise</h5>
+<div class="paragraph">
+<p>In the IDE, open the <code>steps/step-6/src/main/resources/musicstore.graphql</code> file.</p>
+</div>
+<div class="paragraph">
+<p>Implement the TODOs found in the <code>ReviewInput</code> input type.</p>
+</div>
+<div class="paragraph">
+<p>Open the <code>steps/step-6/src/main/java/workshop/gateway/AddReviewDataFetcher.java</code> file.</p>
+</div>
+<div class="paragraph">
+<p>Implement the TODOs found in the <code>rxGet</code> method.</p>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_observations_7">Observations</h5>
+<div class="paragraph">
+<p>Browse to <a href="http://localhost:8080" class="bare">http://localhost:8080</a> and click on the login menu button located at the top right.</p>
+</div>
+<div class="paragraph">
+<p>You can either connect with username <code>vladimir</code> or <code>thomas</code>.
+The password is the username.</p>
+</div>
+<div class="paragraph">
+<p>Select an album and scroll down to the bottom of the page.
+Add a review.</p>
+</div>
+<div class="paragraph">
+<p>You should see the review result added below the form.</p>
+</div>
+<div class="paragraph">
+<p>Then scroll up to the top and the average rating should have been updated.</p>
+</div>
+<div class="paragraph">
+<p>Browse back to the genre page of this album.</p>
+</div>
+<div class="paragraph">
+<p>The average rating of the album should be present.</p>
+</div>
+<div class="paragraph">
+<p>Note that, when displaying the genre page, the rating service console shows that the API Gateway sent a request only for the average rating, not for the reviews:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>[2019-11-05 10:58:22] [INFO   ] GET /album/12/rating 200 11 - 1 ms</pre>
+</div>
+</div>
+</div>
+</div>
 </div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2019-11-05 00:02:03 UTC
+Last updated 2019-11-05 10:02:54 UTC
 </div>
 </div>
 <style>
