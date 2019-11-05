@@ -25,12 +25,12 @@ public class Step5Server extends WorkshopVerticle {
     HtpasswdAuth authProvider = HtpasswdAuth.create(vertx, authOptions);
 
     SessionHandler sessionHandler = SessionHandler.create(LocalSessionStore.create(vertx)).setAuthProvider(authProvider);
-    // Add catch-all route and set sessionHandler
+    // TODO: add generic route and set sessionHandler
     FormLoginHandler formLoginHandler = FormLoginHandler.create(authProvider).setDirectLoggedInOKURL("/");
-    // Add post route to /login.html and set FormLoginHandler
+    // TODO: add post route to /login.html and set formLoginHandler
     router.get("/logout").handler(rc -> {
-      // Clear user from RoutingContext
-      // Get session and destroy it
+      // TODO: clear user from RoutingContext
+      // TODO: get session and destroy it
       rc.response().setStatusCode(307).putHeader(HttpHeaders.LOCATION, "/").end();
     });
 

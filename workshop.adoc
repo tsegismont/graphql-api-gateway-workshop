@@ -1295,3 +1295,109 @@ In the inventory service console, you should a single request logged:
 ----
 
 Browse to http://localhost:8080 and explore the _MusicStore_ catalog.
+
+==== Step 5: Authentication
+
+It is good if an online store lets you browse its product catalog.
+But isn't it better if customers can buy items and write reviews?
+
+Before doing so, a critical piece is missing on the API Gateway: authentication.
+
+In the real-world, authentication for microservices-based applications is often delegated to a separated component.
+
+But here we will simply focus on how:
+
+. security can be added to the Vert.x Web server
+. user info can be retrieved from data fetchers
+
+Vert.x Web provides security handlers that can be added to the router to implement different authentication mechanisms.
+
+Let's say we want to authenticate users with a form, storing credentials in an https://httpd.apache.org/docs/current/en/programs/htpasswd.html[`htpassword`] file.
+When authenticating, the server should store user info in the web session.
+If the user logs out, the session data must be destroyed eagerly instead of waiting for session timeout.
+
+First, an auth provider must be created:
+
+[source,java]
+----
+HtpasswdAuthOptions authOptions = new HtpasswdAuthOptions()
+  .setHtpasswdFile("passwordfile")
+  .setPlainTextEnabled(true);
+HtpasswdAuth authProvider = HtpasswdAuth.create(vertx, authOptions);
+----
+
+WARNING: Do not enable plaintext `htpassword` files in production!
+
+Then a session handler added to the router:
+
+[source,java]
+----
+SessionHandler sessionHandler = SessionHandler.create(LocalSessionStore.create(vertx)).setAuthProvider(authProvider);
+router.route().handler(sessionHandler);
+----
+
+The session handler will inspect all incoming requests to determine if a session cookie is present and add user info the the `RoutingContext`.
+
+HTTP `POST` requests to the `/login.html` path shall be handled by a form login handler:
+
+[source,java]
+----
+FormLoginHandler formLoginHandler = FormLoginHandler.create(authProvider).setDirectLoggedInOKURL("/");
+router.post("/login.html").handler(formLoginHandler);
+----
+
+Lastly, HTTP `GET` requests to the `/logout` path should trigger session data removal:
+
+[source,java]
+----
+router.get("/logout").handler(rc -> {
+  rc.clearUser();
+  rc.session().destroy();
+  rc.response().setStatusCode(307).putHeader(HttpHeaders.LOCATION, "/").end();
+});
+----
+
+[NOTICE]
+====
+This is the first time we implement a Vert.x Web handler.
+
+In a nutshell, a Vert.x Web handler is an operation that takes a single `RoutingContext` argument and interact with the HTTP server request and response.
+
+A handler can terminate the routing process by replying to the response or hand-over to the next handler by calling `RoutingContext#next()`.
+====
+
+Authentication is now set up, but what about retrieving user info in data fetchers?
+
+The `DataFetchingEnvironment` provides a context object.
+Since the GraphQL runtime is independent of any transport, the content of this object depends on the GraphQL-Java integration.
+
+Vert.x Web GraphQL, by default, puts the `RoutingContext` instance in the GraphQL context.
+Consequently it allows you to retrieve the user info:
+
+[source,java]
+----
+RoutingContext routingContext = env.getContext();
+User user = routingContext.user();
+return user!=null ? user.principal().getString("username"):null;
+----
+
+===== Exercise
+
+In the IDE, open the `steps/step-5/src/main/java/workshop/gateway/Step5Server.java` file.
+
+Implement the TODOs found in the `createRouter` method.
+
+Open the `steps/step-5/src/main/java/workshop/gateway/UserUtil.java` file.
+
+Implement the TODOs found in the `currentUser` method.
+
+===== Observations
+
+Browse to http://localhost:8080 and click on the login menu button located at the top right.
+
+You can either connect with username `vladimir` or `thomas`.
+The password is the username.
+
+Browse to http://localhost:8080/album/9.
+
+The _Add to cart_ button should now be visibile as well as the review input section at the bottom of the page.

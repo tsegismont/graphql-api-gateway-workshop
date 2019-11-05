@@ -7,9 +7,9 @@ import io.vertx.ext.web.RoutingContext;
 public class UserUtil {
 
   public static String currentUser(DataFetchingEnvironment env) {
-    // Get RoutingContext from env#getContext
-    // Retrieve user from RoutingContext
-    // If user is not null, return username attribute from principal
+    // TODO: get RoutingContext from env#getContext
+    // TODO: get user from RoutingContext
+    // TODO: if user is not null, get the principal and return username, otherwise return null
     return null;
   }
 }
