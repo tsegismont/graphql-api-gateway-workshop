@@ -1588,7 +1588,25 @@ The <code>workshop.gateway.WorkshopVerticle</code> class exposes a few repositor
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="java"><span class="nc">Unresolved</span> <span class="n">directive</span> <span class="n">in</span> <span class="n">workshop</span><span class="o">.</span><span class="na">adoc</span> <span class="o">-</span> <span class="nl">include:</span><span class="o">:</span><span class="n">common</span><span class="o">/</span><span class="n">src</span><span class="o">/</span><span class="n">main</span><span class="o">/</span><span class="n">java</span><span class="o">/</span><span class="n">workshop</span><span class="o">/</span><span class="n">gateway</span><span class="o">/</span><span class="nc">RxDataFetcher</span><span class="o">.</span><span class="na">java</span><span class="o">[]</span></code></pre>
+<pre class="rouge highlight"><code data-lang="java"><span class="kn">package</span> <span class="n">workshop</span><span class="o">.</span><span class="na">gateway</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">graphql.schema.DataFetcher</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">graphql.schema.DataFetchingEnvironment</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">hu.akarnokd.rxjava2.interop.SingleInterop</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">io.reactivex.Single</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.util.concurrent.CompletionStage</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">interface</span> <span class="nc">RxDataFetcher</span><span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span> <span class="kd">extends</span> <span class="nc">DataFetcher</span><span class="o">&lt;</span><span class="nc">CompletionStage</span><span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;&gt;</span> <span class="o">{</span>
+
+  <span class="nd">@Override</span>
+  <span class="k">default</span> <span class="nc">CompletionStage</span><span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span> <span class="nf">get</span><span class="o">(</span><span class="nc">DataFetchingEnvironment</span> <span class="n">environment</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">Exception</span> <span class="o">{</span>
+    <span class="nc">Single</span><span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span> <span class="n">single</span> <span class="o">=</span> <span class="n">rxGet</span><span class="o">(</span><span class="n">environment</span><span class="o">);</span>
+    <span class="k">return</span> <span class="n">single</span><span class="o">==</span><span class="kc">null</span> <span class="o">?</span> <span class="kc">null</span><span class="o">:</span><span class="n">single</span><span class="o">.</span><span class="na">to</span><span class="o">(</span><span class="nc">SingleInterop</span><span class="o">.</span><span class="na">get</span><span class="o">());</span>
+  <span class="o">}</span>
+
+  <span class="nc">Single</span><span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span> <span class="nf">rxGet</span><span class="o">(</span><span class="nc">DataFetchingEnvironment</span> <span class="n">env</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">Exception</span><span class="o">;</span>
+<span class="o">}</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1827,7 +1845,43 @@ Now in the results panel you should see:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="graphql"><span class="err">Unresolved</span><span class="w"> </span><span class="err">directive</span><span class="w"> </span><span class="err">in</span><span class="w"> </span><span class="err">workshop.adoc</span><span class="w"> </span><span class="err">-</span><span class="w"> </span><span class="err">include::steps/step-3/src/main/resources/musicstore.graphql[]</span></code></pre>
+<pre class="rouge highlight"><code data-lang="graphql"><span class="k">type</span><span class="w"> </span><span class="n">Genre</span><span class="w"> </span><span class="p">{</span><span class="w">
+  </span><span class="n">id</span><span class="p">:</span><span class="w"> </span><span class="nb">Int</span><span class="p">!</span><span class="w">
+  </span><span class="n">name</span><span class="p">:</span><span class="w"> </span><span class="nb">String</span><span class="p">!</span><span class="w">
+  </span><span class="n">image</span><span class="p">:</span><span class="w"> </span><span class="nb">String</span><span class="w">
+</span><span class="p">}</span><span class="w">
+
+</span><span class="k">type</span><span class="w"> </span><span class="n">Track</span><span class="w"> </span><span class="p">{</span><span class="w">
+  </span><span class="n">number</span><span class="p">:</span><span class="w"> </span><span class="nb">Int</span><span class="p">!</span><span class="w">
+  </span><span class="n">name</span><span class="p">:</span><span class="w"> </span><span class="nb">String</span><span class="p">!</span><span class="w">
+</span><span class="p">}</span><span class="w">
+
+</span><span class="k">type</span><span class="w"> </span><span class="n">Album</span><span class="w"> </span><span class="p">{</span><span class="w">
+  </span><span class="n">id</span><span class="p">:</span><span class="w"> </span><span class="nb">Int</span><span class="p">!</span><span class="w">
+  </span><span class="n">name</span><span class="p">:</span><span class="w"> </span><span class="nb">String</span><span class="p">!</span><span class="w">
+  </span><span class="n">genre</span><span class="p">:</span><span class="w"> </span><span class="n">Genre</span><span class="p">!</span><span class="w">
+  </span><span class="n">artist</span><span class="p">:</span><span class="w"> </span><span class="nb">String</span><span class="p">!</span><span class="w">
+  </span><span class="n">image</span><span class="p">:</span><span class="w"> </span><span class="nb">String</span><span class="w">
+  </span><span class="n">tracks</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="n">Track</span><span class="p">!]!</span><span class="w">
+  </span><span class="n">rating</span><span class="p">:</span><span class="w"> </span><span class="nb">Int</span><span class="w">
+  </span><span class="n">reviews</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="n">Review</span><span class="p">!]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+
+</span><span class="k">type</span><span class="w"> </span><span class="n">Review</span><span class="w"> </span><span class="p">{</span><span class="w">
+  </span><span class="n">name</span><span class="p">:</span><span class="w"> </span><span class="nb">String</span><span class="p">!</span><span class="w">
+  </span><span class="n">rating</span><span class="p">:</span><span class="w"> </span><span class="nb">Int</span><span class="p">!</span><span class="w">
+  </span><span class="n">comment</span><span class="p">:</span><span class="w"> </span><span class="nb">String</span><span class="w">
+</span><span class="p">}</span><span class="w">
+
+</span><span class="k">type</span><span class="w"> </span><span class="n">Query</span><span class="w"> </span><span class="p">{</span><span class="w">
+  </span><span class="n">genres</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="n">Genre</span><span class="p">!]</span><span class="w">
+  </span><span class="n">albums</span><span class="p">(</span><span class="n">genre</span><span class="p">:</span><span class="w"> </span><span class="nb">Int</span><span class="p">):</span><span class="w"> </span><span class="p">[</span><span class="n">Album</span><span class="p">!]</span><span class="w">
+  </span><span class="n">album</span><span class="p">(</span><span class="n">id</span><span class="p">:</span><span class="w"> </span><span class="nb">Int</span><span class="p">!):</span><span class="w"> </span><span class="n">Album</span><span class="w">
+</span><span class="p">}</span><span class="w">
+
+</span><span class="k">schema</span><span class="w"> </span><span class="p">{</span><span class="w">
+  </span><span class="n">query</span><span class="p">:</span><span class="w"> </span><span class="n">Query</span><span class="w">
+</span><span class="p">}</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1835,7 +1889,50 @@ Now in the results panel you should see:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="java"><span class="nc">Unresolved</span> <span class="n">directive</span> <span class="n">in</span> <span class="n">workshop</span><span class="o">.</span><span class="na">adoc</span> <span class="o">-</span> <span class="nl">include:</span><span class="o">:</span><span class="n">steps</span><span class="o">/</span><span class="n">step</span><span class="o">-</span><span class="mi">3</span><span class="o">/</span><span class="n">src</span><span class="o">/</span><span class="n">main</span><span class="o">/</span><span class="n">java</span><span class="o">/</span><span class="n">workshop</span><span class="o">/</span><span class="n">gateway</span><span class="o">/</span><span class="nc">Step3Server</span><span class="o">.</span><span class="na">java</span><span class="o">[]</span></code></pre>
+<pre class="rouge highlight"><code data-lang="java"><span class="kn">package</span> <span class="n">workshop</span><span class="o">.</span><span class="na">gateway</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">graphql.GraphQL</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">graphql.schema.idl.RuntimeWiring</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">graphql.schema.idl.TypeRuntimeWiring</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">io.vertx.reactivex.ext.web.Router</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">io.vertx.reactivex.ext.web.handler.BodyHandler</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">io.vertx.reactivex.ext.web.handler.ErrorHandler</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">io.vertx.reactivex.ext.web.handler.StaticHandler</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">io.vertx.reactivex.ext.web.handler.graphql.GraphQLHandler</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">io.vertx.reactivex.ext.web.handler.graphql.GraphiQLHandler</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Step3Server</span> <span class="kd">extends</span> <span class="nc">WorkshopVerticle</span> <span class="o">{</span>
+
+  <span class="kd">protected</span> <span class="nc">Router</span> <span class="nf">createRouter</span><span class="o">()</span> <span class="o">{</span>
+    <span class="nc">Router</span> <span class="n">router</span> <span class="o">=</span> <span class="nc">Router</span><span class="o">.</span><span class="na">router</span><span class="o">(</span><span class="n">vertx</span><span class="o">);</span>
+
+    <span class="n">router</span><span class="o">.</span><span class="na">route</span><span class="o">().</span><span class="na">handler</span><span class="o">(</span><span class="nc">BodyHandler</span><span class="o">.</span><span class="na">create</span><span class="o">());</span>
+
+    <span class="nc">GraphQL</span> <span class="n">graphQL</span> <span class="o">=</span> <span class="n">setupGraphQLJava</span><span class="o">(</span><span class="s">"musicstore.graphql"</span><span class="o">);</span>
+    <span class="n">router</span><span class="o">.</span><span class="na">route</span><span class="o">(</span><span class="s">"/graphql"</span><span class="o">).</span><span class="na">handler</span><span class="o">(</span><span class="nc">GraphQLHandler</span><span class="o">.</span><span class="na">create</span><span class="o">(</span><span class="n">graphQL</span><span class="o">));</span>
+    <span class="n">router</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="s">"/graphiql/*"</span><span class="o">).</span><span class="na">handler</span><span class="o">(</span><span class="nc">GraphiQLHandler</span><span class="o">.</span><span class="na">create</span><span class="o">());</span>
+
+    <span class="n">router</span><span class="o">.</span><span class="na">get</span><span class="o">().</span><span class="na">handler</span><span class="o">(</span><span class="nc">StaticHandler</span><span class="o">.</span><span class="na">create</span><span class="o">());</span>
+
+    <span class="n">router</span><span class="o">.</span><span class="na">route</span><span class="o">().</span><span class="na">failureHandler</span><span class="o">(</span><span class="nc">ErrorHandler</span><span class="o">.</span><span class="na">create</span><span class="o">());</span>
+
+    <span class="k">return</span> <span class="n">router</span><span class="o">;</span>
+  <span class="o">}</span>
+
+  <span class="kd">protected</span> <span class="nc">RuntimeWiring</span> <span class="nf">runtimeWiring</span><span class="o">()</span> <span class="o">{</span>
+    <span class="k">return</span> <span class="nc">RuntimeWiring</span><span class="o">.</span><span class="na">newRuntimeWiring</span><span class="o">()</span>
+      <span class="o">.</span><span class="na">type</span><span class="o">(</span><span class="s">"Query"</span><span class="o">,</span> <span class="k">this</span><span class="o">::</span><span class="n">query</span><span class="o">)</span>
+      <span class="o">.</span><span class="na">build</span><span class="o">();</span>
+  <span class="o">}</span>
+
+  <span class="kd">private</span> <span class="nc">TypeRuntimeWiring</span><span class="o">.</span><span class="na">Builder</span> <span class="nf">query</span><span class="o">(</span><span class="nc">TypeRuntimeWiring</span><span class="o">.</span><span class="na">Builder</span> <span class="n">builder</span><span class="o">)</span> <span class="o">{</span>
+    <span class="k">return</span> <span class="n">builder</span>
+      <span class="o">.</span><span class="na">dataFetcher</span><span class="o">(</span><span class="s">"genres"</span><span class="o">,</span> <span class="k">new</span> <span class="nc">GenresDataFetcher</span><span class="o">(</span><span class="n">genresRepository</span><span class="o">))</span>
+      <span class="o">.</span><span class="na">dataFetcher</span><span class="o">(</span><span class="s">"albums"</span><span class="o">,</span> <span class="k">new</span> <span class="nc">AlbumsDataFetcher</span><span class="o">(</span><span class="n">albumsRepository</span><span class="o">))</span>
+      <span class="o">.</span><span class="na">dataFetcher</span><span class="o">(</span><span class="s">"album"</span><span class="o">,</span> <span class="k">new</span> <span class="nc">AlbumDataFetcher</span><span class="o">(</span><span class="n">albumsRepository</span><span class="o">,</span> <span class="n">ratingRepository</span><span class="o">))</span>
+      <span class="o">;</span>
+  <span class="o">}</span>
+<span class="o">}</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -2032,7 +2129,33 @@ But if you open the inventory service console, you will see a single request for
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="java"><span class="nc">Unresolved</span> <span class="n">directive</span> <span class="n">in</span> <span class="n">workshop</span><span class="o">.</span><span class="na">adoc</span> <span class="o">-</span> <span class="nl">include:</span><span class="o">:</span><span class="n">steps</span><span class="o">/</span><span class="n">step</span><span class="o">-</span><span class="mi">4</span><span class="o">/</span><span class="n">src</span><span class="o">/</span><span class="n">main</span><span class="o">/</span><span class="n">java</span><span class="o">/</span><span class="n">workshop</span><span class="o">/</span><span class="n">gateway</span><span class="o">/</span><span class="nc">AlbumRatingDataFetcher</span><span class="o">.</span><span class="na">java</span><span class="o">[]</span></code></pre>
+<pre class="rouge highlight"><code data-lang="java"><span class="kn">package</span> <span class="n">workshop</span><span class="o">.</span><span class="na">gateway</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">graphql.schema.DataFetchingEnvironment</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">io.reactivex.Single</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">workshop.model.Album</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">workshop.repository.RatingRepository</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">AlbumRatingDataFetcher</span> <span class="kd">implements</span> <span class="nc">RxDataFetcher</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;</span> <span class="o">{</span>
+
+  <span class="kd">private</span> <span class="kd">final</span> <span class="nc">RatingRepository</span> <span class="n">ratingRepository</span><span class="o">;</span>
+
+  <span class="kd">public</span> <span class="nf">AlbumRatingDataFetcher</span><span class="o">(</span><span class="nc">RatingRepository</span> <span class="n">ratingRepository</span><span class="o">)</span> <span class="o">{</span>
+    <span class="k">this</span><span class="o">.</span><span class="na">ratingRepository</span> <span class="o">=</span> <span class="n">ratingRepository</span><span class="o">;</span>
+  <span class="o">}</span>
+
+  <span class="nd">@Override</span>
+  <span class="kd">public</span> <span class="nc">Single</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;</span> <span class="nf">rxGet</span><span class="o">(</span><span class="nc">DataFetchingEnvironment</span> <span class="n">env</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">Exception</span> <span class="o">{</span>
+    <span class="nc">Album</span> <span class="n">album</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="na">getSource</span><span class="o">();</span>
+    <span class="nc">Single</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;</span> <span class="n">rating</span><span class="o">;</span>
+    <span class="k">if</span> <span class="o">(</span><span class="n">album</span><span class="o">.</span><span class="na">getRating</span><span class="o">()!=</span><span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+      <span class="n">rating</span> <span class="o">=</span> <span class="nc">Single</span><span class="o">.</span><span class="na">just</span><span class="o">(</span><span class="n">album</span><span class="o">.</span><span class="na">getRating</span><span class="o">());</span>
+    <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+      <span class="n">rating</span> <span class="o">=</span> <span class="n">ratingRepository</span><span class="o">.</span><span class="na">findRatingByAlbum</span><span class="o">(</span><span class="n">album</span><span class="o">.</span><span class="na">getId</span><span class="o">());</span>
+    <span class="o">}</span>
+    <span class="k">return</span> <span class="n">rating</span><span class="o">;</span>
+  <span class="o">}</span>
+<span class="o">}</span></code></pre>
 </div>
 </div>
 <div class="admonitionblock important">
@@ -2553,7 +2676,7 @@ Add a review.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2019-11-05 10:02:54 UTC
+Last updated 2019-11-05 10:08:40 UTC
 </div>
 </div>
 <style>
