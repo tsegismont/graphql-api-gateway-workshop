@@ -507,6 +507,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_step_4_on_demand_data_fetching">Step 4: On demand data fetching</a></li>
 <li><a href="#_step_5_authentication">Step 5: Authentication</a></li>
 <li><a href="#_step_6_mutations">Step 6: Mutations</a></li>
+<li><a href="#_step_7_on_demand_data_fetching_in_mutation_results">Step 7: On demand data fetching in mutation results</a></li>
 </ul>
 </li>
 </ul>
@@ -2670,13 +2671,146 @@ Add a review.</p>
 </div>
 </div>
 </div>
+<div class="sect3">
+<h4 id="_step_7_on_demand_data_fetching_in_mutation_results">Step 7: On demand data fetching in mutation results</h4>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Important</div>
+</td>
+<td class="content">
+You cannot complete this step if you haven&#8217;t setup the Postgres Database successfully.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>In the previous step, we added a <code>Mutation</code> type for customer reviews.
+The <code>addReview</code> mutation returned a <code>ReviewResult</code> that had all the data loaded.</p>
+</div>
+<div class="paragraph">
+<p>However, since mutation results behave the same as query results, we can also fetch data on demand.</p>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s say we modify the schema to support adding and removing items from a shopping cart:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="graphql"><span class="k">type</span><span class="w"> </span><span class="n">CartItem</span><span class="w"> </span><span class="p">{</span><span class="w">
+  </span><span class="n">album</span><span class="p">:</span><span class="w"> </span><span class="n">Album</span><span class="w">
+  </span><span class="n">quantity</span><span class="p">:</span><span class="w"> </span><span class="nb">Int</span><span class="w">
+</span><span class="p">}</span><span class="w">
+
+</span><span class="k">type</span><span class="w"> </span><span class="n">Cart</span><span class="w"> </span><span class="p">{</span><span class="w">
+  </span><span class="n">items</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="n">CartItem</span><span class="p">!]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+
+</span><span class="k">type</span><span class="w"> </span><span class="n">Mutation</span><span class="w"> </span><span class="p">{</span><span class="w">
+  </span><span class="n">addToCart</span><span class="p">(</span><span class="n">albumId</span><span class="p">:</span><span class="w"> </span><span class="nb">Int</span><span class="p">!):</span><span class="w"> </span><span class="n">Cart</span><span class="w">
+  </span><span class="n">removeFromCart</span><span class="p">(</span><span class="n">albumId</span><span class="p">:</span><span class="w"> </span><span class="nb">Int</span><span class="p">!):</span><span class="w"> </span><span class="n">Cart</span><span class="w">
+  </span><span class="n">addReview</span><span class="p">(</span><span class="n">albumId</span><span class="p">:</span><span class="w"> </span><span class="nb">Int</span><span class="p">!,</span><span class="w"> </span><span class="n">review</span><span class="p">:</span><span class="w"> </span><span class="n">ReviewInput</span><span class="p">):</span><span class="w"> </span><span class="n">ReviewResult</span><span class="w">
+</span><span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We must define a data fetcher for the <code>album</code> field of the <code>CartItem</code> type:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="kd">protected</span> <span class="nc">RuntimeWiring</span> <span class="nf">runtimeWiring</span><span class="o">()</span> <span class="o">{</span>
+  <span class="k">return</span> <span class="nc">RuntimeWiring</span><span class="o">.</span><span class="na">newRuntimeWiring</span><span class="o">()</span>
+    <span class="o">.</span><span class="na">type</span><span class="o">(</span><span class="s">"Query"</span><span class="o">,</span> <span class="k">this</span><span class="o">::</span><span class="n">query</span><span class="o">)</span>
+    <span class="o">.</span><span class="na">type</span><span class="o">(</span><span class="s">"Mutation"</span><span class="o">,</span> <span class="k">this</span><span class="o">::</span><span class="n">mutation</span><span class="o">)</span>
+    <span class="o">.</span><span class="na">type</span><span class="o">(</span><span class="s">"Album"</span><span class="o">,</span> <span class="k">this</span><span class="o">::</span><span class="n">album</span><span class="o">)</span>
+    <span class="o">.</span><span class="na">type</span><span class="o">(</span><span class="s">"CartItem"</span><span class="o">,</span> <span class="k">this</span><span class="o">::</span><span class="n">cartItem</span><span class="o">)</span>
+    <span class="o">.</span><span class="na">build</span><span class="o">();</span>
+<span class="o">}</span>
+
+
+<span class="kd">private</span> <span class="nc">TypeRuntimeWiring</span><span class="o">.</span><span class="na">Builder</span> <span class="nf">cartItem</span><span class="o">(</span><span class="nc">TypeRuntimeWiring</span><span class="o">.</span><span class="na">Builder</span> <span class="n">builder</span><span class="o">)</span> <span class="o">{</span>
+   <span class="k">return</span> <span class="n">builder</span>
+    <span class="o">.</span><span class="na">dataFetcher</span><span class="o">(</span><span class="s">"album"</span><span class="o">,</span> <span class="k">new</span> <span class="nc">CartItemAlbumDataFetcher</span><span class="o">(</span><span class="n">albumsRepository</span><span class="o">))</span>
+    <span class="o">;</span>
+<span class="o">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In the data fetcher implementation, we should return the album data from the inventory service:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="nc">CartItem</span> <span class="n">cartItem</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="na">getSource</span><span class="o">();</span>
+<span class="k">return</span> <span class="n">albumsRepository</span><span class="o">.</span><span class="na">findById</span><span class="o">(</span><span class="n">cartItem</span><span class="o">.</span><span class="na">getAlbumId</span><span class="o">(),</span> <span class="kc">false</span><span class="o">);</span></code></pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+The <code>withTracks</code> param is set to false because it is unlikely that a page dealing with the shopping cart will need the tracks list.
+It would still be available on demand though.
+</td>
+</tr>
+</table>
+</div>
+<div class="sect4">
+<h5 id="_exercise_8">Exercise</h5>
+<div class="paragraph">
+<p>In the IDE, open the <code>steps/step-7/src/main/resources/musicstore.graphql</code> file.</p>
+</div>
+<div class="paragraph">
+<p>Implement the TODO found in the <code>CartItem</code> input type.</p>
+</div>
+<div class="paragraph">
+<p>Open the <code>steps/step-7/src/main/java/workshop/gateway/Step7Server.java</code> file.</p>
+</div>
+<div class="paragraph">
+<p>Implement the TODO found in the <code>cartItem</code> method.</p>
+</div>
+<div class="paragraph">
+<p>Open the <code>steps/step-7/src/main/java/workshop/gateway/CartItemAlbumDataFetcher.java</code> file.</p>
+</div>
+<div class="paragraph">
+<p>Implement the TODOs found in the <code>rxGet</code> method.</p>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_observations_8">Observations</h5>
+<div class="paragraph">
+<p>Browse to <a href="http://localhost:8080" class="bare">http://localhost:8080</a> and click on the login menu button located at the top right.</p>
+</div>
+<div class="paragraph">
+<p>You can either connect with username <code>vladimir</code> or <code>thomas</code>.
+The password is the username.</p>
+</div>
+<div class="paragraph">
+<p>Select an album and click the <em>Add to cart</em> button.</p>
+</div>
+<div class="paragraph">
+<p>You should see a popup with the message <code>Done!</code>.</p>
+</div>
+<div class="paragraph">
+<p>On the top right of the page, the cart icon should show a badge with the number of items in the cart.</p>
+</div>
+<div class="paragraph">
+<p>Click on the cart icon.</p>
+</div>
+<div class="paragraph">
+<p>In the cart page, add or remove items.</p>
+</div>
+</div>
+</div>
 </div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2019-11-05 10:31:09 UTC
+Last updated 2019-11-05 11:01:51 UTC
 </div>
 </div>
 <style>
