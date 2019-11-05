@@ -504,6 +504,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_step_1_the_graphql_java_runtime">Step 1: The GraphQL-Java runtime</a></li>
 <li><a href="#_step_2_fields_with_arguments">Step 2: Fields with arguments</a></li>
 <li><a href="#_step_3_fetching_data_efficiently">Step 3: Fetching data efficiently</a></li>
+<li><a href="#_step_4_on_demand_data_fetching">Step 4: On demand data fetching</a></li>
 </ul>
 </li>
 </ul>
@@ -2079,13 +2080,318 @@ But if you open the inventory service console, you will see a single request for
 </div>
 </div>
 </div>
+<div class="sect3">
+<h4 id="_step_4_on_demand_data_fetching">Step 4: On demand data fetching</h4>
+<div class="paragraph">
+<p>In the previous step, we made tracks, rating and reviews data available when users execute the <code>album</code> query.</p>
+</div>
+<div class="paragraph">
+<p>But what about a user who would like to get some or all of this data from another entry point in the graph?</p>
+</div>
+<div class="paragraph">
+<p>For example, if you display a list of albums of a single genre, you might want to present each album&#8217;s rating on the web page.</p>
+</div>
+<div class="paragraph">
+<p>To do so, the runtime wiring must define how these <code>Album</code> fields can be fetched:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="kd">protected</span> <span class="nc">RuntimeWiring</span> <span class="nf">runtimeWiring</span><span class="o">()</span> <span class="o">{</span>
+  <span class="k">return</span> <span class="nc">RuntimeWiring</span><span class="o">.</span><span class="na">newRuntimeWiring</span><span class="o">()</span>
+    <span class="o">.</span><span class="na">type</span><span class="o">(</span><span class="s">"Query"</span><span class="o">,</span> <span class="k">this</span><span class="o">::</span><span class="n">query</span><span class="o">)</span>
+    <span class="o">.</span><span class="na">type</span><span class="o">(</span><span class="s">"Album"</span><span class="o">,</span> <span class="k">this</span><span class="o">::</span><span class="n">album</span><span class="o">)</span> // <b class="conum">(1)</b>
+    <span class="o">.</span><span class="na">build</span><span class="o">();</span>
+<span class="o">}</span>
+
+<span class="kd">private</span> <span class="nc">TypeRuntimeWiring</span><span class="o">.</span><span class="na">Builder</span> <span class="nf">album</span><span class="o">(</span><span class="nc">TypeRuntimeWiring</span><span class="o">.</span><span class="na">Builder</span> <span class="n">builder</span><span class="o">)</span> <span class="o">{</span> // <b class="conum">(2)</b>
+  <span class="k">return</span> <span class="n">builder</span>
+    <span class="o">.</span><span class="na">dataFetcher</span><span class="o">(</span><span class="s">"tracks"</span><span class="o">,</span> <span class="k">new</span> <span class="nc">AlbumTracksDataFetcher</span><span class="o">(</span><span class="n">tracksRepository</span><span class="o">))</span>
+    <span class="o">.</span><span class="na">dataFetcher</span><span class="o">(</span><span class="s">"rating"</span><span class="o">,</span> <span class="k">new</span> <span class="nc">AlbumRatingDataFetcher</span><span class="o">(</span><span class="n">ratingRepository</span><span class="o">))</span>
+    <span class="o">.</span><span class="na">dataFetcher</span><span class="o">(</span><span class="s">"reviews"</span><span class="o">,</span> <span class="k">new</span> <span class="nc">AlbumReviewsDataFetcher</span><span class="o">(</span><span class="n">ratingRepository</span><span class="o">))</span>
+    <span class="o">;</span>
+<span class="o">}</span></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>Define <code>Album</code> runtime wiring in the <code>album</code> method</p>
+</li>
+<li>
+<p>Data fetchers definitions for fields that are not always present in the <code>Album</code> object</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s take a look at the data fetcher implementation:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="kn">package</span> <span class="n">workshop</span><span class="o">.</span><span class="na">gateway</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">graphql.schema.DataFetchingEnvironment</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">io.reactivex.Single</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">workshop.model.Album</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">workshop.repository.RatingRepository</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">AlbumRatingDataFetcher</span> <span class="kd">implements</span> <span class="nc">RxDataFetcher</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;</span> <span class="o">{</span>
+
+  <span class="kd">private</span> <span class="kd">final</span> <span class="nc">RatingRepository</span> <span class="n">ratingRepository</span><span class="o">;</span>
+
+  <span class="kd">public</span> <span class="nf">AlbumRatingDataFetcher</span><span class="o">(</span><span class="nc">RatingRepository</span> <span class="n">ratingRepository</span><span class="o">)</span> <span class="o">{</span>
+    <span class="k">this</span><span class="o">.</span><span class="na">ratingRepository</span> <span class="o">=</span> <span class="n">ratingRepository</span><span class="o">;</span>
+  <span class="o">}</span>
+
+  <span class="nd">@Override</span>
+  <span class="kd">public</span> <span class="nc">Single</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;</span> <span class="nf">rxGet</span><span class="o">(</span><span class="nc">DataFetchingEnvironment</span> <span class="n">env</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">Exception</span> <span class="o">{</span>
+    <span class="nc">Album</span> <span class="n">album</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="na">getSource</span><span class="o">();</span>
+    <span class="nc">Single</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;</span> <span class="n">rating</span><span class="o">;</span>
+    <span class="k">if</span> <span class="o">(</span><span class="n">album</span><span class="o">.</span><span class="na">getRating</span><span class="o">()!=</span><span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+      <span class="n">rating</span> <span class="o">=</span> <span class="nc">Single</span><span class="o">.</span><span class="na">just</span><span class="o">(</span><span class="n">album</span><span class="o">.</span><span class="na">getRating</span><span class="o">());</span>
+    <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+      <span class="n">rating</span> <span class="o">=</span> <span class="n">ratingRepository</span><span class="o">.</span><span class="na">findRatingByAlbum</span><span class="o">(</span><span class="n">album</span><span class="o">.</span><span class="na">getId</span><span class="o">());</span>
+    <span class="o">}</span>
+    <span class="k">return</span> <span class="n">rating</span><span class="o">;</span>
+  <span class="o">}</span>
+<span class="o">}</span></code></pre>
+</div>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Important</div>
+</td>
+<td class="content">
+Notice that the <code>rating</code> field is loaded only if not already present.
+Indeed, without this protection, we would send two requests to the rating service when we execute the <code>album</code> query.
+</td>
+</tr>
+</table>
+</div>
+<div class="sect4">
+<h5 id="_exercise_5">Exercise</h5>
+<div class="paragraph">
+<p>In the IDE, open the <code>steps/step-4/src/main/java/workshop/gateway/Step4Server.java</code> file.</p>
+</div>
+<div class="paragraph">
+<p>Implement the TODO found in the <code>runtimeWiring</code> method.</p>
+</div>
+<div class="paragraph">
+<p>Open the <code>steps/step-4/src/main/java/workshop/gateway/AlbumTracksDataFetcher.java</code> file.</p>
+</div>
+<div class="paragraph">
+<p>Implement the TODOs found in the <code>rxGet</code> method.</p>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_observations_5">Observations</h5>
+<div class="paragraph">
+<p>Browse to <a href="http://localhost:8080/graphiql/" class="bare">http://localhost:8080/graphiql/</a>.</p>
+</div>
+<div class="paragraph">
+<p>In the query panel, type the following query and execute it:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="graphql"><span class="p">{</span><span class="w">
+  </span><span class="n">albums</span><span class="p">(</span><span class="n">genre</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="n">name</span><span class="w">
+    </span><span class="n">tracks</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="n">name</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In the results panel you should see:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="json"><span class="p">{</span><span class="w">
+  </span><span class="nl">"data"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"albums"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+      </span><span class="p">{</span><span class="w">
+        </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Dark Side Of The Moon"</span><span class="p">,</span><span class="w">
+        </span><span class="nl">"tracks"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+          </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Speak To Me"</span><span class="w">
+          </span><span class="p">},</span><span class="w">
+          </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Breathe (In The Air)"</span><span class="w">
+          </span><span class="p">},</span><span class="w">
+          </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"On The Run"</span><span class="w">
+          </span><span class="p">},</span><span class="w">
+          </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Time"</span><span class="w">
+          </span><span class="p">},</span><span class="w">
+          </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"The Great Gig In The Sky"</span><span class="w">
+          </span><span class="p">},</span><span class="w">
+          </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Money"</span><span class="w">
+          </span><span class="p">},</span><span class="w">
+          </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Us And Them"</span><span class="w">
+          </span><span class="p">},</span><span class="w">
+          </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Any Colour You Like"</span><span class="w">
+          </span><span class="p">},</span><span class="w">
+          </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Brain Damage"</span><span class="w">
+          </span><span class="p">},</span><span class="w">
+          </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Eclipse"</span><span class="w">
+          </span><span class="p">}</span><span class="w">
+        </span><span class="p">]</span><span class="w">
+      </span><span class="p">},</span><span class="w">
+      </span><span class="p">{</span><span class="w">
+        </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Appetite For Destruction"</span><span class="p">,</span><span class="w">
+        </span><span class="nl">"tracks"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+          </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Welcome To The Jungle"</span><span class="w">
+          </span><span class="p">},</span><span class="w">
+          </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"It's So Easy"</span><span class="w">
+          </span><span class="p">},</span><span class="w">
+          </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Nightrain"</span><span class="w">
+          </span><span class="p">},</span><span class="w">
+          </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Out Ta Get Me"</span><span class="w">
+          </span><span class="p">},</span><span class="w">
+          </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Mr. Brownstone"</span><span class="w">
+          </span><span class="p">},</span><span class="w">
+          </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Paradise City"</span><span class="w">
+          </span><span class="p">},</span><span class="w">
+          </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"My Michelle"</span><span class="w">
+          </span><span class="p">},</span><span class="w">
+          </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Think About You"</span><span class="w">
+          </span><span class="p">},</span><span class="w">
+          </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Sweet Child O' Mine"</span><span class="w">
+          </span><span class="p">},</span><span class="w">
+          </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"You're Crazy"</span><span class="w">
+          </span><span class="p">},</span><span class="w">
+          </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Anything Goes"</span><span class="w">
+          </span><span class="p">},</span><span class="w">
+          </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Rocket Queen"</span><span class="w">
+          </span><span class="p">}</span><span class="w">
+        </span><span class="p">]</span><span class="w">
+      </span><span class="p">},</span><span class="w">
+      </span><span class="p">{</span><span class="w">
+        </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Back In Black"</span><span class="p">,</span><span class="w">
+        </span><span class="nl">"tracks"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+          </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Hells Bells"</span><span class="w">
+          </span><span class="p">},</span><span class="w">
+          </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Shoot to Thrill"</span><span class="w">
+          </span><span class="p">},</span><span class="w">
+          </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"What Do You Do for Money Honey"</span><span class="w">
+          </span><span class="p">},</span><span class="w">
+          </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Givin the Dog a Bone"</span><span class="w">
+          </span><span class="p">},</span><span class="w">
+          </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Let Me Put My Love Into You"</span><span class="w">
+          </span><span class="p">},</span><span class="w">
+          </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Back In Black"</span><span class="w">
+          </span><span class="p">},</span><span class="w">
+          </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"You Shook Me All Night Long"</span><span class="w">
+          </span><span class="p">},</span><span class="w">
+          </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Have a Drink on Me"</span><span class="w">
+          </span><span class="p">},</span><span class="w">
+          </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Shake a Leg"</span><span class="w">
+          </span><span class="p">},</span><span class="w">
+          </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Rock and Roll Ain't Noise Pollution"</span><span class="w">
+          </span><span class="p">}</span><span class="w">
+        </span><span class="p">]</span><span class="w">
+      </span><span class="p">},</span><span class="w">
+      </span><span class="p">{</span><span class="w">
+        </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Master Of Puppets"</span><span class="p">,</span><span class="w">
+        </span><span class="nl">"tracks"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+          </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Battery"</span><span class="w">
+          </span><span class="p">},</span><span class="w">
+          </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Master Of Puppets"</span><span class="w">
+          </span><span class="p">},</span><span class="w">
+          </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"The Thing That Should Not Be"</span><span class="w">
+          </span><span class="p">},</span><span class="w">
+          </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Welcome Home (Sanitarium)"</span><span class="w">
+          </span><span class="p">},</span><span class="w">
+          </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Disposable Heroes"</span><span class="w">
+          </span><span class="p">},</span><span class="w">
+          </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Leper Messiah"</span><span class="w">
+          </span><span class="p">},</span><span class="w">
+          </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Orion"</span><span class="w">
+          </span><span class="p">},</span><span class="w">
+          </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Damage Inc."</span><span class="w">
+          </span><span class="p">}</span><span class="w">
+        </span><span class="p">]</span><span class="w">
+      </span><span class="p">}</span><span class="w">
+    </span><span class="p">]</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Then type and execute this <code>albumQuery</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="rouge highlight"><code data-lang="graphql"><span class="p">{</span><span class="w">
+  </span><span class="n">album</span><span class="p">(</span><span class="n">id</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="n">tracks</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="n">number</span><span class="w">
+      </span><span class="n">name</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In the inventory service console, you should a single request logged:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>[2019-11-03 10:12:23] [INFO   ] GET /album/1?withTracks= 200 528 - 1 ms</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Browse to <a href="http://localhost:8080" class="bare">http://localhost:8080</a> and explore the <em>MusicStore</em> catalog.</p>
+</div>
+</div>
+</div>
 </div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2019-11-04 23:30:10 UTC
+Last updated 2019-11-05 00:02:03 UTC
 </div>
 </div>
 <style>
