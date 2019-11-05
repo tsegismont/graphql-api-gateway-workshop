@@ -80,6 +80,7 @@ public class Step7Server extends WorkshopVerticle {
 
   private TypeRuntimeWiring.Builder cartItem(TypeRuntimeWiring.Builder builder) {
     return builder
-      .dataFetcher("album", new CartItemAlbumDataFetcher(albumsRepository));
+      .dataFetcher("album", new CartItemAlbumDataFetcher(albumsRepository))
+      ;
   }
 }

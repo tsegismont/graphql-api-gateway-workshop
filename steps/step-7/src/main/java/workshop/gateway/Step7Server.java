@@ -66,7 +66,7 @@ public class Step7Server extends WorkshopVerticle {
   private TypeRuntimeWiring.Builder mutation(TypeRuntimeWiring.Builder builder) {
     return builder
       .dataFetcher("addReview", new AddReviewDataFetcher(ratingRepository))
-      // Add data fetcher for the addToCart field of the Mutation type
+      .dataFetcher("addToCart", new AddToCartDataFetcher(cartRepository))
       .dataFetcher("removeFromCart", new RemoveFromCartDataFetcher(cartRepository))
       ;
   }
@@ -80,6 +80,7 @@ public class Step7Server extends WorkshopVerticle {
 
   private TypeRuntimeWiring.Builder cartItem(TypeRuntimeWiring.Builder builder) {
     return builder
-      .dataFetcher("album", new CartItemAlbumDataFetcher(albumsRepository));
+      // TODO: add data fetcher for the album field of the CartItem type
+      ;
   }
 }

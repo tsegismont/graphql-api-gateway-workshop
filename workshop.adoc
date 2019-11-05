@@ -1502,3 +1502,95 @@ Note that, when displaying the genre page, the rating service console shows that
 ----
 [2019-11-05 10:58:22] [INFO   ] GET /album/12/rating 200 11 - 1 ms
 ----
+
+==== Step 7: On demand data fetching in mutation results
+
+IMPORTANT: You cannot complete this step if you haven't setup the Postgres Database successfully.
+
+In the previous step, we added a `Mutation` type for customer reviews.
+The `addReview` mutation returned a `ReviewResult` that had all the data loaded.
+
+However, since mutation results behave the same as query results, we can also fetch data on demand.
+
+Let's say we modify the schema to support adding and removing items from a shopping cart:
+
+[source,graphql]
+----
+type CartItem {
+  album: Album
+  quantity: Int
+}
+
+type Cart {
+  items: [CartItem!]
+}
+
+type Mutation {
+  addToCart(albumId: Int!): Cart
+  removeFromCart(albumId: Int!): Cart
+  addReview(albumId: Int!, review: ReviewInput): ReviewResult
+}
+----
+
+We must define a data fetcher for the `album` field of the `CartItem` type:
+
+[source,java]
+----
+protected RuntimeWiring runtimeWiring() {
+  return RuntimeWiring.newRuntimeWiring()
+    .type("Query", this::query)
+    .type("Mutation", this::mutation)
+    .type("Album", this::album)
+    .type("CartItem", this::cartItem)
+    .build();
+}
+
+
+private TypeRuntimeWiring.Builder cartItem(TypeRuntimeWiring.Builder builder) {
+   return builder
+    .dataFetcher("album", new CartItemAlbumDataFetcher(albumsRepository))
+    ;
+}
+----
+
+In the data fetcher implementation, we should return the album data from the inventory service:
+
+[source,java]
+----
+CartItem cartItem = env.getSource();
+return albumsRepository.findById(cartItem.getAlbumId(), false);
+----
+
+NOTE: The `withTracks` param is set to false because it is unlikely that a page dealing with the shopping cart will need the tracks list.
+It would still be available on demand though.
+
+===== Exercise
+
+In the IDE, open the `steps/step-7/src/main/resources/musicstore.graphql` file.
+
+Implement the TODO found in the `CartItem` input type.
+
+Open the `steps/step-7/src/main/java/workshop/gateway/Step7Server.java` file.
+
+Implement the TODO found in the `cartItem` method.
+
+Open the `steps/step-7/src/main/java/workshop/gateway/CartItemAlbumDataFetcher.java` file.
+
+Implement the TODOs found in the `rxGet` method.
+
+===== Observations
+
+Browse to http://localhost:8080 and click on the login menu button located at the top right.
+
+You can either connect with username `vladimir` or `thomas`.
+The password is the username.
+
+Select an album and click the _Add to cart_ button.
+
+You should see a popup with the message `Done!`.
+
+On the top right of the page, the cart icon should show a badge with the number of items in the cart.
+
+Click on the cart icon.
+
+In the cart page, add or remove items.

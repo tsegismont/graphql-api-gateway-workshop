@@ -27,7 +27,7 @@ type Review {
 }
 
 type CartItem {
-  album: Album
+  # TODO add album field of type Album
   quantity: Int
 }
 

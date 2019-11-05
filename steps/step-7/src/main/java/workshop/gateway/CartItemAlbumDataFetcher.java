@@ -16,8 +16,8 @@ public class CartItemAlbumDataFetcher implements RxDataFetcher<Album> {
 
   @Override
   public Single<Album> rxGet(DataFetchingEnvironment env) throws Exception {
-    // Retrieve source CartItem from env
-    // Find corresponding *without loading tracks*
+    // TODO: retrieve source CartItem from env
+    // TODO: find corresponding album using albumsRepository#findById *without loading tracks*
     return null;
   }
 }
