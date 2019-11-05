@@ -34,12 +34,17 @@ type Query {
 }
 
 input ReviewInput {
+  # TODO: add rating field of type Int!
+  # TODO: add comment field of type String
 }
 
 type ReviewResult {
+  rating: Int!
+  reviews: [Review!]!
 }
 
 type Mutation {
+  addReview(albumId: Int!, review: ReviewInput): ReviewResult
 }
 
 schema {

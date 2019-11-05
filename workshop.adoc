@@ -1401,3 +1401,104 @@ The password is the username.
 Browse to http://localhost:8080/album/9.
 
 The _Add to cart_ button should now be visibile as well as the review input section at the bottom of the page.
+
+==== Step 6: Mutations
+
+We have seen that a GraphQL schema must contain at least a root `Query`.
+
+Another entry point to the graph is the `Mutation` type.
+
+Mutations, in the schema file, look like their queries counterpart, except that:
+
+* the different semantic is a signal for ther server runtime and client implementations that backend data is going to change
+* they can take an `Input` argument
+
+Here is how the schema is changed to support customer reviews:
+
+[source,graphql]
+----
+
+input ReviewInput {
+  rating: Int!
+  comment: String
+}
+
+type ReviewResult {
+  rating: Int!
+  reviews: [Review!]!
+}
+
+type Mutation {
+  addReview(albumId: Int!, review: ReviewInput): ReviewResult
+}
+----
+
+On the server-side, GraphQL-Java executes queries and mutations differently:
+while it does not invoke data fetchers for query fields in any particular order, those of mutations are, as per the specification, always invoked *serially* and *in the order defined by the schema*.
+
+Otherwise mutation data fetchers are configured exactly in the same way:
+
+[source,java]
+----
+protected RuntimeWiring runtimeWiring() {
+  return RuntimeWiring.newRuntimeWiring()
+    .type("Query", this::query)
+    .type("Mutation", this::mutation)
+    .type("Album", this::album)
+    .build();
+}
+
+private TypeRuntimeWiring.Builder mutation(TypeRuntimeWiring.Builder builder) {
+  return builder
+    .dataFetcher("addReview", new AddReviewDataFetcher(ratingRepository))
+    ;
+}
+----
+
+In the data fetcher implementation, the input argument is retrieved from the `DataFetchingEnvironment`:
+
+[source,java]
+----
+String currentUser = UserUtil.currentUser(env);
+if (currentUser==null) {
+  throw new NotLoggedInException();
+}
+Integer albumId = env.getArgument("albumId");
+ReviewInput reviewInput = EnvironmentUtil.getInputArgument(env, "review", ReviewInput.class);
+reviewInput.setName(currentUser);
+return ratingRepository.addReview(albumId, reviewInput);
+----
+
+===== Exercise
+
+In the IDE, open the `steps/step-6/src/main/resources/musicstore.graphql` file.
+
+Implement the TODOs found in the `ReviewInput` input type.
+
+Open the `steps/step-6/src/main/java/workshop/gateway/AddReviewDataFetcher.java` file.
+
+Implement the TODOs found in the `rxGet` method.
+
+===== Observations
+
+Browse to http://localhost:8080 and click on the login menu button located at the top right.
+
+You can either connect with username `vladimir` or `thomas`.
+The password is the username.
+
+Select an album and scroll down to the bottom of the page.
+Add a review.
+
+You should see the review result added below the form.
+
+Then scroll up to the top and the average rating should have been updated.
+
+Browse back to the genre page of this album.
+
+The average rating of the album should be present.
+
+Note that, when displaying the genre page, the rating service console shows that the API Gateway sent a request only for the average rating, not for the reviews:
+
+----
+[2019-11-05 10:58:22] [INFO   ] GET /album/12/rating 200 11 - 1 ms
+----
