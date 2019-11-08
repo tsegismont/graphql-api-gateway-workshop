@@ -1914,6 +1914,7 @@ Now in the results panel you should see:</p>
     <span class="n">router</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="s">"/graphiql/*"</span><span class="o">).</span><span class="na">handler</span><span class="o">(</span><span class="nc">GraphiQLHandler</span><span class="o">.</span><span class="na">create</span><span class="o">());</span>
 
     <span class="n">router</span><span class="o">.</span><span class="na">get</span><span class="o">().</span><span class="na">handler</span><span class="o">(</span><span class="nc">StaticHandler</span><span class="o">.</span><span class="na">create</span><span class="o">());</span>
+    <span class="n">router</span><span class="o">.</span><span class="na">get</span><span class="o">().</span><span class="na">handler</span><span class="o">(</span><span class="nl">WorkshopVerticle:</span><span class="o">:</span><span class="n">rerouteToVueIndex</span><span class="o">);</span>
 
     <span class="n">router</span><span class="o">.</span><span class="na">route</span><span class="o">().</span><span class="na">failureHandler</span><span class="o">(</span><span class="nc">ErrorHandler</span><span class="o">.</span><span class="na">create</span><span class="o">());</span>
 
@@ -2810,7 +2811,7 @@ The password is the username.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2019-11-08 12:44:53 UTC
+Last updated 2019-11-08 13:27:57 UTC
 </div>
 </div>
 <style>
