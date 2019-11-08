@@ -22,6 +22,7 @@ public class Step3Server extends WorkshopVerticle {
     router.get("/graphiql/*").handler(GraphiQLHandler.create());
 
     router.get().handler(StaticHandler.create());
+    router.get().handler(WorkshopVerticle::rerouteToVueIndex);
 
     router.route().failureHandler(ErrorHandler.create());
 

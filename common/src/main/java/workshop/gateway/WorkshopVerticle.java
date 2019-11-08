@@ -11,6 +11,7 @@ import io.vertx.ext.web.client.WebClientOptions;
 import io.vertx.pgclient.PgConnectOptions;
 import io.vertx.reactivex.core.AbstractVerticle;
 import io.vertx.reactivex.ext.web.Router;
+import io.vertx.reactivex.ext.web.RoutingContext;
 import io.vertx.reactivex.ext.web.client.WebClient;
 import io.vertx.reactivex.pgclient.PgPool;
 import io.vertx.sqlclient.PoolOptions;
@@ -65,6 +66,14 @@ public abstract class WorkshopVerticle extends AbstractVerticle {
       .ignoreElement();
 
     return dbSetup.andThen(httpSetup);
+  }
+
+  protected static void rerouteToVueIndex(RoutingContext rc) {
+    if (!"/".equals(rc.normalisedPath())) {
+      rc.reroute("/");
+    } else {
+      rc.next();
+    }
   }
 
   protected PgPool createPgPool(String database, String user, String password) {
