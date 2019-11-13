@@ -470,6 +470,13 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_rating_service">Rating Service</a></li>
 </ul>
 </li>
+<li><a href="#_building_blocks">Building blocks</a>
+<ul class="sectlevel2">
+<li><a href="#_graphql_java">GraphQL-Java</a></li>
+<li><a href="#_eclipse_vert_x">Eclipse Vert.x</a></li>
+<li><a href="#_rxjava">RxJava</a></li>
+</ul>
+</li>
 <li><a href="#_getting_started">Getting started</a>
 <ul class="sectlevel2">
 <li><a href="#_prerequisites">Prerequisites</a>
@@ -491,27 +498,57 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </li>
 <li><a href="#_lets_code">Let&#8217;s code!</a>
 <ul class="sectlevel2">
-<li><a href="#_building_blocks">Building blocks</a>
+<li><a href="#_step_0_vert_x_web_router">Step 0: Vert.x Web Router</a>
 <ul class="sectlevel3">
-<li><a href="#_graphql_java">GraphQL-Java</a></li>
-<li><a href="#_eclipse_vert_x">Eclipse Vert.x</a></li>
-<li><a href="#_rxjava">RxJava</a></li>
+<li><a href="#_exercise">Exercise</a></li>
+<li><a href="#_observations">Observations</a></li>
 </ul>
 </li>
-<li><a href="#_steps">Steps</a>
+<li><a href="#_step_1_the_graphql_java_runtime">Step 1: The GraphQL-Java runtime</a>
 <ul class="sectlevel3">
-<li><a href="#_step_0_vert_x_web_router">Step 0: Vert.x Web Router</a></li>
-<li><a href="#_step_1_the_graphql_java_runtime">Step 1: The GraphQL-Java runtime</a></li>
-<li><a href="#_step_2_fields_with_arguments">Step 2: Fields with arguments</a></li>
-<li><a href="#_step_3_fetching_data_efficiently">Step 3: Fetching data efficiently</a></li>
-<li><a href="#_step_4_on_demand_data_fetching">Step 4: On demand data fetching</a></li>
-<li><a href="#_step_5_authentication">Step 5: Authentication</a></li>
-<li><a href="#_step_6_mutations">Step 6: Mutations</a></li>
-<li><a href="#_step_7_on_demand_data_fetching_in_mutation_results">Step 7: On demand data fetching in mutation results</a></li>
+<li><a href="#_exercise_2">Exercise</a></li>
+<li><a href="#_observations_2">Observations</a></li>
+</ul>
+</li>
+<li><a href="#_step_2_fields_with_arguments">Step 2: Fields with arguments</a>
+<ul class="sectlevel3">
+<li><a href="#_exercise_3">Exercise</a></li>
+<li><a href="#_observations_3">Observations</a></li>
+</ul>
+</li>
+<li><a href="#_step_3_fetching_data_efficiently">Step 3: Fetching data efficiently</a>
+<ul class="sectlevel3">
+<li><a href="#_exercise_4">Exercise</a></li>
+<li><a href="#_observations_4">Observations</a></li>
+</ul>
+</li>
+<li><a href="#_step_4_on_demand_data_fetching">Step 4: On demand data fetching</a>
+<ul class="sectlevel3">
+<li><a href="#_exercise_5">Exercise</a></li>
+<li><a href="#_observations_5">Observations</a></li>
+</ul>
+</li>
+<li><a href="#_step_5_authentication">Step 5: Authentication</a>
+<ul class="sectlevel3">
+<li><a href="#_exercise_6">Exercise</a></li>
+<li><a href="#_observations_6">Observations</a></li>
+</ul>
+</li>
+<li><a href="#_step_6_mutations">Step 6: Mutations</a>
+<ul class="sectlevel3">
+<li><a href="#_exercise_7">Exercise</a></li>
+<li><a href="#_observations_7">Observations</a></li>
+</ul>
+</li>
+<li><a href="#_step_7_on_demand_data_fetching_in_mutation_results">Step 7: On demand data fetching in mutation results</a>
+<ul class="sectlevel3">
+<li><a href="#_exercise_8">Exercise</a></li>
+<li><a href="#_observations_8">Observations</a></li>
 </ul>
 </li>
 </ul>
 </li>
+<li><a href="#_conclusion">Conclusion</a></li>
 </ul>
 </div>
 </div>
@@ -910,9 +947,6 @@ When logged-in, you may add albums to your cart, manage your cart items or post 
 </div>
 <div class="title">Figure 6. The <em>MusicStore</em> application</div>
 </div>
-<div class="paragraph">
-<p>You will build the API Gateway for this microservices-based application.</p>
-</div>
 <div class="admonitionblock note">
 <table>
 <tr>
@@ -977,6 +1011,155 @@ It can also compute an average rating for each album.</p>
 </div>
 <div class="paragraph">
 <p>Again, for simplicity, reviews are stored only in memory.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_building_blocks">Building blocks</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>You will build the API Gateway for the <em>MusicStore</em> using the following technologies.</p>
+</div>
+<div class="sect2">
+<h3 id="_graphql_java">GraphQL-Java</h3>
+<div class="paragraph">
+<p>The <a href="https://www.graphql-java.com/">GraphQL-Java</a> library is the Java implementation of the GraphQL specification.</p>
+</div>
+<div class="paragraph">
+<p>To configure it, you must provide at least:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>a GraphQL schema, either from a definition file or built programmatically</p>
+</li>
+<li>
+<p>data fetchers functions for schema types and fields (<em>runtime wiring</em>)</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>A GraphQL-Java data fetcher must implement the <code>graphql.schema.DataFetcher</code> interface.
+In practice, it must have a <code>get</code> method that takes a <code>graphql.schema.DataFetchingEnvironment</code> argument and returns a result:</p>
+</div>
+<div class="listingblock">
+<div class="title">DataFetcher interface</div>
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">DataFetcher</span><span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span> <span class="o">{</span>
+    <span class="no">T</span> <span class="nf">get</span><span class="o">(</span><span class="nc">DataFetchingEnvironment</span> <span class="n">environment</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">Exception</span><span class="o">;</span>
+<span class="o">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The result can be a <code>CompletionStage</code> if it is provided asynchronously.</p>
+</div>
+<div class="paragraph">
+<p>The <em>environment</em> argument gives information about the current position in the graph: source type, arguments, fields to be fetched&#8230;&#8203; etc</p>
+</div>
+<div class="paragraph">
+<p>The GraphQL-Java runtime job is to execute queries and it does not provide any transport implementation.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_eclipse_vert_x">Eclipse Vert.x</h3>
+<div class="paragraph">
+<p><a href="https://vertx.io">Vert.x</a> is a toolkit to write asynchronous and reactive applications on the JVM.</p>
+</div>
+<div class="paragraph">
+<p>It implements the reactor pattern and uses <em>Netty</em> for the networking layer.
+It is similar to <em>Node.js</em> but it is capable of scaling across CPU cores instead of using a single thread.</p>
+</div>
+<div class="paragraph">
+<p>Vert.x does not mandate any programming model but the easiest way to get started is to create a <em>verticle</em>.</p>
+</div>
+<div class="paragraph">
+<p>A verticle is an entry-point class with a <em>start</em> method:</p>
+</div>
+<div class="listingblock">
+<div class="title">Vert.x verticle</div>
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">MyVerticle</span> <span class="kd">extends</span> <span class="nc">AbstractVerticle</span> <span class="o">{</span>
+
+ <span class="c1">// Called when verticle is deployed</span>
+ <span class="kd">public</span> <span class="kt">void</span> <span class="nf">start</span><span class="o">()</span> <span class="o">{</span>
+ <span class="o">}</span>
+
+ <span class="c1">// Optional - called when verticle is undeployed</span>
+ <span class="kd">public</span> <span class="kt">void</span> <span class="nf">stop</span><span class="o">()</span> <span class="o">{</span>
+ <span class="o">}</span>
+
+<span class="o">}</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The core library provides low-level abstractions to start HTTP servers, work with the filesystem, &#8230;&#8203;etc.</p>
+</div>
+<div class="paragraph">
+<p><a href="https://vertx.io/docs/vertx-web-graphql/java/">Vert.x Web GraphQL</a> integrates the GraphQL-Java library so that queries and results can be sent over HTTP and Websockets.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_rxjava">RxJava</h3>
+<div class="paragraph">
+<p>Quotinq the <a href="https://github.com/ReactiveX/RxJava">RxJava</a> project website:</p>
+</div>
+<div class="quoteblock">
+<blockquote>
+RxJava – Reactive Extensions for the JVM – a library for composing asynchronous and event-based programs using observable sequences for the Java VM.
+</blockquote>
+<div class="attribution">
+&#8212; RxJava project
+</div>
+</div>
+<div class="paragraph">
+<p>When working with asynchronous APIs, the code can quickly become difficult to understand if you need to execute several sequential operations.
+It&#8217;s even worse when composing results of concurrent operations.</p>
+</div>
+<div class="paragraph">
+<p>This issue is widely known as callback-hell and RxJava provides operators to deal with it.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+<code>CompletableFuture</code> / <code>CompletionStage</code> introduced in JDK 8 helps a lot with asynchronous composition.
+But RxJava comes with a broader range of operators and is also able to deal with asynchronous data flows.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s take a couple of examples:</p>
+</div>
+<div class="listingblock">
+<div class="title">Sequential composition: async Postgres query execution and transformation of row results into a Java object</div>
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="kd">public</span> <span class="nc">Single</span><span class="o">&lt;</span><span class="nc">Cart</span><span class="o">&gt;</span> <span class="nf">findCart</span><span class="o">(</span><span class="nc">String</span> <span class="n">username</span><span class="o">)</span> <span class="o">{</span>
+  <span class="k">return</span> <span class="n">pool</span><span class="o">.</span><span class="na">rxPreparedQuery</span><span class="o">(</span><span class="no">FIND_CART</span><span class="o">,</span> <span class="nc">Tuple</span><span class="o">.</span><span class="na">of</span><span class="o">(</span><span class="n">username</span><span class="o">))</span>
+    <span class="o">.</span><span class="na">flatMapObservable</span><span class="o">(</span><span class="nl">Observable:</span><span class="o">:</span><span class="n">fromIterable</span><span class="o">)</span>
+    <span class="o">.</span><span class="na">map</span><span class="o">(</span><span class="nl">CartRepository:</span><span class="o">:</span><span class="n">rowToCartItem</span><span class="o">)</span>
+    <span class="o">.</span><span class="na">collectInto</span><span class="o">(</span><span class="k">new</span> <span class="nc">Cart</span><span class="o">(),</span> <span class="nl">Cart:</span><span class="o">:</span><span class="n">add</span><span class="o">);</span>
+<span class="o">}</span></code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Concurrent composition: combining results of async web client requests into a single Java object</div>
+<div class="content">
+<pre class="rouge highlight"><code data-lang="java"><span class="nc">Single</span><span class="o">&lt;</span><span class="nc">Album</span><span class="o">&gt;</span> <span class="n">inventoryData</span> <span class="o">=</span> <span class="n">albumsRepository</span><span class="o">.</span><span class="na">findById</span><span class="o">(</span><span class="n">id</span><span class="o">,</span> <span class="kc">true</span><span class="o">);</span>
+<span class="nc">Single</span><span class="o">&lt;</span><span class="nc">RatingInfo</span><span class="o">&gt;</span> <span class="n">ratingData</span> <span class="o">=</span> <span class="n">ratingRepository</span><span class="o">.</span><span class="na">findRatingAndReviewsByAlbum</span><span class="o">(</span><span class="n">id</span><span class="o">);</span>
+<span class="k">return</span> <span class="n">inventoryData</span><span class="o">.</span><span class="na">zipWith</span><span class="o">(</span><span class="n">ratingData</span><span class="o">,</span> <span class="o">(</span><span class="n">a</span><span class="o">,</span> <span class="n">r</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="o">{</span>
+  <span class="n">a</span><span class="o">.</span><span class="na">setRating</span><span class="o">(</span><span class="n">r</span><span class="o">.</span><span class="na">getRating</span><span class="o">());</span>
+  <span class="n">a</span><span class="o">.</span><span class="na">setReviews</span><span class="o">(</span><span class="n">r</span><span class="o">.</span><span class="na">getReviews</span><span class="o">());</span>
+  <span class="k">return</span> <span class="n">a</span><span class="o">;</span>
+<span class="o">});</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>By default, Vert.x uses a callback style but it also has an <a href="https://vertx.io/docs/vertx-rx/java2/">Rxified API</a>.</p>
 </div>
 </div>
 </div>
@@ -1237,152 +1420,6 @@ Make sure you have built the project beforehand and started the Postgres databas
 <div class="sect1">
 <h2 id="_lets_code">Let&#8217;s code!</h2>
 <div class="sectionbody">
-<div class="sect2">
-<h3 id="_building_blocks">Building blocks</h3>
-<div class="sect3">
-<h4 id="_graphql_java">GraphQL-Java</h4>
-<div class="paragraph">
-<p>The <a href="https://www.graphql-java.com/">GraphQL-Java</a> library is the Java implementation of the GraphQL specification.</p>
-</div>
-<div class="paragraph">
-<p>To configure it, you must provide at least:</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>a GraphQL schema, either from a definition file or built programmatically</p>
-</li>
-<li>
-<p>data fetchers functions for schema types and fields (<em>runtime wiring</em>)</p>
-</li>
-</ul>
-</div>
-<div class="paragraph">
-<p>A GraphQL-Java data fetcher must implement the <code>graphql.schema.DataFetcher</code> interface.
-In practice, it must have a <code>get</code> method that takes a <code>graphql.schema.DataFetchingEnvironment</code> argument and returns a result:</p>
-</div>
-<div class="listingblock">
-<div class="title">DataFetcher interface</div>
-<div class="content">
-<pre class="rouge highlight"><code data-lang="java"><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">DataFetcher</span><span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span> <span class="o">{</span>
-    <span class="no">T</span> <span class="nf">get</span><span class="o">(</span><span class="nc">DataFetchingEnvironment</span> <span class="n">environment</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">Exception</span><span class="o">;</span>
-<span class="o">}</span></code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>The result can be a <code>CompletionStage</code> if it is provided asynchronously.</p>
-</div>
-<div class="paragraph">
-<p>The <em>environment</em> argument gives information about the current position in the graph: source type, arguments, fields to be fetched&#8230;&#8203; etc</p>
-</div>
-<div class="paragraph">
-<p>The GraphQL-Java runtime job is to execute queries and it does not provide any transport implementation.</p>
-</div>
-</div>
-<div class="sect3">
-<h4 id="_eclipse_vert_x">Eclipse Vert.x</h4>
-<div class="paragraph">
-<p><a href="https://vertx.io">Vert.x</a> is a toolkit to write asynchronous and reactive applications on the JVM.</p>
-</div>
-<div class="paragraph">
-<p>It implements the reactor pattern and uses <em>Netty</em> for the networking layer.
-It is similar to <em>Node.js</em> but it is capable of scaling across CPU cores instead of using a single thread.</p>
-</div>
-<div class="paragraph">
-<p>Vert.x does not mandate any programming model but the easiest way to get started is to create a <em>verticle</em>.</p>
-</div>
-<div class="paragraph">
-<p>A verticle is an entry-point class with a <em>start</em> method:</p>
-</div>
-<div class="listingblock">
-<div class="title">Vert.x verticle</div>
-<div class="content">
-<pre class="rouge highlight"><code data-lang="java"><span class="kd">public</span> <span class="kd">class</span> <span class="nc">MyVerticle</span> <span class="kd">extends</span> <span class="nc">AbstractVerticle</span> <span class="o">{</span>
-
- <span class="c1">// Called when verticle is deployed</span>
- <span class="kd">public</span> <span class="kt">void</span> <span class="nf">start</span><span class="o">()</span> <span class="o">{</span>
- <span class="o">}</span>
-
- <span class="c1">// Optional - called when verticle is undeployed</span>
- <span class="kd">public</span> <span class="kt">void</span> <span class="nf">stop</span><span class="o">()</span> <span class="o">{</span>
- <span class="o">}</span>
-
-<span class="o">}</span></code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>The core library provides low-level abstractions to start HTTP servers, work with the filesystem, &#8230;&#8203;etc.</p>
-</div>
-<div class="paragraph">
-<p><a href="https://vertx.io/docs/vertx-web-graphql/java/">Vert.x Web GraphQL</a> integrates the GraphQL-Java library so that queries and results can be sent over HTTP and Websockets.</p>
-</div>
-</div>
-<div class="sect3">
-<h4 id="_rxjava">RxJava</h4>
-<div class="paragraph">
-<p>Quotinq the <a href="https://github.com/ReactiveX/RxJava">RxJava</a> project website:</p>
-</div>
-<div class="quoteblock">
-<blockquote>
-RxJava – Reactive Extensions for the JVM – a library for composing asynchronous and event-based programs using observable sequences for the Java VM.
-</blockquote>
-<div class="attribution">
-&#8212; RxJava project
-</div>
-</div>
-<div class="paragraph">
-<p>When working with asynchronous APIs, the code can quickly become difficult to understand if you need to execute several sequential operations.
-It&#8217;s even worse when composing results of concurrent operations.</p>
-</div>
-<div class="paragraph">
-<p>This issue is widely known as callback-hell and RxJava provides operators to deal with it.</p>
-</div>
-<div class="admonitionblock note">
-<table>
-<tr>
-<td class="icon">
-<div class="title">Note</div>
-</td>
-<td class="content">
-<code>CompletableFuture</code> / <code>CompletionStage</code> introduced in JDK 8 helps a lot with asynchronous composition.
-But RxJava comes with a broader range of operators and is also able to deal with asynchronous data flows.
-</td>
-</tr>
-</table>
-</div>
-<div class="paragraph">
-<p>Let&#8217;s take a couple of examples:</p>
-</div>
-<div class="listingblock">
-<div class="title">Sequential composition: async Postgres query execution and transformation of row results into a Java object</div>
-<div class="content">
-<pre class="rouge highlight"><code data-lang="java"><span class="kd">public</span> <span class="nc">Single</span><span class="o">&lt;</span><span class="nc">Cart</span><span class="o">&gt;</span> <span class="nf">findCart</span><span class="o">(</span><span class="nc">String</span> <span class="n">username</span><span class="o">)</span> <span class="o">{</span>
-  <span class="k">return</span> <span class="n">pool</span><span class="o">.</span><span class="na">rxPreparedQuery</span><span class="o">(</span><span class="no">FIND_CART</span><span class="o">,</span> <span class="nc">Tuple</span><span class="o">.</span><span class="na">of</span><span class="o">(</span><span class="n">username</span><span class="o">))</span>
-    <span class="o">.</span><span class="na">flatMapObservable</span><span class="o">(</span><span class="nl">Observable:</span><span class="o">:</span><span class="n">fromIterable</span><span class="o">)</span>
-    <span class="o">.</span><span class="na">map</span><span class="o">(</span><span class="nl">CartRepository:</span><span class="o">:</span><span class="n">rowToCartItem</span><span class="o">)</span>
-    <span class="o">.</span><span class="na">collectInto</span><span class="o">(</span><span class="k">new</span> <span class="nc">Cart</span><span class="o">(),</span> <span class="nl">Cart:</span><span class="o">:</span><span class="n">add</span><span class="o">);</span>
-<span class="o">}</span></code></pre>
-</div>
-</div>
-<div class="listingblock">
-<div class="title">Concurrent composition: combining results of async web client requests into a single Java object</div>
-<div class="content">
-<pre class="rouge highlight"><code data-lang="java"><span class="nc">Single</span><span class="o">&lt;</span><span class="nc">Album</span><span class="o">&gt;</span> <span class="n">inventoryData</span> <span class="o">=</span> <span class="n">albumsRepository</span><span class="o">.</span><span class="na">findById</span><span class="o">(</span><span class="n">id</span><span class="o">,</span> <span class="kc">true</span><span class="o">);</span>
-<span class="nc">Single</span><span class="o">&lt;</span><span class="nc">RatingInfo</span><span class="o">&gt;</span> <span class="n">ratingData</span> <span class="o">=</span> <span class="n">ratingRepository</span><span class="o">.</span><span class="na">findRatingAndReviewsByAlbum</span><span class="o">(</span><span class="n">id</span><span class="o">);</span>
-<span class="k">return</span> <span class="n">inventoryData</span><span class="o">.</span><span class="na">zipWith</span><span class="o">(</span><span class="n">ratingData</span><span class="o">,</span> <span class="o">(</span><span class="n">a</span><span class="o">,</span> <span class="n">r</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="o">{</span>
-  <span class="n">a</span><span class="o">.</span><span class="na">setRating</span><span class="o">(</span><span class="n">r</span><span class="o">.</span><span class="na">getRating</span><span class="o">());</span>
-  <span class="n">a</span><span class="o">.</span><span class="na">setReviews</span><span class="o">(</span><span class="n">r</span><span class="o">.</span><span class="na">getReviews</span><span class="o">());</span>
-  <span class="k">return</span> <span class="n">a</span><span class="o">;</span>
-<span class="o">});</span></code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>By default, Vert.x uses a callback style but it also has an <a href="https://vertx.io/docs/vertx-rx/java2/">Rxified API</a>.</p>
-</div>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_steps">Steps</h3>
 <div class="paragraph">
 <p>This lab is divided into several steps incrementally building the API Gateway for the <em>MusicStore</em> application.</p>
 </div>
@@ -1392,7 +1429,7 @@ To do so, open a terminal in the step directory and type:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="rouge highlight"><code data-lang="shell">mvn vertx:run</code></pre>
+<pre class="rouge highlight"><code data-lang="shell">mvn clean vertx:run</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1433,8 +1470,8 @@ To avoid port conflicts, don&#8217;t forget to close the server before you start
 <div class="paragraph">
 <p>A complete solution can be found in the <code>gateway</code> directory.</p>
 </div>
-<div class="sect3">
-<h4 id="_step_0_vert_x_web_router">Step 0: Vert.x Web Router</h4>
+<div class="sect2">
+<h3 id="_step_0_vert_x_web_router">Step 0: Vert.x Web Router</h3>
 <div class="paragraph">
 <p>The Vert.x core library, as explained above, has very low-level abstractions for HTTP servers.</p>
 </div>
@@ -1468,8 +1505,8 @@ It allows to create <em>routes</em> matching requests by path or HTTP method and
 </li>
 </ol>
 </div>
-<div class="sect4">
-<h5 id="_exercise">Exercise</h5>
+<div class="sect3">
+<h4 id="_exercise">Exercise</h4>
 <div class="paragraph">
 <p>In the IDE, open the <code>steps/step-0/src/main/java/workshop/gateway/Step0Server.java</code> file.</p>
 </div>
@@ -1477,8 +1514,8 @@ It allows to create <em>routes</em> matching requests by path or HTTP method and
 <p>Implement the TODOs found in the <code>createRouter</code> method.</p>
 </div>
 </div>
-<div class="sect4">
-<h5 id="_observations">Observations</h5>
+<div class="sect3">
+<h4 id="_observations">Observations</h4>
 <div class="paragraph">
 <p>Browse to <a href="http://localhost:8080" class="bare">http://localhost:8080</a>.</p>
 </div>
@@ -1499,8 +1536,8 @@ The error message <em>Failed to load data&#8230;&#8203;</em> is expected as we h
 </div>
 </div>
 </div>
-<div class="sect3">
-<h4 id="_step_1_the_graphql_java_runtime">Step 1: The GraphQL-Java runtime</h4>
+<div class="sect2">
+<h3 id="_step_1_the_graphql_java_runtime">Step 1: The GraphQL-Java runtime</h3>
 <div class="paragraph">
 <p>Now that we have a web server, let&#8217;s configure the GraphQL runtime.</p>
 </div>
@@ -1619,8 +1656,8 @@ The <code>workshop.gateway.WorkshopVerticle</code> class exposes a few repositor
 <span class="n">router</span><span class="o">.</span><span class="na">route</span><span class="o">(</span><span class="s">"/graphql"</span><span class="o">).</span><span class="na">handler</span><span class="o">(</span><span class="nc">GraphQLHandler</span><span class="o">.</span><span class="na">create</span><span class="o">(</span><span class="n">graphQL</span><span class="o">));</span></code></pre>
 </div>
 </div>
-<div class="sect4">
-<h5 id="_exercise_2">Exercise</h5>
+<div class="sect3">
+<h4 id="_exercise_2">Exercise</h4>
 <div class="paragraph">
 <p>In the IDE, open the <code>steps/step-1/src/main/resources/musicstore.graphql</code> file.</p>
 </div>
@@ -1640,8 +1677,8 @@ The <code>workshop.gateway.WorkshopVerticle</code> class exposes a few repositor
 <p>Implement the TODOs found in the <code>rxGet</code> method.</p>
 </div>
 </div>
-<div class="sect4">
-<h5 id="_observations_2">Observations</h5>
+<div class="sect3">
+<h4 id="_observations_2">Observations</h4>
 <div class="paragraph">
 <p>Browse to <a href="http://localhost:8080" class="bare">http://localhost:8080</a>.</p>
 </div>
@@ -1708,8 +1745,8 @@ This can be useful when working with a schema that you do not own.
 </div>
 </div>
 </div>
-<div class="sect3">
-<h4 id="_step_2_fields_with_arguments">Step 2: Fields with arguments</h4>
+<div class="sect2">
+<h3 id="_step_2_fields_with_arguments">Step 2: Fields with arguments</h3>
 <div class="paragraph">
 <p>GraphQL types can have fields taking arguments.
 This can be useful for filtering or paging results.</p>
@@ -1737,8 +1774,8 @@ This can be useful for filtering or paging results.</p>
 <pre class="rouge highlight"><code data-lang="java"><span class="nc">Integer</span> <span class="n">genre</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="na">getArgument</span><span class="o">(</span><span class="s">"genre"</span><span class="o">);</span></code></pre>
 </div>
 </div>
-<div class="sect4">
-<h5 id="_exercise_3">Exercise</h5>
+<div class="sect3">
+<h4 id="_exercise_3">Exercise</h4>
 <div class="paragraph">
 <p>In the IDE, open the <code>steps/step-2/src/main/resources/musicstore.graphql</code> file.</p>
 </div>
@@ -1758,8 +1795,8 @@ This can be useful for filtering or paging results.</p>
 <p>Implement the TODO found in the <code>rxGet</code> method.</p>
 </div>
 </div>
-<div class="sect4">
-<h5 id="_observations_3">Observations</h5>
+<div class="sect3">
+<h4 id="_observations_3">Observations</h4>
 <div class="paragraph">
 <p>Browse to <a href="http://localhost:8080/graphiql/" class="bare">http://localhost:8080/graphiql/</a>.</p>
 </div>
@@ -1839,8 +1876,8 @@ Now in the results panel you should see:</p>
 </div>
 </div>
 </div>
-<div class="sect3">
-<h4 id="_step_3_fetching_data_efficiently">Step 3: Fetching data efficiently</h4>
+<div class="sect2">
+<h3 id="_step_3_fetching_data_efficiently">Step 3: Fetching data efficiently</h3>
 <div class="paragraph">
 <p>In this step, the schema has been modified in order to get all albums details in a single query:</p>
 </div>
@@ -1983,8 +2020,8 @@ Now in the results panel you should see:</p>
 </li>
 </ol>
 </div>
-<div class="sect4">
-<h5 id="_exercise_4">Exercise</h5>
+<div class="sect3">
+<h4 id="_exercise_4">Exercise</h4>
 <div class="paragraph">
 <p>In the IDE, open the <code>steps/step-3/src/main/java/workshop/gateway/AlbumDataFetcher.java</code> file.</p>
 </div>
@@ -1992,8 +2029,8 @@ Now in the results panel you should see:</p>
 <p>Implement the TODOs found in the <code>rxGet</code> method.</p>
 </div>
 </div>
-<div class="sect4">
-<h5 id="_observations_4">Observations</h5>
+<div class="sect3">
+<h4 id="_observations_4">Observations</h4>
 <div class="paragraph">
 <p>Browse to <a href="http://localhost:8080/graphiql/" class="bare">http://localhost:8080/graphiql/</a>.</p>
 </div>
@@ -2084,8 +2121,8 @@ But if you open the inventory service console, you will see a single request for
 </div>
 </div>
 </div>
-<div class="sect3">
-<h4 id="_step_4_on_demand_data_fetching">Step 4: On demand data fetching</h4>
+<div class="sect2">
+<h3 id="_step_4_on_demand_data_fetching">Step 4: On demand data fetching</h3>
 <div class="paragraph">
 <p>In the previous step, we made tracks, rating and reviews data available when users execute the <code>album</code> query.</p>
 </div>
@@ -2173,8 +2210,8 @@ Indeed, without this protection, we would send two requests to the rating servic
 </tr>
 </table>
 </div>
-<div class="sect4">
-<h5 id="_exercise_5">Exercise</h5>
+<div class="sect3">
+<h4 id="_exercise_5">Exercise</h4>
 <div class="paragraph">
 <p>In the IDE, open the <code>steps/step-4/src/main/java/workshop/gateway/Step4Server.java</code> file.</p>
 </div>
@@ -2188,8 +2225,8 @@ Indeed, without this protection, we would send two requests to the rating servic
 <p>Implement the TODOs found in the <code>rxGet</code> method.</p>
 </div>
 </div>
-<div class="sect4">
-<h5 id="_observations_5">Observations</h5>
+<div class="sect3">
+<h4 id="_observations_5">Observations</h4>
 <div class="paragraph">
 <p>Browse to <a href="http://localhost:8080/graphiql/" class="bare">http://localhost:8080/graphiql/</a>.</p>
 </div>
@@ -2389,8 +2426,8 @@ Indeed, without this protection, we would send two requests to the rating servic
 </div>
 </div>
 </div>
-<div class="sect3">
-<h4 id="_step_5_authentication">Step 5: Authentication</h4>
+<div class="sect2">
+<h3 id="_step_5_authentication">Step 5: Authentication</h3>
 <div class="paragraph">
 <p>It is good if an online store lets you browse its product catalog.
 But isn&#8217;t it better if customers can buy items and write reviews?</p>
@@ -2509,8 +2546,8 @@ Consequently it allows you to retrieve the user info:</p>
 <span class="k">return</span> <span class="n">user</span><span class="o">!=</span><span class="kc">null</span> <span class="o">?</span> <span class="n">user</span><span class="o">.</span><span class="na">principal</span><span class="o">().</span><span class="na">getString</span><span class="o">(</span><span class="s">"username"</span><span class="o">):</span><span class="kc">null</span><span class="o">;</span></code></pre>
 </div>
 </div>
-<div class="sect4">
-<h5 id="_exercise_6">Exercise</h5>
+<div class="sect3">
+<h4 id="_exercise_6">Exercise</h4>
 <div class="paragraph">
 <p>In the IDE, open the <code>steps/step-5/src/main/java/workshop/gateway/Step5Server.java</code> file.</p>
 </div>
@@ -2524,8 +2561,8 @@ Consequently it allows you to retrieve the user info:</p>
 <p>Implement the TODOs found in the <code>currentUser</code> method.</p>
 </div>
 </div>
-<div class="sect4">
-<h5 id="_observations_6">Observations</h5>
+<div class="sect3">
+<h4 id="_observations_6">Observations</h4>
 <div class="paragraph">
 <p>Browse to <a href="http://localhost:8080" class="bare">http://localhost:8080</a> and click on the login menu button located at the top right.</p>
 </div>
@@ -2541,8 +2578,8 @@ The password is the username.</p>
 </div>
 </div>
 </div>
-<div class="sect3">
-<h4 id="_step_6_mutations">Step 6: Mutations</h4>
+<div class="sect2">
+<h3 id="_step_6_mutations">Step 6: Mutations</h3>
 <div class="paragraph">
 <p>We have seen that a GraphQL schema must contain at least a root <code>Query</code>.</p>
 </div>
@@ -2622,8 +2659,8 @@ while it does not invoke data fetchers for query fields in any particular order,
 <span class="k">return</span> <span class="n">ratingRepository</span><span class="o">.</span><span class="na">addReview</span><span class="o">(</span><span class="n">albumId</span><span class="o">,</span> <span class="n">reviewInput</span><span class="o">);</span></code></pre>
 </div>
 </div>
-<div class="sect4">
-<h5 id="_exercise_7">Exercise</h5>
+<div class="sect3">
+<h4 id="_exercise_7">Exercise</h4>
 <div class="paragraph">
 <p>In the IDE, open the <code>steps/step-6/src/main/resources/musicstore.graphql</code> file.</p>
 </div>
@@ -2637,8 +2674,8 @@ while it does not invoke data fetchers for query fields in any particular order,
 <p>Implement the TODOs found in the <code>rxGet</code> method.</p>
 </div>
 </div>
-<div class="sect4">
-<h5 id="_observations_7">Observations</h5>
+<div class="sect3">
+<h4 id="_observations_7">Observations</h4>
 <div class="paragraph">
 <p>Browse to <a href="http://localhost:8080" class="bare">http://localhost:8080</a> and click on the login menu button located at the top right.</p>
 </div>
@@ -2672,8 +2709,8 @@ Add a review.</p>
 </div>
 </div>
 </div>
-<div class="sect3">
-<h4 id="_step_7_on_demand_data_fetching_in_mutation_results">Step 7: On demand data fetching in mutation results</h4>
+<div class="sect2">
+<h3 id="_step_7_on_demand_data_fetching_in_mutation_results">Step 7: On demand data fetching in mutation results</h3>
 <div class="admonitionblock important">
 <table>
 <tr>
@@ -2758,8 +2795,8 @@ It would still be available on demand though.
 </tr>
 </table>
 </div>
-<div class="sect4">
-<h5 id="_exercise_8">Exercise</h5>
+<div class="sect3">
+<h4 id="_exercise_8">Exercise</h4>
 <div class="paragraph">
 <p>In the IDE, open the <code>steps/step-7/src/main/resources/musicstore.graphql</code> file.</p>
 </div>
@@ -2779,8 +2816,8 @@ It would still be available on demand though.
 <p>Implement the TODOs found in the <code>rxGet</code> method.</p>
 </div>
 </div>
-<div class="sect4">
-<h5 id="_observations_8">Observations</h5>
+<div class="sect3">
+<h4 id="_observations_8">Observations</h4>
 <div class="paragraph">
 <p>Browse to <a href="http://localhost:8080" class="bare">http://localhost:8080</a> and click on the login menu button located at the top right.</p>
 </div>
@@ -2807,11 +2844,56 @@ The password is the username.</p>
 </div>
 </div>
 </div>
+<div class="sect1">
+<h2 id="_conclusion">Conclusion</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Congratulations! You have implemented the API Gateway pattern with GraphQL.</p>
+</div>
+<div class="paragraph">
+<p>You learnt how to:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>configure the GraphQL-Java runtime</p>
+</li>
+<li>
+<p>provide a HTTP transport for the queries</p>
+</li>
+<li>
+<p>implement data fetchers for queries and mutations</p>
+</li>
+<li>
+<p>fetch data efficiently</p>
+</li>
+<li>
+<p>protect users with authentication</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Want to go further? Consider reading the:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://graphql.org/learn/">Introduction to GraphQL</a></p>
+</li>
+<li>
+<p><a href="https://www.graphql-java.com/documentation/v12/">GraphQL-Java documentation</a></p>
+</li>
+<li>
+<p><a href="https://vertx.io/docs/vertx-web-graphql/java/">Vert.x Web GraphQL documentation</a></p>
+</li>
+</ul>
+</div>
+</div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2019-11-08 13:27:57 UTC
+Last updated 2019-11-13 13:13:57 UTC
 </div>
 </div>
 <style>
