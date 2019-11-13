@@ -623,7 +623,7 @@ To do so, open a terminal in the step directory and type:
 
 [source,shell]
 ----
-mvn vertx:run
+mvn clean vertx:run
 ----
 
 Then start coding.

@@ -1,1 +1,1 @@
-mvn vertx:run
+mvn clean vertx:run
