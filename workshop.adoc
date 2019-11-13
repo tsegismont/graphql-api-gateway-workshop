@@ -343,8 +343,6 @@ strict digraph {
 }
 ----
 
-You will build the API Gateway for this microservices-based application.
-
 NOTE: In a real-world application, the static content would often be served from a separate component.
 
 === Web Client
@@ -373,6 +371,109 @@ It exposes this data over HTTP in JSON format.
 It can also compute an average rating for each album.
 
 Again, for simplicity, reviews are stored only in memory.
+
+== Building blocks
+
+You will build the API Gateway for the _MusicStore_ using the following technologies.
+
+=== GraphQL-Java
+
+The https://www.graphql-java.com/[GraphQL-Java] library is the Java implementation of the GraphQL specification.
+
+To configure it, you must provide at least:
+
+* a GraphQL schema, either from a definition file or built programmatically
+* data fetchers functions for schema types and fields (_runtime wiring_)
+
+A GraphQL-Java data fetcher must implement the `graphql.schema.DataFetcher` interface.
+In practice, it must have a `get` method that takes a `graphql.schema.DataFetchingEnvironment` argument and returns a result:
+
+[source,java]
+.DataFetcher interface
+----
+public interface DataFetcher<T> {
+    T get(DataFetchingEnvironment environment) throws Exception;
+}
+----
+
+The result can be a `CompletionStage` if it is provided asynchronously.
+
+The _environment_ argument gives information about the current position in the graph: source type, arguments, fields to be fetched... etc
+
+The GraphQL-Java runtime job is to execute queries and it does not provide any transport implementation.
+
+=== Eclipse Vert.x
+
+https://vertx.io[Vert.x] is a toolkit to write asynchronous and reactive applications on the JVM.
+
+It implements the reactor pattern and uses _Netty_ for the networking layer.
+It is similar to _Node.js_ but it is capable of scaling across CPU cores instead of using a single thread.
+
+Vert.x does not mandate any programming model but the easiest way to get started is to create a _verticle_.
+
+A verticle is an entry-point class with a _start_ method:
+
+[source,java]
+.Vert.x verticle
+----
+public class MyVerticle extends AbstractVerticle {
+
+ // Called when verticle is deployed
+ public void start() {
+ }
+
+ // Optional - called when verticle is undeployed
+ public void stop() {
+ }
+
+}
+----
+
+The core library provides low-level abstractions to start HTTP servers, work with the filesystem, ...etc.
+
+https://vertx.io/docs/vertx-web-graphql/java/[Vert.x Web GraphQL] integrates the GraphQL-Java library so that queries and results can be sent over HTTP and Websockets.
+
+=== RxJava
+
+Quotinq the https://github.com/ReactiveX/RxJava[RxJava] project website:
+
+[quote, RxJava project]
+RxJava – Reactive Extensions for the JVM – a library for composing asynchronous and event-based programs using observable sequences for the Java VM.
+
+When working with asynchronous APIs, the code can quickly become difficult to understand if you need to execute several sequential operations.
+It's even worse when composing results of concurrent operations.
+
+This issue is widely known as callback-hell and RxJava provides operators to deal with it.
+
+NOTE: `CompletableFuture` / `CompletionStage` introduced in JDK 8 helps a lot with asynchronous composition.
+But RxJava comes with a broader range of operators and is also able to deal with asynchronous data flows.
+
+Let's take a couple of examples:
+
+[source,java]
+.Sequential composition: async Postgres query execution and transformation of row results into a Java object
+----
+public Single<Cart> findCart(String username) {
+  return pool.rxPreparedQuery(FIND_CART, Tuple.of(username))
+    .flatMapObservable(Observable::fromIterable)
+    .map(CartRepository::rowToCartItem)
+    .collectInto(new Cart(), Cart::add);
+}
+----
+
+[source,java]
+.Concurrent composition: combining results of async web client requests into a single Java object
+----
+Single<Album> inventoryData = albumsRepository.findById(id, true);
+Single<RatingInfo> ratingData = ratingRepository.findRatingAndReviewsByAlbum(id);
+return inventoryData.zipWith(ratingData, (a, r) -> {
+  a.setRating(r.getRating());
+  a.setReviews(r.getReviews());
+  return a;
+});
+----
+
+By default, Vert.x uses a callback style but it also has an https://vertx.io/docs/vertx-rx/java2/[Rxified API].
 
 == Getting started
 
@@ -513,109 +614,6 @@ If the service starts correctly, you should see a line similar to this on the co
 
 == Let's code!
 
-=== Building blocks
-
-==== GraphQL-Java
-
-The https://www.graphql-java.com/[GraphQL-Java] library is the Java implementation of the GraphQL specification.
-
-To configure it, you must provide at least:
-
-* a GraphQL schema, either from a definition file or built programmatically
-* data fetchers functions for schema types and fields (_runtime wiring_)
-
-A GraphQL-Java data fetcher must implement the `graphql.schema.DataFetcher` interface.
-In practice, it must have a `get` method that takes a `graphql.schema.DataFetchingEnvironment` argument and returns a result:
-
-[source,java]
-.DataFetcher interface
-----
-public interface DataFetcher<T> {
-    T get(DataFetchingEnvironment environment) throws Exception;
-}
-----
-
-The result can be a `CompletionStage` if it is provided asynchronously.
-
-The _environment_ argument gives information about the current position in the graph: source type, arguments, fields to be fetched... etc
-
-The GraphQL-Java runtime job is to execute queries and it does not provide any transport implementation.
-
-==== Eclipse Vert.x
-
-https://vertx.io[Vert.x] is a toolkit to write asynchronous and reactive applications on the JVM.
-
-It implements the reactor pattern and uses _Netty_ for the networking layer.
-It is similar to _Node.js_ but it is capable of scaling across CPU cores instead of using a single thread.
-
-Vert.x does not mandate any programming model but the easiest way to get started is to create a _verticle_.
-
-A verticle is an entry-point class with a _start_ method:
-
-[source,java]
-.Vert.x verticle
-----
-public class MyVerticle extends AbstractVerticle {
-
- // Called when verticle is deployed
- public void start() {
- }
-
- // Optional - called when verticle is undeployed
- public void stop() {
- }
-
-}
-----
-
-The core library provides low-level abstractions to start HTTP servers, work with the filesystem, ...etc.
-
-https://vertx.io/docs/vertx-web-graphql/java/[Vert.x Web GraphQL] integrates the GraphQL-Java library so that queries and results can be sent over HTTP and Websockets.
-
-==== RxJava
-
-Quotinq the https://github.com/ReactiveX/RxJava[RxJava] project website:
-
-[quote, RxJava project]
-RxJava – Reactive Extensions for the JVM – a library for composing asynchronous and event-based programs using observable sequences for the Java VM.
-
-When working with asynchronous APIs, the code can quickly become difficult to understand if you need to execute several sequential operations.
-It's even worse when composing results of concurrent operations.
-
-This issue is widely known as callback-hell and RxJava provides operators to deal with it.
-
-NOTE: `CompletableFuture` / `CompletionStage` introduced in JDK 8 helps a lot with asynchronous composition.
-But RxJava comes with a broader range of operators and is also able to deal with asynchronous data flows.
-
-Let's take a couple of examples:
-
-[source,java]
-.Sequential composition: async Postgres query execution and transformation of row results into a Java object
-----
-public Single<Cart> findCart(String username) {
-  return pool.rxPreparedQuery(FIND_CART, Tuple.of(username))
-    .flatMapObservable(Observable::fromIterable)
-    .map(CartRepository::rowToCartItem)
-    .collectInto(new Cart(), Cart::add);
-}
-----
-
-[source,java]
-.Concurrent composition: combining results of async web client requests into a single Java object
-----
-Single<Album> inventoryData = albumsRepository.findById(id, true);
-Single<RatingInfo> ratingData = ratingRepository.findRatingAndReviewsByAlbum(id);
-return inventoryData.zipWith(ratingData, (a, r) -> {
-  a.setRating(r.getRating());
-  a.setReviews(r.getReviews());
-  return a;
-});
-----
-
-By default, Vert.x uses a callback style but it also has an https://vertx.io/docs/vertx-rx/java2/[Rxified API].
-
-=== Steps
-
 This lab is divided into several steps incrementally building the API Gateway for the _MusicStore_ application.
 
 Each step can be run separately.
@@ -648,7 +646,7 @@ IMPORTANT: To avoid port conflicts, don't forget to close the server before you 
 
 A complete solution can be found in the `gateway` directory.
 
-==== Step 0: Vert.x Web Router
+=== Step 0: Vert.x Web Router
 
 The Vert.x core library, as explained above, has very low-level abstractions for HTTP servers.
 
@@ -670,13 +668,13 @@ router.route().failureHandler(ErrorHandler.create()); // <3>
 <2> Any `GET` request should be handled by the https://vertx.io/docs/vertx-web/java/#_serving_static_resources[`StaticHandler`] for static file serving
 <3> If anything gets wrong for any type of request, invoke the https://vertx.io/docs/vertx-web/java/#_error_handling[`ErrorHandler`].
 
-===== Exercise
+==== Exercise
 
 In the IDE, open the `steps/step-0/src/main/java/workshop/gateway/Step0Server.java` file.
 
 Implement the TODOs found in the `createRouter` method.
 
-===== Observations
+==== Observations
 
 Browse to http://localhost:8080.
 
@@ -684,7 +682,7 @@ The browser should display the _MusicStore_ welcome page.
 
 NOTE: The error message _Failed to load data..._ is expected as we haven't implemented the GraphQL runtime yet.
 
-==== Step 1: The GraphQL-Java runtime
+=== Step 1: The GraphQL-Java runtime
 
 Now that we have a web server, let's configure the GraphQL runtime.
 
@@ -750,7 +748,7 @@ GraphQL graphQL = setupGraphQLJava("musicstore.graphql");
 router.route("/graphql").handler(GraphQLHandler.create(graphQL));
 ----
 
-===== Exercise
+==== Exercise
 
 In the IDE, open the `steps/step-1/src/main/resources/musicstore.graphql` file.
 
@@ -764,7 +762,7 @@ Open the `steps/step-1/src/main/java/workshop/gateway/GenresDataFetcher.java` fi
 
 Implement the TODOs found in the `rxGet` method.
 
-===== Observations
+==== Observations
 
 Browse to http://localhost:8080.
 
@@ -813,7 +811,7 @@ TIP: In the top right corner of the web page, click the `Docks` link.
 GraphiQL will open the schema explorer.
 This can be useful when working with a schema that you do not own.
 
-==== Step 2: Fields with arguments
+=== Step 2: Fields with arguments
 
 GraphQL types can have fields taking arguments.
 This can be useful for filtering or paging results.
@@ -834,7 +832,7 @@ In the data fetcher implementation, the argument value is retrieved from the `Da
 Integer genre = env.getArgument("genre");
 ----
 
-===== Exercise
+==== Exercise
 
 In the IDE, open the `steps/step-2/src/main/resources/musicstore.graphql` file.
 
@@ -848,7 +846,7 @@ Open the `steps/step-2/src/main/java/workshop/gateway/AlbumsDataFetcher.java` fi
 
 Implement the TODO found in the `rxGet` method.
 
-===== Observations
+==== Observations
 
 Browse to http://localhost:8080/graphiql/.
 
@@ -922,7 +920,7 @@ Now in the results panel you should see:
 }
 ----
 
-==== Step 3: Fetching data efficiently
+=== Step 3: Fetching data efficiently
 
 In this step, the schema has been modified in order to get all albums details in a single query:
 
@@ -963,13 +961,13 @@ Consequently, it is more efficient to:
 . retrieve album data with tracks included in a single backend request
 . retrieve rating data concurrently
 
-===== Exercise
+==== Exercise
 
 In the IDE, open the `steps/step-3/src/main/java/workshop/gateway/AlbumDataFetcher.java` file.
 
 Implement the TODOs found in the `rxGet` method.
 
-===== Observations
+==== Observations
 
 Browse to http://localhost:8080/graphiql/.
 
@@ -1054,7 +1052,7 @@ But if you open the inventory service console, you will see a single request for
 [2019-11-03 10:12:23] [INFO   ] GET /album/8?withTracks= 200 481 - 1 ms
 ----
 
-==== Step 4: On demand data fetching
+=== Step 4: On demand data fetching
 
 In the previous step, we made tracks, rating and reviews data available when users execute the `album` query.
 
@@ -1094,7 +1092,7 @@ include::steps/step-4/src/main/java/workshop/gateway/AlbumRatingDataFetcher.java
 IMPORTANT: Notice that the `rating` field is loaded only if not already present.
 Indeed, without this protection, we would send two requests to the rating service when we execute the `album` query.
 
-===== Exercise
+==== Exercise
 
 In the IDE, open the `steps/step-4/src/main/java/workshop/gateway/Step4Server.java` file.
 
@@ -1104,7 +1102,7 @@ Open the `steps/step-4/src/main/java/workshop/gateway/AlbumTracksDataFetcher.jav
 
 Implement the TODOs found in the `rxGet` method.
 
-===== Observations
+==== Observations
 
 Browse to http://localhost:8080/graphiql/.
 
@@ -1296,7 +1294,7 @@ In the inventory service console, you should a single request logged:
 
 Browse to http://localhost:8080 and explore the _MusicStore_ catalog.
 
-==== Step 5: Authentication
+=== Step 5: Authentication
 
 It is good if an online store lets you browse its product catalog.
 But isn't it better if customers can buy items and write reviews?
@@ -1381,7 +1379,7 @@ User user = routingContext.user();
 return user!=null ? user.principal().getString("username"):null;
 ----
 
-===== Exercise
+==== Exercise
 
 In the IDE, open the `steps/step-5/src/main/java/workshop/gateway/Step5Server.java` file.
 
@@ -1391,7 +1389,7 @@ Open the `steps/step-5/src/main/java/workshop/gateway/UserUtil.java` file.
 
 Implement the TODOs found in the `currentUser` method.
 
-===== Observations
+==== Observations
 
 Browse to http://localhost:8080 and click on the login menu button located at the top right.
 
@@ -1402,7 +1400,7 @@ Browse to http://localhost:8080/album/9.
 
 The _Add to cart_ button should now be visibile as well as the review input section at the bottom of the page.
 
-==== Step 6: Mutations
+=== Step 6: Mutations
 
 We have seen that a GraphQL schema must contain at least a root `Query`.
 
@@ -1469,7 +1467,7 @@ reviewInput.setName(currentUser);
 return ratingRepository.addReview(albumId, reviewInput);
 ----
 
-===== Exercise
+==== Exercise
 
 In the IDE, open the `steps/step-6/src/main/resources/musicstore.graphql` file.
 
@@ -1479,7 +1477,7 @@ Open the `steps/step-6/src/main/java/workshop/gateway/AddReviewDataFetcher.java`
 
 Implement the TODOs found in the `rxGet` method.
 
-===== Observations
+==== Observations
 
 Browse to http://localhost:8080 and click on the login menu button located at the top right.
 
@@ -1503,7 +1501,7 @@ Note that, when displaying the genre page, the rating service console shows that
 [2019-11-05 10:58:22] [INFO   ] GET /album/12/rating 200 11 - 1 ms
 ----
 
-==== Step 7: On demand data fetching in mutation results
+=== Step 7: On demand data fetching in mutation results
 
 IMPORTANT: You cannot complete this step if you haven't setup the Postgres Database successfully.
 
@@ -1564,7 +1562,7 @@ return albumsRepository.findById(cartItem.getAlbumId(), false);
 NOTE: The `withTracks` param is set to false because it is unlikely that a page dealing with the shopping cart will need the tracks list.
 It would still be available on demand though.
 
-===== Exercise
+==== Exercise
 
 In the IDE, open the `steps/step-7/src/main/resources/musicstore.graphql` file.
 
@@ -1578,7 +1576,7 @@ Open the `steps/step-7/src/main/java/workshop/gateway/CartItemAlbumDataFetcher.j
 
 Implement the TODOs found in the `rxGet` method.
 
-===== Observations
+==== Observations
 
 Browse to http://localhost:8080 and click on the login menu button located at the top right.
 
