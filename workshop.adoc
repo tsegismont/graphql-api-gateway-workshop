@@ -1592,3 +1592,21 @@ On the top right of the page, the cart icon should show a badge with the number 
 Click on the cart icon.
 
 In the cart page, add or remove items.
+
+== Conclusion
+
+Congratulations! You have implemented the API Gateway pattern with GraphQL.
+
+You learnt how to:
+
+* configure the GraphQL-Java runtime
+* provide a HTTP transport for the queries
+* implement data fetchers for queries and mutations
+* fetch data efficiently
+* protect users with authentication
+
+Want to go further? Consider reading the:
+
+* https://graphql.org/learn/[Introduction to GraphQL]
+* https://www.graphql-java.com/documentation/v12/[GraphQL-Java documentation]
+* https://vertx.io/docs/vertx-web-graphql/java/[Vert.x Web GraphQL documentation]
