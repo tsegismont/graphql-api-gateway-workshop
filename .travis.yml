@@ -18,14 +18,14 @@ jobs:
     - stage: build
       name: "Build - OpenJDK 8"
       script:
-        - mvn -Dvertx-maven-plugin.version=1.0.21 -B verify
-        - mvn -Dvertx-maven-plugin.version=1.0.21 -B verify -Psolution
+        - mvn -Dvertx-maven-plugin.version=1.0.21 -B clean verify
+        - mvn -Dvertx-maven-plugin.version=1.0.21 -B clean verify -Psolution
       jdk: openjdk8
     - stage: build
       name: "Build - OpenJDK 11"
       script:
-        - mvn -Dvertx-maven-plugin.version=1.0.21 -B verify
-        - mvn -Dvertx-maven-plugin.version=1.0.21 -B verify -Psolution
+        - mvn -Dvertx-maven-plugin.version=1.0.21 -B clean verify
+        - mvn -Dvertx-maven-plugin.version=1.0.21 -B clean verify -Psolution
       jdk: openjdk11
     - stage: deploy
       name: "Deploy doc"
