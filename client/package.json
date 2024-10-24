@@ -21,7 +21,7 @@
     "graphql-tag": "2.10.1",
     "jquery": "^3.5.1",
     "popper.js": "^1.16.0",
-    "vue": "^2.6.10",
+    "vue": "^3.0.0",
     "vue-router": "^3.0.6"
   },
   "devDependencies": {
